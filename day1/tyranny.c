@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+// gcc tyranny.c -o tyranny && ./tyranny input
+
 int fuel(int mass) {
      return mass / 3 - 2;
 }
@@ -20,7 +22,7 @@ int main(int argc, char **argv) {
 
      int result = 0;
      while(fscanf(file, "%d\n", &num) != EOF) {
-          printf("%d -> %d\n", num, rfuel(num));
+          //printf("%d -> %d\n", num, rfuel(num));
           result += rfuel(num);;
      }
      printf("Sum: %d\n", result);
