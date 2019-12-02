@@ -5,11 +5,11 @@ use warnings;
 use 5.010;
 
 sub trace {
-  my ($a, $b, @memory) = @_;
+  my ($noun, $verb, @memory) = @_;
   my $ip = 0;
 
-  $memory[1] = $a;
-  $memory[2] = $b;
+  $memory[1] = $noun;
+  $memory[2] = $verb;
 
   #printf "%s\n", join ",", @memory;
   while (my $op = $memory[$ip]) {
@@ -41,4 +41,11 @@ my $input = <>;
 chomp $input;
 my @memory = split /,/, $input;
 
-printf("%d\n", trace(12, 2, @memory));
+for my $noun (0 .. 99) {
+  for my $verb (0 .. 99) {
+    my $result = trace($noun, $verb, @memory);
+    if ($result == 19690720) {
+      die 100 * $noun + $verb;
+    }
+  }
+}
