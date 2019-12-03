@@ -53,18 +53,26 @@ int main(int argc, char **argv) {
   auto pathA = trace(lineA);
   auto pathB = trace(lineB);
   int min_manhatten = 0;
+  int min_position = 0;
 
+  printf("searching ...\n");
   for(auto it = pathA.begin(); it < pathA.end(); it++) {
-    if(std::find(pathB.begin(), pathB.end(), *it) != pathB.end()) {
+    auto match = std::find(pathB.begin(), pathB.end(), *it);
+    if(match != pathB.end()) {
       int manhattan = abs(it->first) + abs(it->second);
       if(manhattan < min_manhatten || min_manhatten == 0) {
         min_manhatten = manhattan;
       }
-      printf("match %d %d\n", it->first, it->second);
+      int position = std::distance(pathA.begin(), it) + std::distance(pathB.begin(), match) + 2;
+      if(position < min_position || min_position == 0) {
+        min_position = position;
+      }
+      printf("match %d %d m%d p%d\n", it->first, it->second, manhattan, position);
     }
   }
 
   printf("minimum distance %d\n", min_manhatten);
+  printf("minimum position %d\n", min_position);
 
   return 0;
 }
