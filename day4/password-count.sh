@@ -8,8 +8,8 @@ seq 254032 789860 |
 
 wc -l matches
 
-# globally replace any sequence of 3+ identical numbers with x, and then look
-# for any remaining sequences that still have a pair.
+# globally replace any sequence of 3+ identical numbers with x to mask those
+# pairs and then look for any remaining sequences that still have a pair.
 sed -e 's/\([0-9]\)\1\{2,\}/x/g' matches |
     grep -e '\([0-9]\)\1' > refined
 
