@@ -22,8 +22,7 @@
     (if (<= (length chars) 2)
         (append (match-operand operand)
                 (list '(0 0 0)))
-        (append (match-operand
-                 (string->number (list->string (take-right chars 2))))
+        (append (match-operand (modulo operand 100))
                 (list
                  (match (map (lambda (n) (if (eq? n #\1) 1 0))
                                  (drop-right chars 2))
