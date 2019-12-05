@@ -17,12 +17,15 @@
     [(8) '(equals 4)]
     [(99) '(halt 0)]))
 
+(define (parameter-flags operand)
+  (list
+   (modulo (quotient operand 10000) 10)
+   (modulo (quotient operand 1000) 10)
+   (modulo (quotient operand 100) 10)))
+
 (define (parse-operand operand)
   (append (match-operand (modulo operand 100))
-          (list (list
-                 (modulo (quotient operand 10000) 10)
-                 (modulo (quotient operand 1000) 10)
-                 (modulo (quotient operand 100) 10)))))
+          (list (parameter-flags operand))))
 
 (define (fetch memory offset)
   (vector-ref memory offset))
