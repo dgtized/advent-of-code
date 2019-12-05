@@ -72,8 +72,8 @@
              (println (list pc "write" w))
              (step memory (+ pc args) input (cons w output)))]
           [(eqv? op 'halt)
-           (println (reverse output))
-           (list memory pc input output)])))
+           (println (string-join (vector->list memory) ","))
+           (list pc input (reverse output))])))
 
 (let ((memory (load-program)))
   ;; (println (fetch memory 255))
