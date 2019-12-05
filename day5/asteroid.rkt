@@ -19,9 +19,9 @@
 
 (define (parameter-flags operand)
   (list
-   (modulo (quotient operand 10000) 10)
+   (modulo (quotient operand 100) 10)
    (modulo (quotient operand 1000) 10)
-   (modulo (quotient operand 100) 10)))
+   (modulo (quotient operand 10000) 10)))
 
 (define (parse-operand operand)
   (append (match-operand (modulo operand 100))
@@ -36,7 +36,7 @@
 
 (define (parameter-value memory pc flags param)
   (let ((immediate (fetch memory (+ pc param))))
-    (if (= 1 (list-ref (reverse flags) (- param 1)))
+    (if (= 1 (list-ref flags (- param 1)))
         immediate
         (fetch memory immediate))))
 
