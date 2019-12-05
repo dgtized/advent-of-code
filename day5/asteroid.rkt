@@ -18,18 +18,11 @@
     [(99) '(halt 0)]))
 
 (define (parse-operand operand)
-  (let* ((chars (string->list (number->string operand))))
-    (if (<= (length chars) 2)
-        (append (match-operand operand)
-                (list '(0 0 0)))
-        (append (match-operand (modulo operand 100))
-                (list
-                 (match (map (lambda (n) (if (eq? n #\1) 1 0))
-                                 (drop-right chars 2))
-                       [(list) (list 0 0 0)]
-                       [(list c) (list 0 0 c)]
-                       [(list b c) (list 0 b c)]
-                       [(list a b c) (list a b c)]))))))
+  (append (match-operand (modulo operand 100))
+          (list (list
+                 (modulo (quotient operand 10000) 10)
+                 (modulo (quotient operand 1000) 10)
+                 (modulo (quotient operand 100) 10)))))
 
 (define (fetch memory offset)
   (vector-ref memory offset))
