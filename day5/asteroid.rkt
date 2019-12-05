@@ -3,7 +3,7 @@
 (require racket/string)
 
 (define (load-program)
-  (list->vector (string-split (car (file->lines "input")) ",")))
+  (list->vector (map string->number (string-split (car (file->lines "input")) ","))))
 
 (define (match-operand operand)
   (case operand
@@ -18,9 +18,9 @@
     [(99) '(halt 0)]))
 
 (define (parse-operand operand)
-  (let* ((chars (string->list operand)))
+  (let* ((chars (string->list (number->string operand))))
     (if (<= (length chars) 2)
-        (append (match-operand (string->number operand))
+        (append (match-operand operand)
                 (list '(0 0 0)))
         (append (match-operand
                  (string->number (list->string (take-right chars 2))))
@@ -33,10 +33,10 @@
                        [(list a b c) (list a b c)]))))))
 
 (define (fetch memory offset)
-  (string->number (vector-ref memory offset)))
+  (vector-ref memory offset))
 
 (define (store memory offset value)
-  (vector-set! memory offset (number->string value))
+  (vector-set! memory offset value)
   memory)
 
 (define (parameter-value memory pc flags param)
@@ -106,7 +106,7 @@
                    (+ pc args)
                    input output))]
           [(eqv? op 'halt)
-           (println (string-join (vector->list memory) ","))
+           (println (string-join (map number->string (vector->list memory)) ","))
            (list pc input (reverse output))])))
 
 (let ((memory (load-program)))
