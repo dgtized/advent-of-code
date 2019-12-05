@@ -11,6 +11,10 @@
     [(2) '(multiply 4)]
     [(3) '(read 2)]
     [(4) '(write 2)]
+    [(5) '(jump-if-true 3)]
+    [(6) '(jump-if-false 3)]
+    [(7) '(less-than 4)]
+    [(8) '(equals 4)]
     [(99) '(halt 0)]))
 
 (define (parse-operand operand)
@@ -71,10 +75,42 @@
            (let ((w (parameter-value memory pc flags 1)))
              (println (list pc "write" w))
              (step memory (+ pc args) input (cons w output)))]
+          [(eqv? op 'jump-if-true)
+           (let ((cnd (parameter-value memory pc flags 1))
+                 (jmp (parameter-value memory pc flags 2)))
+             (println (list pc "jump-if-true" cnd jmp))
+             (step memory
+                   (if (> cnd 0) jmp (+ pc args))
+                   input output))]
+          [(eqv? op 'jump-if-false)
+           (let ((cnd (parameter-value memory pc flags 1))
+                 (jmp (parameter-value memory pc flags 2)))
+             (println (list pc "jump-if-false" cnd jmp))
+             (step memory
+                   (if (= cnd 0) jmp (+ pc args))
+                   input output))]
+          [(eqv? op 'less-than)
+           (let ((a (parameter-value memory pc flags 1))
+                 (b (parameter-value memory pc flags 2))
+                 (r (fetch memory (+ pc 3))))
+             (println (list pc "less-than" (if (< a b) 1 0) r))
+             (step (store memory r (if (< a b) 1 0))
+                   (+ pc args)
+                   input output))]
+          [(eqv? op 'equals)
+           (let ((a (parameter-value memory pc flags 1))
+                 (b (parameter-value memory pc flags 2))
+                 (r (fetch memory (+ pc 3))))
+             (println (list pc "equals" (if (= a b) 1 0) r))
+             (step (store memory r (if (= a b) 1 0))
+                   (+ pc args)
+                   input output))]
           [(eqv? op 'halt)
            (println (string-join (vector->list memory) ","))
            (list pc input (reverse output))])))
 
 (let ((memory (load-program)))
-  ;; (println (fetch memory 255))
   (step memory 0 '(1) '()))
+
+(let ((memory (load-program)))
+  (step memory 0 '(5) '()))
