@@ -3,7 +3,11 @@
 (require racket/string)
 
 (define (load-program)
-  (list->vector (map string->number (string-split (car (file->lines "input")) ","))))
+  (let ((source (car (file->lines "input"))))
+    (list->vector (map string->number (string-split source ",")))))
+
+(define (print-memory memory)
+  (println (string-join (map number->string (vector->list memory)) ",")))
 
 (define (fetch memory offset)
   (vector-ref memory offset))
@@ -101,7 +105,7 @@
              (+ pc args)
              input output))]
     [(list 'halt _ _)
-     (println (string-join (map number->string (vector->list memory)) ","))
+     (print-memory memory)
      (list pc input (reverse output))]))
 
 (let ((memory (load-program)))
