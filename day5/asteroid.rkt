@@ -5,6 +5,13 @@
 (define (load-program)
   (list->vector (map string->number (string-split (car (file->lines "input")) ","))))
 
+(define (fetch memory offset)
+  (vector-ref memory offset))
+
+(define (store memory offset value)
+  (vector-set! memory offset value)
+  memory)
+
 (define (match-operand operand)
   (case operand
     [(1) '(add 4)]
@@ -23,16 +30,10 @@
    (modulo (quotient operand 1000) 10)
    (modulo (quotient operand 10000) 10)))
 
-(define (parse-operand operand)
-  (append (match-operand (modulo operand 100))
-          (list (parameter-flags operand))))
-
-(define (fetch memory offset)
-  (vector-ref memory offset))
-
-(define (store memory offset value)
-  (vector-set! memory offset value)
-  memory)
+(define (fetch-operand memory pc)
+  (let ((operand (fetch memory pc)))
+    (append (match-operand (modulo operand 100))
+            (list (parameter-flags operand)))))
 
 (define (parameter-value memory pc flags param)
   (let ((immediate (fetch memory (+ pc param))))
@@ -41,7 +42,7 @@
         (fetch memory immediate))))
 
 (define (step memory pc input output)
-  (match (parse-operand (vector-ref memory pc))
+  (match (fetch-operand memory pc)
     [(list 'add args flags)
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
