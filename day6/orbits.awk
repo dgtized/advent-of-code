@@ -20,10 +20,8 @@ END {
       indirect++
     }
 
-    print body " " indirect;
-
     total += indirect;
   }
 
-  print total
+  print "checksum: " total
 }
