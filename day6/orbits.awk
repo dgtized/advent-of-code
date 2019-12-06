@@ -4,7 +4,7 @@
 
 BEGIN { FS=")" } # split on field separator )
 
-# loop through input & orbits and all bodies seen
+# loop through input & record orbits and all bodies seen
 {
   bodies[$1] = 1
   bodies[$2] = 1
@@ -12,7 +12,7 @@ BEGIN { FS=")" } # split on field separator )
 }
 
 END {
-  # calculate checksum by tracing to COM from all bodies
+  # calculate checksum by counting path to COM from all bodies
   total = 0;
   for(body in bodies) {
     current = body
@@ -33,7 +33,7 @@ END {
     distance ++
   }
 
-  # walk back from YOU until it intersects path to SAN
+  # walk back from YOU until it intersects path from SAN
   distance = 0
   current = "YOU"
   while(current != "COM") {
