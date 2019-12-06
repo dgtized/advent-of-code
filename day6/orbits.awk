@@ -13,7 +13,7 @@ BEGIN { FS=")" } # split on field separator )
 
 END {
   # calculate checksum by counting path to COM from all bodies
-  total = 0;
+  total = 0
   for(body in bodies) {
     current = body
     while(current != "COM") {
@@ -21,7 +21,6 @@ END {
       total++
     }
   }
-
   print "checksum: " total
 
   # compute distance from santa until COM
@@ -30,7 +29,7 @@ END {
   while(current != "COM") {
     current = orbits[current]
     path[current] = distance
-    distance ++
+    distance++
   }
 
   # walk back from YOU until it intersects path from SAN
@@ -42,6 +41,6 @@ END {
       print "intersection @" current " " distance " " path[current] " -> " distance + path[current]
       break
     }
-    distance ++
+    distance++
   }
 }
