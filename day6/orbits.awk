@@ -11,16 +11,14 @@ BEGIN {
 }
 
 END {
+  # calculate checksum by tracing to COM from all bodies
   total = 0;
   for(body in bodies) {
-    indirect = 0
     current = body
     while(current != "COM") {
       current = orbits[current]
-      indirect++
+      total++
     }
-
-    total += indirect;
   }
 
   print "checksum: " total
@@ -34,13 +32,14 @@ END {
     distance ++
   }
 
+  # walk back from YOU until it intersects path to SAN
   distance = 0
   current = "YOU"
   while(current != "COM") {
     current = orbits[current]
     if (current in path) {
-      print "@" current " " distance " " path[current] " -> " distance + path[current]
-      exit
+      print "intersection @" current " " distance " " path[current] " -> " distance + path[current]
+      break
     }
     distance ++
   }
