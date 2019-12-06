@@ -1,9 +1,10 @@
 #!/usr/bin/gawk -f
 
-BEGIN {
-  FS=")"
-}
+# ./orbits.awk input
 
+BEGIN { FS=")" } # split on field separator )
+
+# loop through input & orbits and all bodies seen
 {
   bodies[$1] = 1
   bodies[$2] = 1
