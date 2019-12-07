@@ -2,8 +2,8 @@
 
 (require racket/string)
 
-(define (load-program)
-  (let ((source (car (file->lines "input"))))
+(define (load-program filename)
+  (let ((source (car (file->lines filename))))
     (list->vector (map string->number (string-split source ",")))))
 
 (define (print-memory memory)
@@ -116,7 +116,7 @@
 
 (define (run-sequence memory input)
   (when (string? input)
-    0)
+    input)
   (let ((result (step memory 0 input '())))
     (if (pair? result)
         (car result)
@@ -129,5 +129,14 @@
          (d (run-sequence memory (list (list-ref input 3) c))))
     (run-sequence memory (list (list-ref input 4) d))))
 
-(let ((memory (load-program)))
-  (thruster-seq memory '(0 1 2 3 4)))
+(let ((memory (load-program "input.43210")))
+  (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
+
+;; (let ((memory (load-program "input.54321")))
+;;   (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
+
+(let ((memory (load-program "input")))
+  (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
+
+;; (let ((memory (load-program "input.54321")))
+;;   (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4))))
