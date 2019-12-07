@@ -64,12 +64,14 @@
              (+ pc args)
              input output))]
     [(list 'read args _)
-     (let ((i (car input))
-           (r (fetch memory (+ pc 1))))
-       ;; (println (list pc "read" (car input) r))
-       (step (store memory r i)
-             (+ pc args)
-             (cdr input) output))]
+     (if (pair? input)
+         (let ((i (car input))
+               (r (fetch memory (+ pc 1))))
+           (println (list pc "read" (car input) r))
+           (step (store memory r i)
+                 (+ pc args)
+                 (cdr input) output))
+         "read without input")]
     [(list 'write args flags)
      (let ((w (parameter-value memory pc flags 1)))
        ;; (println (list pc "write" w))
