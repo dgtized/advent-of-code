@@ -58,8 +58,20 @@
         immediate
         (fetch memory immediate))))
 
+(define (read-port! ports port)
+  (let ((channel (vector-ref ports port)))
+    (if (empty? channel)
+        'blocked
+        (let ((value (car channel)))
+          (vector-set! ports port (cdr channel))
+          value))))
+
+(define (write-port! ports port value)
+  (let ((channel (vector-ref ports port)))
+    (vector-set! ports port (append channel (list value)))))
+
 (define debugging #f)
-(define (step machine)
+(define (step machine ports)
   (define (debug lst)
     (when debugging (println lst)))
 
@@ -82,21 +94,20 @@
                     [memory (store memory r (* a b))]
                     [pc (+ pc args)]))]
     [(list 'read args _)
-     (if (pair? input)
-         (let ((i (car input))
-               (r (fetch memory (+ pc 1))))
-           (debug (list pc "read" (car input) r))
-           (struct-copy cpu machine
-                        [memory (store memory r i)]
-                        [pc (+ pc args)]
-                        [input (cdr input)]))
-         (struct-copy cpu machine [condition 'read]))]
+     (let ((value (read-port! ports input)))
+       (if (eq? value 'blocked)
+           (struct-copy cpu machine [condition 'read])
+           (let ((r (fetch memory (+ pc 1))))
+             (debug (list pc "read" value r))
+             (struct-copy cpu machine
+                          [memory (store memory r value)]
+                          [pc (+ pc args)]))))]
     [(list 'write args flags)
-     (let ((w (parameter-value memory pc flags 1)))
-       (debug (list pc "write" w))
+     (let ((value (parameter-value memory pc flags 1)))
+       (debug (list pc "write" value))
+       (write-port! ports output value)
        (struct-copy cpu machine
-                    [pc (+ pc args)]
-                    [output (cons w output)]))]
+                    [pc (+ pc args)]))]
     [(list 'jump-if-true args flags)
      (let ((cnd (parameter-value memory pc flags 1))
            (jmp (parameter-value memory pc flags 2)))
@@ -127,25 +138,32 @@
                     [pc (+ pc args)]))]
     [(list 'halt _ _) (struct-copy cpu machine [condition 'halt])]))
 
-(define (run-until-blocked machine)
+(define (run-until-blocked machine ports)
   (match machine
     [(cpu _ _ _ _ 'run)
-     (run-until-blocked (step machine))]
+     (run-until-blocked (step machine ports) ports)]
     [(cpu _ _ _ _ 'read)
      machine]
     [(cpu _ _ _ _ 'halt)
      machine]))
 
-(define (run-sequence memory input)
-  (let ((state (run-until-blocked (cpu memory 0 input '() 'run))))
-    (car (cpu-output state))))
+(define (run-sequence memory input output ports)
+  (let ((state (run-until-blocked (cpu memory 0 input output 'run) ports)))
+    (read-port! ports 5)))
 
 (define (thruster-seq memory input)
-  (let* ((a (run-sequence memory (list (list-ref input 0) 0)))
-         (b (run-sequence memory (list (list-ref input 1) a)))
-         (c (run-sequence memory (list (list-ref input 2) b)))
-         (d (run-sequence memory (list (list-ref input 3) c))))
-    (run-sequence memory (list (list-ref input 4) d))))
+  (let* ((ports (vector (list (list-ref input 0) 0)
+                        (list (list-ref input 1))
+                        (list (list-ref input 2))
+                        (list (list-ref input 3))
+                        (list (list-ref input 4))
+                        (list)))
+         (a (run-sequence memory 0 1 ports))
+         (b (run-sequence memory 1 2 ports))
+         (c (run-sequence memory 2 3 ports))
+         (d (run-sequence memory 3 4 ports))
+         (e (run-sequence memory 4 5 ports)))
+    e))
 
 ;; (thruster-seq (load-program "input.43210") '(4 3 2 1 0))
 
