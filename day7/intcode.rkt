@@ -114,5 +114,20 @@
      ;; (print-memory memory)
      (reverse output)]))
 
+(define (run-sequence memory input)
+  (when (string? input)
+    0)
+  (let ((result (step memory 0 input '())))
+    (if (pair? result)
+        (car result)
+        result)))
+
+(define (thruster-seq memory input)
+  (let* ((a (run-sequence memory (list (list-ref input 0) 0)))
+         (b (run-sequence memory (list (list-ref input 1) a)))
+         (c (run-sequence memory (list (list-ref input 2) b)))
+         (d (run-sequence memory (list (list-ref input 3) c))))
+    (run-sequence memory (list (list-ref input 4) d))))
+
 (let ((memory (load-program)))
-  (step memory 0 '(6 0) '()))
+  (thruster-seq memory '(0 1 2 3 4)))
