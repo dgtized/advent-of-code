@@ -45,13 +45,16 @@
         immediate
         (fetch memory immediate))))
 
+(define debugging #f)
 (define (step memory pc input output)
+  (define (debug lst)
+    (when debugging (println lst)))
   (match (fetch-operand memory pc)
     [(list 'add args flags)
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
-       ;; (println (list pc "addition " (+ a b) r))
+       (debug (list pc "addition " (+ a b) r))
        (step (store memory r (+ a b))
              (+ pc args)
              input output))]
@@ -59,7 +62,7 @@
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
-       ;; (println (list pc "multiply" (* a b) r))
+       (debug (list pc "multiply" (* a b) r))
        (step (store memory r (* a b))
              (+ pc args)
              input output))]
@@ -67,26 +70,26 @@
      (if (pair? input)
          (let ((i (car input))
                (r (fetch memory (+ pc 1))))
-           (println (list pc "read" (car input) r))
+           (debug (list pc "read" (car input) r))
            (step (store memory r i)
                  (+ pc args)
                  (cdr input) output))
          "read without input")]
     [(list 'write args flags)
      (let ((w (parameter-value memory pc flags 1)))
-       ;; (println (list pc "write" w))
+       (debug (list pc "write" w))
        (step memory (+ pc args) input (cons w output)))]
     [(list 'jump-if-true args flags)
      (let ((cnd (parameter-value memory pc flags 1))
            (jmp (parameter-value memory pc flags 2)))
-       ;; (println (list pc "jump-if-true" cnd jmp))
+       (debug (list pc "jump-if-true" cnd jmp))
        (step memory
              (if (> cnd 0) jmp (+ pc args))
              input output))]
     [(list 'jump-if-false args flags)
      (let ((cnd (parameter-value memory pc flags 1))
            (jmp (parameter-value memory pc flags 2)))
-       ;; (println (list pc "jump-if-false" cnd jmp))
+       (debug (list pc "jump-if-false" cnd jmp))
        (step memory
              (if (= cnd 0) jmp (+ pc args))
              input output))]
@@ -94,7 +97,7 @@
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
-       (println (list pc "less-than" (if (< a b) 1 0) r))
+       (debug (list pc "less-than" (if (< a b) 1 0) r))
        (step (store memory r (if (< a b) 1 0))
              (+ pc args)
              input output))]
@@ -102,7 +105,7 @@
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
-       ;; (println (list pc "equals" (if (= a b) 1 0) r))
+       (debug (list pc "equals" (if (= a b) 1 0) r))
        (step (store memory r (if (= a b) 1 0))
              (+ pc args)
              input output))]
@@ -111,4 +114,4 @@
      (reverse output)]))
 
 (let ((memory (load-program)))
-  (step memory 0 '(4 0) '()))
+  (step memory 0 '(6 0) '()))
