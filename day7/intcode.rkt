@@ -13,8 +13,9 @@
   (vector-ref memory offset))
 
 (define (store memory offset value)
-  (vector-set! memory offset value)
-  memory)
+  (let ((newmem (vector-copy memory)))
+    (vector-set! newmem offset value)
+    newmem))
 
 (define (match-operand operand)
   (case operand
