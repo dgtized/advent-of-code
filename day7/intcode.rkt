@@ -70,68 +70,61 @@
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "addition " (+ a b) r))
-       (cpu (store memory r (+ a b))
-             (+ pc args)
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [memory (store memory r (+ a b))]
+                    [pc (+ pc args)]))]
     [(list 'multiply args flags)
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "multiply" (* a b) r))
-       (cpu (store memory r (* a b))
-             (+ pc args)
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [memory (store memory r (* a b))]
+                    [pc (+ pc args)]))]
     [(list 'read args _)
      (if (pair? input)
          (let ((i (car input))
                (r (fetch memory (+ pc 1))))
            (debug (list pc "read" (car input) r))
-           (cpu (store memory r i)
-                 (+ pc args)
-                 (cdr input) output
-                 'run))
+           (struct-copy cpu machine
+                        [memory (store memory r i)]
+                        [pc (+ pc args)]
+                        [input (cdr input)]))
          (struct-copy cpu machine [condition 'read]))]
     [(list 'write args flags)
      (let ((w (parameter-value memory pc flags 1)))
        (debug (list pc "write" w))
-       (cpu memory (+ pc args) input (cons w output)
-            'run))]
+       (struct-copy cpu machine
+                    [pc (+ pc args)]
+                    [output (cons w output)]))]
     [(list 'jump-if-true args flags)
      (let ((cnd (parameter-value memory pc flags 1))
            (jmp (parameter-value memory pc flags 2)))
        (debug (list pc "jump-if-true" cnd jmp))
-       (cpu memory
-             (if (> cnd 0) jmp (+ pc args))
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [pc (if (> cnd 0) jmp (+ pc args))]))]
     [(list 'jump-if-false args flags)
      (let ((cnd (parameter-value memory pc flags 1))
            (jmp (parameter-value memory pc flags 2)))
        (debug (list pc "jump-if-false" cnd jmp))
-       (cpu memory
-             (if (= cnd 0) jmp (+ pc args))
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [pc (if (= cnd 0) jmp (+ pc args))]))]
     [(list 'less-than args flags)
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "less-than" (if (< a b) 1 0) r))
-       (cpu (store memory r (if (< a b) 1 0))
-             (+ pc args)
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [memory (store memory r (if (< a b) 1 0))]
+                    [pc (+ pc args)]))]
     [(list 'equals args flags)
      (let ((a (parameter-value memory pc flags 1))
            (b (parameter-value memory pc flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "equals" (if (= a b) 1 0) r))
-       (cpu (store memory r (if (= a b) 1 0))
-             (+ pc args)
-             input output
-             'run))]
+       (struct-copy cpu machine
+                    [memory (store memory r (if (= a b) 1 0))]
+                    [pc (+ pc args)]))]
     [(list 'halt _ _) (struct-copy cpu machine [condition 'halt])]))
 
 (define (run-until-blocked machine)
