@@ -48,4 +48,5 @@ is a list of the pixel values across every layers."
     (cl-loop for i below layer-width by image-width
              do (insert (substring layer i (+ i image-width)) "\n"))))
 
+;; Generate "image.sif" output
 ;; (generate-image (visible-layer))
