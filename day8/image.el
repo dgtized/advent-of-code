@@ -44,9 +44,11 @@ is a list of the pixel values across every layers."
 
 (defun generate-image (layer)
   "Render an image from a particular layer, split into individual rows."
-  (with-temp-file "image.sif"
-    (cl-loop for i below layer-width by image-width
-             do (insert (substring layer i (+ i image-width)) "\n"))))
+  (let ((contrasted (s-replace "0" " " layer)))
+    (with-temp-file "image.sif"
+      (cl-loop for i below layer-width by image-width
+               do (insert (substring contrasted i (+ i image-width))
+                          "\n")))))
 
 ;; Generate "image.sif" output
 ;; (generate-image (visible-layer))
