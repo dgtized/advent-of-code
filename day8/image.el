@@ -18,6 +18,10 @@
                          collect (list (s-count-matches "0" layer)
                                        (* (s-count-matches "1" layer)
                                           (s-count-matches "2" layer))))))
+    ;; TODO: Is it possible to use cl-loop minimize yet return the checksum for that layer?
+    ;; By default it appears to return the value computed and not the element?
+    ;; (cl-loop for i in '(3 1 4) minimize (1+ i)) => 2
+    ;; How can you get back the minimal source element for further transforms?
     (car (cl-sort counts '< :key 'car))))
 
 ;; (image-checksum)
