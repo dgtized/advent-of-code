@@ -154,7 +154,9 @@
        (struct-copy cpu machine
                     [relative-base (+ (cpu-relative-base machine) base)]
                     [pc (+ pc args)]))]
-    [(list 'halt _ _) (struct-copy cpu machine [condition 'halt])]))
+    [(list 'halt _ _)
+     (debug (list pc "halt"))
+     (struct-copy cpu machine [condition 'halt])]))
 
 (define (run-until-blocked machine ports)
   (match (cpu-condition machine)
@@ -195,3 +197,8 @@
   (list out (= 16 (string-length (number->string out)))))
 (let ((out (car (port-output (run-source "104,1125899906842624,99")))))
   (list out (= 1125899906842624 out)))
+
+(let ((memory (load-program "input"))
+      (ports (list->vector '((1) ()))))
+    (run-until-blocked (cpu memory 0 0 0 1 'run) ports)
+    ports)
