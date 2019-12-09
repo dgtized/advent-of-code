@@ -82,7 +82,7 @@
   (let ((channel (vector-ref ports port)))
     (vector-set! ports port (append channel (list value)))))
 
-(define debugging #t)
+(define debugging #f)
 (define (step machine ports)
   (define (debug lst)
     (when debugging (println lst)))
@@ -198,6 +198,7 @@
 (let ((out (car (port-output (run-source "104,1125899906842624,99")))))
   (list out (= 1125899906842624 out)))
 
+(set! debugging #t)
 (let ((memory (load-program "input"))
       (ports (list->vector '((1) ()))))
     (run-until-blocked (cpu memory 0 0 0 1 'run) ports)
