@@ -87,7 +87,7 @@
   (define (debug lst)
     (when debugging (println lst)))
 
-  (match-define (cpu memory pc relative-base input output condition) machine)
+  (match-define (cpu memory pc _ input output _) machine)
   (match (fetch-operand memory pc)
     [(list 'add args flags)
      (let ((a (parameter-value machine flags 1))
