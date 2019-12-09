@@ -109,7 +109,7 @@
      (let ((value (read-port! ports input)))
        (if (eq? value 'blocked)
            (struct-copy cpu machine [condition 'read])
-           (let ((r (fetch memory (+ pc 1))))
+           (let ((r (parameter-value machine flags 1)))
              (debug (list pc "read" flags value r))
              (struct-copy cpu machine
                           [memory (store memory r value)]
