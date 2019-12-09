@@ -148,38 +148,6 @@
     [(cpu _ _ _ _ 'halt)
      machine]))
 
-(define (run-sequence memory input output ports)
-  (let ((state (run-until-blocked (cpu memory 0 input output 'run) ports)))
-    (read-port! ports 5)))
-
-(define (thruster-seq memory input)
-  (let* ((ports (vector (list (list-ref input 0) 0)
-                        (list (list-ref input 1))
-                        (list (list-ref input 2))
-                        (list (list-ref input 3))
-                        (list (list-ref input 4))
-                        (list)))
-         (a (run-sequence memory 0 1 ports))
-         (b (run-sequence memory 1 2 ports))
-         (c (run-sequence memory 2 3 ports))
-         (d (run-sequence memory 3 4 ports))
-         (e (run-sequence memory 4 5 ports)))
-    e))
-
-;; (thruster-seq (load-program "input.43210") '(4 3 2 1 0))
-
-(let ((memory (load-program "input.43210")))
-  (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
-
-;; (let ((memory (load-program "input.54321")))
-;;   (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
-
-(let ((memory (load-program "input")))
-  (thruster-seq memory (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4)))))
-
-;; (let ((memory (load-program "input.54321")))
-;;   (argmax (lambda (s) (thruster-seq memory s)) (permutations '(0 1 2 3 4))))
-
 (define (step-all machines ports)
   (map (lambda (m) (run-until-blocked m ports)) machines))
 
@@ -191,26 +159,3 @@
   (if (any-running? machines)
       (run-all (step-all machines ports) ports)
       machines))
-
-(define (amplifiers memory input)
-  (let* ((ports (vector (list (list-ref input 0) 0)
-                        (list (list-ref input 1))
-                        (list (list-ref input 2))
-                        (list (list-ref input 3))
-                        (list (list-ref input 4))
-                        (list)))
-         (machines (list (cpu memory 0 0 1 'run)
-                         (cpu memory 0 1 2 'run)
-                         (cpu memory 0 2 3 'run)
-                         (cpu memory 0 3 4 'run)
-                         (cpu memory 0 4 0 'run))))
-    (run-all machines ports)
-    ports))
-
-(let ((program (load-program "input")))
-  (let ((best (argmax (lambda (s) (read-port! (amplifiers program s) 0)) (permutations '(5 6 7 8 9)))))
-    (amplifiers program best)))
-
-;; (for ([input (permutations '(5 6 7 8 9))])
-;;   (println (list input
-;;                  (read-port! (amplifiers (load-program "input") input) 0))))
