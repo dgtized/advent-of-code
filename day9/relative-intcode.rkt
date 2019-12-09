@@ -2,32 +2,39 @@
 
 (require racket/string)
 
-(define (load-program filename)
-  (let ((source (car (file->lines filename))))
-    (list->vector (map string->number (string-split source ",")))))
+(define (parse-program source)
+  (list->vector (map string->number (string-split source ","))))
 
-(struct cpu (memory pc input output condition))
+(define (load-program filename)
+  (parse-program (car (file->lines filename))))
+
+(struct cpu (memory pc relative-base input output condition))
 
 (define (print-memory cpu)
   (println (list "pc:" (cpu-pc cpu)
+                 " rb: " (cpu-relative-base cpu)
                  " input: " (cpu-input cpu)
                  " output: " (cpu-output cpu)
                  " condition: " (cpu-condition cpu)))
   (println (string-join (map number->string (vector->list (cpu-memory cpu))) ",")))
 
 (define (fetch memory offset)
-  (vector-ref memory offset))
+  (if (> offset (vector-length memory))
+      0
+      (vector-ref memory offset)))
 
 (define (cpu-fetch cpu offset)
   (vector-ref (cpu-memory cpu) offset))
 
 (define (store memory offset value)
-  (let ((newmem (vector-copy memory)))
-    (vector-set! newmem offset value)
-    newmem))
-
-;; (define (cpu-store cpu offset value)
-;;   (store (cpu-memory cpu) offset value))
+  (if (> offset (vector-length memory))
+      (let ((newmem (make-vector (exact-floor (* offset 1.25)))))
+        (vector-copy! newmem 0 memory 0)
+        (vector-set! newmem offset value)
+        newmem)
+      (let ((newmem (vector-copy memory)))
+        (vector-set! newmem offset value)
+        newmem)))
 
 (define (match-operand operand)
   (case operand
@@ -39,6 +46,7 @@
     [(6) '(jump-if-false 3)]
     [(7) '(less-than 4)]
     [(8) '(equals 4)]
+    [(9) '(relative-base 2)]
     [(99) '(halt 0)]))
 
 (define (parameter-flags operand)
@@ -52,11 +60,15 @@
     (append (match-operand (modulo operand 100))
             (list (parameter-flags operand)))))
 
-(define (parameter-value memory pc flags param)
-  (let ((immediate (fetch memory (+ pc param))))
-    (if (= 1 (list-ref flags (- param 1)))
-        immediate
-        (fetch memory immediate))))
+(define (parameter-value machine flags param)
+  (let* ((memory (cpu-memory machine))
+         (pc (cpu-pc machine))
+         (relative-base (cpu-relative-base machine))
+         (immediate (fetch memory (+ pc param))))
+    (case (list-ref flags (- param 1))
+      [(1) immediate]
+      [(2) (fetch memory (+ relative-base immediate))]
+      [else (fetch memory immediate)])))
 
 (define (read-port! ports port)
   (let ((channel (vector-ref ports port)))
@@ -70,24 +82,24 @@
   (let ((channel (vector-ref ports port)))
     (vector-set! ports port (append channel (list value)))))
 
-(define debugging #f)
+(define debugging #t)
 (define (step machine ports)
   (define (debug lst)
     (when debugging (println lst)))
 
-  (match-define (cpu memory pc input output condition) machine)
+  (match-define (cpu memory pc relative-base input output condition) machine)
   (match (fetch-operand memory pc)
     [(list 'add args flags)
-     (let ((a (parameter-value memory pc flags 1))
-           (b (parameter-value memory pc flags 2))
+     (let ((a (parameter-value machine flags 1))
+           (b (parameter-value machine flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "addition " (+ a b) r))
        (struct-copy cpu machine
                     [memory (store memory r (+ a b))]
                     [pc (+ pc args)]))]
     [(list 'multiply args flags)
-     (let ((a (parameter-value memory pc flags 1))
-           (b (parameter-value memory pc flags 2))
+     (let ((a (parameter-value machine flags 1))
+           (b (parameter-value machine flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "multiply" (* a b) r))
        (struct-copy cpu machine
@@ -103,49 +115,55 @@
                           [memory (store memory r value)]
                           [pc (+ pc args)]))))]
     [(list 'write args flags)
-     (let ((value (parameter-value memory pc flags 1)))
+     (let ((value (parameter-value machine flags 1)))
        (debug (list pc "write" value))
        (write-port! ports output value)
        (struct-copy cpu machine
                     [pc (+ pc args)]))]
     [(list 'jump-if-true args flags)
-     (let ((cnd (parameter-value memory pc flags 1))
-           (jmp (parameter-value memory pc flags 2)))
+     (let ((cnd (parameter-value machine flags 1))
+           (jmp (parameter-value machine flags 2)))
        (debug (list pc "jump-if-true" cnd jmp))
        (struct-copy cpu machine
                     [pc (if (> cnd 0) jmp (+ pc args))]))]
     [(list 'jump-if-false args flags)
-     (let ((cnd (parameter-value memory pc flags 1))
-           (jmp (parameter-value memory pc flags 2)))
+     (let ((cnd (parameter-value machine flags 1))
+           (jmp (parameter-value machine flags 2)))
        (debug (list pc "jump-if-false" cnd jmp))
        (struct-copy cpu machine
                     [pc (if (= cnd 0) jmp (+ pc args))]))]
     [(list 'less-than args flags)
-     (let ((a (parameter-value memory pc flags 1))
-           (b (parameter-value memory pc flags 2))
+     (let ((a (parameter-value machine flags 1))
+           (b (parameter-value machine flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "less-than" (if (< a b) 1 0) r))
        (struct-copy cpu machine
                     [memory (store memory r (if (< a b) 1 0))]
                     [pc (+ pc args)]))]
     [(list 'equals args flags)
-     (let ((a (parameter-value memory pc flags 1))
-           (b (parameter-value memory pc flags 2))
+     (let ((a (parameter-value machine flags 1))
+           (b (parameter-value machine flags 2))
            (r (fetch memory (+ pc 3))))
        (debug (list pc "equals" (if (= a b) 1 0) r))
        (struct-copy cpu machine
                     [memory (store memory r (if (= a b) 1 0))]
                     [pc (+ pc args)]))]
+    [(list 'relative-base args flags)
+     (let ((base (parameter-value machine flags 1)))
+       (debug (list pc "relative-base" base))
+       (struct-copy cpu machine
+                    [relative-base base]
+                    [pc (+ pc args)]))]
     [(list 'halt _ _) (struct-copy cpu machine [condition 'halt])]))
 
 (define (run-until-blocked machine ports)
-  (match machine
-    [(cpu _ _ _ _ 'run)
+  (match (cpu-condition machine)
+    ['run
      (run-until-blocked (step machine ports) ports)]
-    [(cpu _ _ _ _ 'read)
+    ['read
      (struct-copy cpu machine
                   [condition 'run])]
-    [(cpu _ _ _ _ 'halt)
+    ['halt
      machine]))
 
 (define (step-all machines ports)
@@ -159,3 +177,9 @@
   (if (any-running? machines)
       (run-all (step-all machines ports) ports)
       machines))
+
+;; quine
+(let ((ports (list->vector '(() ()))))
+  (run-until-blocked (cpu (parse-program "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99") 0 0 0 1 'run)
+                     ports)
+  ports)
