@@ -152,7 +152,7 @@
      (let ((base (parameter-value machine flags 1)))
        (debug (list pc "relative-base" flags base))
        (struct-copy cpu machine
-                    [relative-base base]
+                    [relative-base (+ (cpu-relative-base machine) base)]
                     [pc (+ pc args)]))]
     [(list 'halt _ _) (struct-copy cpu machine [condition 'halt])]))
 
