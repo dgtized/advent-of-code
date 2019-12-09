@@ -178,8 +178,13 @@
       (run-all (step-all machines ports) ports)
       machines))
 
+(define (run-source source)
+  (let ((memory (parse-program source))
+        (ports (list->vector '(() ()))))
+    (run-until-blocked (cpu memory 0 0 0 1 'run) ports)
+    ports))
+
 ;; quine
-(let ((ports (list->vector '(() ()))))
-  (run-until-blocked (cpu (parse-program "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99") 0 0 0 1 'run)
-                     ports)
-  ports)
+(run-source "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99")
+(run-source "1102,34915192,34915192,7,4,7,99,0")
+(run-source "104,1125899906842624,99")
