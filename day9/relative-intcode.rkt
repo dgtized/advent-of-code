@@ -66,9 +66,9 @@
          (relative-base (cpu-relative-base machine))
          (immediate (fetch memory (+ pc param))))
     (case (list-ref flags (- param 1))
+      [(0) (fetch memory immediate)]
       [(1) immediate]
-      [(2) (fetch memory (+ relative-base immediate))]
-      [else (fetch memory immediate)])))
+      [(2) (fetch memory (+ relative-base immediate))])))
 
 (define (read-port! ports port)
   (let ((channel (vector-ref ports port)))
@@ -199,7 +199,7 @@
   (list out (= 1125899906842624 out)))
 
 (set! debugging #t)
-(let ((memory (load-program "input"))
-      (ports (list->vector '((1) ()))))
-    (run-until-blocked (cpu memory 0 0 0 1 'run) ports)
-    ports)
+(let* ((memory (load-program "input"))
+      (ports (list->vector '((1) ())))
+      (cpu (run-until-blocked (cpu memory 0 0 0 1 'run) ports)))
+  (list ports))
