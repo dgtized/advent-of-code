@@ -1,6 +1,21 @@
 import scala.io.Source
+import scala.math
 
-case class Point(x: Int, y: Int)
+case class Point(x: Int, y: Int) {
+  def angle(point: Point): Double =
+    math.atan2(
+      (point.y - this.y).toDouble,
+      (point.x - this.x).toDouble
+    )
+
+  def visible(points : List[Point]) : Integer =
+    points.filter { point => point != this }.groupBy { point =>
+      this.angle(point)
+    }.size
+
+}
+
+
 
 object MonitorStation extends App {
   val lines = Source.fromFile(args(0)).getLines.toList
@@ -18,7 +33,8 @@ object MonitorStation extends App {
     y = y + 1
   }
 
-  points.foreach { point =>
-    println(point)
-  }
+  println
+
+  val max = points.maxBy { source => source.visible(points) }
+  println(max + " " + max.visible(points))
 }
