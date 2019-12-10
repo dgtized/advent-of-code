@@ -18,7 +18,16 @@ case class Point(x: Int, y: Int) {
       math.pow(point.y - this.y, 2))
 }
 
-
+object Sweep {
+  def clockwise(points : List[List[Point]]) : List[Point] =
+    if(points.isEmpty) {
+      List[Point]()
+    } else {
+      points.map { _.head } ::: clockwise(
+        points.map { _.tail }.filter { !_.isEmpty }
+      )
+    }
+}
 
 object MonitorStation extends App {
   val lines = Source.fromFile(args(0)).getLines.toList
@@ -43,8 +52,21 @@ object MonitorStation extends App {
 
   println
 
-  ordered = points.groupBy { x => source.angle(x) }.
+  val ordered = points.groupBy { x => source.angle(x) }.
     toSeq.
     map { case (k, v) => (k, v.sortBy { x => source.distance(x) }) }.
-    sortBy { case (k, v) => k }
+    sortBy { case (k, _) => k }
+
+  val northIdx = ordered.indexWhere { case (k, _) => k >= -math.Pi / 2 }
+  println(northIdx + " " + ordered(northIdx))
+
+  val orderedPoints = ordered.map { case(_, v) => v }.toList
+
+  val clockwiseLists = orderedPoints.drop(northIdx) ::: orderedPoints.take(northIdx)
+
+  val clockwise = Sweep.clockwise(clockwiseLists)
+
+  //clockwise.zipWithIndex.foreach { case (x, i) => println(List(i+1, x, source.angle(x), source.distance(x))) }
+  val hit = clockwise(200-1)
+  println(hit + " " + (hit.x * 100 + hit.y))
 }
