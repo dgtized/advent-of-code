@@ -1,3 +1,5 @@
+// execute with: scala monitor_station.scala input
+
 import scala.io.Source
 import scala.math
 
