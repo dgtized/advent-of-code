@@ -13,6 +13,9 @@ case class Point(x: Int, y: Int) {
       this.angle(point)
     }.size
 
+  def distance(point: Point): Double =
+    math.sqrt(math.pow(point.x - this.x, 2) +
+      math.pow(point.y - this.y, 2))
 }
 
 
@@ -35,6 +38,13 @@ object MonitorStation extends App {
 
   println
 
-  val max = points.maxBy { source => source.visible(points) }
-  println(max + " " + max.visible(points))
+  val source = points.maxBy { source => source.visible(points) }
+  println(source + " " + source.visible(points))
+
+  println
+
+  ordered = points.groupBy { x => source.angle(x) }.
+    toSeq.
+    map { case (k, v) => (k, v.sortBy { x => source.distance(x) }) }.
+    sortBy { case (k, v) => k }
 }
