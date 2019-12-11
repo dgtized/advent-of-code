@@ -249,4 +249,5 @@
       (cpu (init-cpu (load-program "input") 0 1))
       (bot (robot 0 0 'north))
       (path (list (panel 0 0 0))))
-  (run-robot cpu ports bot path))
+  (set-count (list->set (map (lambda (pane) (match pane [(panel x y _) (list x y)]))
+                      (run-robot cpu ports bot path)))))
