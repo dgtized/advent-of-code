@@ -31,7 +31,7 @@
 
 (define (store memory offset value)
   (if (> offset (vector-length memory))
-      (let ((newmem (make-vector (exact-floor (* offset 1.25)))))
+      (let ((newmem (make-vector (exact-floor (* offset 1.5)))))
         (vector-copy! newmem 0 memory 0)
         (vector-set! newmem offset value)
         newmem)
@@ -250,4 +250,21 @@
       (bot (robot 0 0 'north))
       (path (list (panel 0 0 0))))
   (set-count (list->set (map (lambda (pane) (match pane [(panel x y _) (list x y)]))
-                      (run-robot cpu ports bot path)))))
+                             (run-robot cpu ports bot path)))))
+
+;; paint
+(let* ((ports (list->vector '(() ())))
+       (cpu (init-cpu (load-program "input") 0 1))
+       (bot (robot 50 50 'north))
+       (path (run-robot cpu ports bot (list (panel 50 50 1))))
+       (grid (build-vector 100 (lambda (x) (make-string 100 #\ )))))
+  (for ([pane path])
+    (match pane
+      [(panel x y color)
+       (vector-set! grid y (let ((copy (string-copy (vector-ref grid y))))
+                             (string-set! copy x (if (= color 0) #\ #\+))
+                             copy))]))
+  (for ([row (reverse (vector->list grid))])
+    (println row)))
+
+
