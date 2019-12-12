@@ -14,6 +14,8 @@ type body struct {
 	dz int
 }
 
+var body_count = 4;
+
 func delta_v(pa *int, pb *int, da *int, db *int) {
 	if *pa > *pb {
 		(*da)--
@@ -24,25 +26,23 @@ func delta_v(pa *int, pb *int, da *int, db *int) {
 	}
 }
 
-func step(bodies []body) []body {
-	for outer := 0; outer < len(bodies); outer++ {
-		for inner := outer + 1; inner < len(bodies); inner++ {
-			delta_v(&bodies[outer].x, &bodies[inner].x,
-				&bodies[outer].dx, &bodies[inner].dx)
-			delta_v(&bodies[outer].y, &bodies[inner].y,
-				&bodies[outer].dy, &bodies[inner].dy)
-			delta_v(&bodies[outer].z, &bodies[inner].z,
-				&bodies[outer].dz, &bodies[inner].dz)
+func step(bodies *([]body)) {
+	for outer := 0; outer < body_count; outer++ {
+		for inner := outer + 1; inner < body_count; inner++ {
+			delta_v(&(*bodies)[outer].x, &(*bodies)[inner].x,
+				&(*bodies)[outer].dx, &(*bodies)[inner].dx)
+			delta_v(&(*bodies)[outer].y, &(*bodies)[inner].y,
+				&(*bodies)[outer].dy, &(*bodies)[inner].dy)
+			delta_v(&(*bodies)[outer].z, &(*bodies)[inner].z,
+				&(*bodies)[outer].dz, &(*bodies)[inner].dz)
 		}
 	}
 
-	for i := 0; i < len(bodies); i++ {
-		bodies[i].x += bodies[i].dx
-		bodies[i].y += bodies[i].dy
-		bodies[i].z += bodies[i].dz
+	for i := 0; i < body_count; i++ {
+		(*bodies)[i].x += (*bodies)[i].dx
+		(*bodies)[i].y += (*bodies)[i].dy
+		(*bodies)[i].z += (*bodies)[i].dz
 	}
-
-	return bodies
 }
 
 func abs(v int) int {
@@ -55,7 +55,7 @@ func abs(v int) int {
 
 func energy(bodies []body) int {
 	var total int
-	for i := 0; i < len(bodies); i++ {
+	for i := 0; i < body_count; i++ {
 		var potential = abs(bodies[i].x) + abs(bodies[i].y) + abs(bodies[i].z)
 		var kinetic = abs(bodies[i].dx) + abs(bodies[i].dy) + abs(bodies[i].dz)
 		total += potential * kinetic
@@ -66,7 +66,7 @@ func energy(bodies []body) int {
 func run_sim(bodies []body, iterations int, print bool) {
 	fmt.Println(0, bodies)
 	for iter := 0; iter < iterations; iter++ {
-		bodies = step(bodies)
+		step(&bodies)
 		if print {
 			fmt.Println(iter+1, bodies)
 		}
@@ -86,7 +86,7 @@ func find_repeat(bodies []body) {
 
 	var iter int
 	for {
-		bodies = step(bodies)
+		step(&bodies)
 		var h = hash(bodies)
 		var last, found = seen[h]
 		if found {
