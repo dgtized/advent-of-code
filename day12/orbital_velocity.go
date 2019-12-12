@@ -95,6 +95,31 @@ func find_repeat(bodies []body) {
 		} else {
 			seen[h] = iter
 		}
+		if(iter % 1000000 == 0) {
+			println(iter)
+		}
+		iter++
+	}
+	fmt.Println(bodies)
+}
+
+func find_start(bodies []body) {
+	var seen = make(map[string]int)
+
+	seen[hash(bodies)] = 0
+
+	var iter = 1
+	for {
+		step(&bodies)
+		var h = hash(bodies)
+		var last, found = seen[h]
+		if found {
+			println("seen @", iter, " last", last, " steps")
+			break
+		}
+		if(iter % 1000000 == 0) {
+			println(iter)
+		}
 		iter++
 	}
 	fmt.Println(bodies)
@@ -124,6 +149,6 @@ func main() {
 	run_sim(test2, 100, false)
 	run_sim(bodies, 1000, false)
 
-	find_repeat(test)
-	find_repeat(bodies)
+	find_start(test)
+	find_start(bodies)
 }
