@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"fmt"
 )
 
@@ -66,12 +67,37 @@ func run_sim(bodies []body, iterations int, print bool) {
 	fmt.Println(0, bodies)
 	for iter := 0; iter < iterations; iter++ {
 		bodies = step(bodies)
-		if (print) {
+		if print {
 			fmt.Println(iter+1, bodies)
 		}
 	}
 	fmt.Println("**", bodies)
 	fmt.Println(energy(bodies))
+}
+
+func hash(bodies []body) string {
+	h := sha256.New()
+	h.Write([]byte(fmt.Sprintf("%v", bodies)))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func find_repeat(bodies []body) {
+	var seen = make(map[string]int)
+
+	var iter int
+	for {
+		bodies = step(bodies)
+		var h = hash(bodies)
+		var last, found = seen[h]
+		if found {
+			println("seen @", iter, " last", last, " steps")
+			break
+		} else {
+			seen[h] = iter
+		}
+		iter++
+	}
+	fmt.Println(bodies)
 }
 
 func main() {
@@ -97,4 +123,7 @@ func main() {
 	run_sim(test, 10, true)
 	run_sim(test2, 100, false)
 	run_sim(bodies, 1000, false)
+
+	find_repeat(test)
+	find_repeat(bodies)
 }
