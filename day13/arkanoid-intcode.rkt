@@ -205,7 +205,10 @@
                                             [(4) #\B]))
                       copy))]))
   (for ([row (vector->list grid)])
-    (println row)))
+    (println row))
+
+  (length (filter (lambda (c) (eq? c #\*))
+                (flatten (map string->list (vector->list grid))))))
 
 
 
