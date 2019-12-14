@@ -186,29 +186,34 @@
       '()
       (cons (take lst n) (split-groups (drop lst n) n))))
 
+(define (print-grid output)
+  (let ((grid (build-vector 22 (lambda (x) (make-string 38 #\ )))))
+    (for [(coords output)]
+      (match coords
+        [(list x y color)
+         (if (= x -1)
+             null
+             (vector-set! grid y
+                          (let ((copy (string-copy (vector-ref grid y))))
+                            (string-set! copy x (case color
+                                                  [(0) #\ ]
+                                                  [(1) #\W]
+                                                  [(2) #\*]
+                                                  [(3) #\P]
+                                                  [(4) #\B]))
+                            copy)))]))
+    (for ([row (vector->list grid)])
+      (println row))
+    (println (length (filter (lambda (c) (eq? c #\*))
+                            (flatten (map string->list (vector->list grid))))))))
+
 ;; paint
 (let* ((ports (list->vector '(() ())))
        (cpu (run-until-blocked (init-cpu (load-program "input") 0 1)
                                ports))
-       (grid (build-vector 22 (lambda (x) (make-string 38 #\ ))))
        (output (split-groups (vector-ref ports 1) 3)))
-  (for [(coords output)]
-    (match coords
-      [(list x y color)
-       (vector-set! grid y
-                    (let ((copy (string-copy (vector-ref grid y))))
-                      (string-set! copy x (case color
-                                            [(0) #\ ]
-                                            [(1) #\W]
-                                            [(2) #\*]
-                                            [(3) #\P]
-                                            [(4) #\B]))
-                      copy))]))
-  (for ([row (vector->list grid)])
-    (println row))
+  (print-grid output))
 
-  (length (filter (lambda (c) (eq? c #\*))
-                (flatten (map string->list (vector->list grid))))))
 
 
 
