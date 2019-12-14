@@ -6,6 +6,34 @@ defmodule Stochiometry.CLI do
     IO.inspect(conversions)
 
     IO.inspect(calc(conversions, [{"FUEL", 1}], %{}))
+    IO.inspect(search(conversions, 1, 1))
+  end
+
+  # really bad heuristic search
+  def search(conversions, fuel, last_valid) do
+    max_ore = 1_000_000_000_000
+    ore = calc(conversions, [{"FUEL", fuel}], %{})
+
+    IO.inspect([fuel, ore])
+
+    ratio = ore / fuel
+
+    if(ore <= max_ore) do
+      estimate_fuel =
+        if fuel * 2 * ratio < max_ore do
+          fuel * 2
+        else
+          if (fuel + 1000) * ratio < max_ore do
+            fuel + 1000
+          else
+            fuel + 1
+          end
+        end
+
+      search(conversions, estimate_fuel, fuel)
+    else
+      last_valid
+    end
   end
 
   def load_converions(args) do
