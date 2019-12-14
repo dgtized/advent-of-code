@@ -5,7 +5,7 @@ defmodule Stochiometry.CLI do
     conversions = load_converions(args)
     IO.inspect(conversions)
 
-    IO.inspect(calc(conversions, [{"FUEL", 1}], []))
+    IO.inspect(calc(conversions, [{"FUEL", 1}], %{}))
   end
 
   def load_converions(args) do
@@ -26,21 +26,35 @@ defmodule Stochiometry.CLI do
   end
 
   def calc(conversions, [{source, requested} | remainder], residuals) do
-    IO.inspect({[source, requested], residuals})
+    # IO.inspect({"processing", [source, requested]})
+    # IO.inspect(residuals)
 
     if source == "ORE" do
       requested + calc(conversions, remainder, residuals)
     else
       {count, deps} = conversions[source]
 
-      batches = Float.ceil(requested / count)
+      residue = Map.get(residuals, source, 0.0)
+
+      batches =
+        if residue > requested do
+          0
+        else
+          Float.ceil((requested - residue) / count)
+        end
+
+      leftover = batches * count + residue - requested
 
       next =
         Enum.map(deps, fn {dep, required} ->
           {dep, batches * required}
         end)
 
-      calc(conversions, combine(remainder ++ next), residuals)
+      calc(
+        conversions,
+        combine(remainder ++ next),
+        Map.put(residuals, source, leftover)
+      )
     end
   end
 
@@ -49,7 +63,7 @@ defmodule Stochiometry.CLI do
   end
 
   def combine(lst) do
-    IO.inspect(["combine", lst])
+    # IO.inspect(["combine", lst])
 
     r =
       Enum.group_by(lst, fn {n, c} ->
@@ -61,7 +75,7 @@ defmodule Stochiometry.CLI do
         {name, Enum.reduce(similar, 0, fn {_, v}, acc -> acc + v end)}
       end)
 
-    IO.inspect(["combine", r])
+    # IO.inspect(["combine", r])
 
     r
   end
