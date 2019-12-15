@@ -2,21 +2,6 @@
 
 (require "../lib/intcode.rkt")
 
-(define (step-all machines ports)
-  (map (lambda (m) (run-until-blocked m ports)) machines))
-
-(define (any-running? machines)
-  (ormap (lambda (m) (eq? 'run (cpu-condition m)))
-          machines))
-
-(define (run-all machines ports)
-  (if (any-running? machines)
-      (run-all (step-all machines ports) ports)
-      machines))
-
-(define (port-output ports)
-  (vector-ref ports 1))
-
 (struct robot (x y cardinal))
 
 (define/match (turn cardinal rotate)
