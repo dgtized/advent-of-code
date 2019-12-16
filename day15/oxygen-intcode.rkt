@@ -59,7 +59,7 @@
                                        [(robot) #\D]))
                  copy)))
 
-(define (print-world bot world)
+(define (render-world bot world)
   (match (world-coords world)
     [(list xsize xoffset ysize yoffset)
      (let ((grid (build-vector ysize (lambda (x) (make-string xsize #\ )))))
@@ -73,8 +73,11 @@
        (match bot
          [(robot rx ry)
           (update-tile grid (+ rx xoffset) (+ ry yoffset) 'robot)])
-       (for ([row (vector->list grid)])
-         (println row)))]))
+       grid)]))
+
+(define (print-world bot world)
+  (for ([row (vector->list (render-world bot world))])
+    (println row)))
 
 (define (repl cpu bot world)
   (print-world bot world)
