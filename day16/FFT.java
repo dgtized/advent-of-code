@@ -5,8 +5,8 @@ import java.nio.file.Files;
 // javac FFT.java && java FFT input.test
 public class FFT {
 
-  public static void debug(int input[]) {
-    for(int i = 0; i < 8; i++) {
+  public static void debug(int input[], int offset) {
+    for(int i = offset; i < offset + 8; i++) {
       System.out.printf("%1d", input[i]);
     }
     System.out.println();
@@ -36,6 +36,15 @@ public class FFT {
     return output;
   }
 
+  public static void stage1(int input[]) {
+    debug(input, 0);
+    for(int iters = 0; iters < 100; iters++) {
+      input = phase(input);
+      //debug(input, 0);
+    }
+    debug(input, 0);
+  }
+
   public static void main(String args[]) {
     File file = new File(args[0]);
     try {
@@ -44,10 +53,25 @@ public class FFT {
       for(int i = 0; i < bytes.length-1; i++) {
         input[i] = bytes[i] - 48;
       }
-      for(int iters = 0; iters <= 100; iters++) {
-        debug(input);
-        input = phase(input);
+      stage1(input);
+      System.out.println("\n*** STAGE 2 ***");
+
+      int [] message = new int[input.length * 10000];
+      for(int i = 0; i < input.length * 10000; i++) {
+        message[i] = input[i % input.length];
       }
+      String r = "";
+      for(int i = 0; i < 7; i++) {
+        r = r + String.format("%d", message[i]);
+      }
+      int msgOffset = Integer.parseInt(r);
+      System.out.println("Offset: " + msgOffset);
+      for(int iters = 0; iters < 100; iters++) {
+        message = phase(message);
+        debug(message, 0);
+      }
+      debug(message, msgOffset);
+
     } catch(IOException e) {
       e.printStackTrace();
     }
