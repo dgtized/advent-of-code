@@ -34,6 +34,19 @@ public class FFT {
     return output;
   }
 
+  public static int[] phase2(int input[]) {
+    int [] output = new int [input.length];
+
+    int sum = 0;
+    // Abuse duplication in tail to add up each FFT row
+    for(int i = 0; i < input.length; i++) {
+      sum += input[output.length - i - 1];
+      output[output.length - i - 1] = Math.abs(sum % 10);
+    }
+
+    return output;
+  }
+
   public static void stage1(int input[]) {
     debug(input, 0);
     for(int iters = 0; iters < 100; iters++) {
@@ -71,7 +84,7 @@ public class FFT {
       int msgOffset = messageOffset(message);
 
       for(int iters = 0; iters < 100; iters++) {
-        message = phase(message);
+        message = phase2(message);
         debug(message, 0);
       }
       debug(message, msgOffset);
