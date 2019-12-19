@@ -17,19 +17,17 @@ public class FFT {
     int [] pattern = new int []{0, 1, 0, -1};
 
     for(int base = 0; base < input.length; base++) {
-      // if(base > 0) {
-      //   System.out.printf("%"+base*6+"s", " ");
-      // }
       int sum = 0;
       for(int digit = base; digit < input.length; digit++) {
         int offset = (base == 0 ? digit + 1 : (digit + 1) / (base+1));
         int pat = pattern[offset % 4];
-        int out = input[digit];
-        // System.out.printf("%2d*%-2d+", out, pat);
-        sum += pat * out;
+        if(pat == 0) {
+          digit += base; // skip zero chunks
+        } else {
+          sum += pat * input[digit];
+        }
       }
       sum = Math.abs(sum)%10;
-      // System.out.printf(" = %d\n", sum);
       output[base] = sum;
     }
 
