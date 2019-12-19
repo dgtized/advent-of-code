@@ -79,6 +79,36 @@
   (for ([row (vector->list (render-world bot world))])
     (println row)))
 
+(define (opposite dir)
+  (case dir
+    [(1) 2]
+    [(2) 1]
+    [(3) 4]
+    [(4) 3]))
+
+(define (solve world)
+  world)
+
+(define (test-direction cpu bot world dir)
+  (match (travel cpu bot dir)
+    [(list ncpu nbot tile)
+     (cond [(eq? (tile-type tile) 'wall)
+            (list ncpu nbot (cons tile world))]
+           [else (travel ncpu nbot (cons tile world)
+                         (opposite dir))])]))
+
+(define (test-all-directions cpu bot world)
+  (apply test-direction
+         (append
+          (apply test-direction
+                 (append
+                  (apply test-direction
+                         (append
+                          (test-direction cpu bot world 1)
+                          '(2)))
+                  '(3)))
+          '(4))))
+
 (define (repl cpu bot world)
   (print-world bot world)
   (println "Input: ")
@@ -95,3 +125,4 @@
 (let* ((program (load-program "input"))
        (bot (robot 0 0)))
   (repl (init-cpu program 0 1) bot (list (tile 0 0 'empty))))
+
