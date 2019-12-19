@@ -45,6 +45,16 @@ public class FFT {
     debug(input, 0);
   }
 
+  public static int messageOffset(int message[]) {
+    String r = "";
+    for(int i = 0; i < 7; i++) {
+      r = r + String.format("%d", message[i]);
+    }
+    int msgOffset = Integer.parseInt(r);
+    System.out.println("Offset: " + msgOffset);
+    return msgOffset;
+  }
+
   public static void main(String args[]) {
     File file = new File(args[0]);
     try {
@@ -60,12 +70,8 @@ public class FFT {
       for(int i = 0; i < input.length * 10000; i++) {
         message[i] = input[i % input.length];
       }
-      String r = "";
-      for(int i = 0; i < 7; i++) {
-        r = r + String.format("%d", message[i]);
-      }
-      int msgOffset = Integer.parseInt(r);
-      System.out.println("Offset: " + msgOffset);
+      int msgOffset = messageOffset(message);
+
       for(int iters = 0; iters < 100; iters++) {
         message = phase(message);
         debug(message, 0);
