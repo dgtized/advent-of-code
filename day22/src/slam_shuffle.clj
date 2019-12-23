@@ -7,15 +7,22 @@
 (defn new-deck []
   (range 0 10007))
 
-;; inc 3, deck 5
-;; 0 -> 0
-;; 1 -> 3
-;; 2 -> 6-5 = 1
-;; 3 -> 9-5 = 4
-;; 4 -> 12-5-5 = 2
+(defn deal-increment [increment deck]
+  (let [deck-size (count deck)]
+    (apply assoc
+           (vec deck)
+           (flatten
+            (map-indexed (fn [idx card]
+                           [(mod (* idx 3) deck-size) card])
+                         deck)))))
 
-(defn deal-increment [position increment deck]
-  deck)
+;; inc 3, deck 5
+;; 0 -> i(0) * 3 = 0
+;; 1 -> i(1) * 3
+;; 2 -> i(2) * 3 = 6-5 = 1
+;; 3 -> i(3) * 3 = 9-5 = 4
+;; 4 -> i(4) * 3 = 12-5-5 = 2
+(comment (deal-increment 3 (range 0 5)))
 
 (defn interpret [command deck]
   (cond (= "deal into new stack" command)
