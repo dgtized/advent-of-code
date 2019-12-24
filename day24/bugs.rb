@@ -18,20 +18,18 @@ end
 
 def cycle(grid)
   next_grid = grid.to_a
-  5.times do |i|
-    5.times do |j|
-      cells = surroundings(i, j)
-      alive = grid.element(i, j).positive?
-      adjacent = cells.count { |x, y| grid.element(x, y).positive? }
-      next_grid[i][j] =
-        if alive && adjacent == 1
-          1
-        elsif !alive && [1, 2].include?(adjacent)
-          1
-        else
-          0
-        end
-    end
+  grid.each_with_index do |cell, row, col|
+    cells = surroundings(row, col)
+    alive = cell.positive?
+    adjacent = cells.count { |i, j| grid.element(i, j).positive? }
+    next_grid[row][col] =
+      if alive && adjacent == 1
+        1
+      elsif !alive && [1, 2].include?(adjacent)
+        1
+      else
+        0
+      end
   end
   Matrix[*next_grid]
 end
