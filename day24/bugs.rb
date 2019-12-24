@@ -34,7 +34,40 @@ def cycle(grid)
   Matrix[*next_grid]
 end
 
+def biodiversity(grid)
+  sum = 0
+  grid.each_with_index do |cell, row, col|
+    if cell.positive?
+      sum +=  2**(5*row + col)
+    end
+  end
+  sum
+end
+
 grid = read_grid('input.test')
 p grid
 p cycle(grid)
 p cycle(cycle(grid))
+
+p biodiversity(Matrix[[0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0],
+                      [1, 0, 0, 0, 0],
+                      [0, 1, 0, 0, 0]])
+
+grid = read_grid('input')
+
+seen = {}
+
+diversity = biodiversity(grid)
+while true
+  seen[diversity] = true
+  grid = cycle(grid)
+  diversity = biodiversity(grid)
+  if seen.has_key?(diversity)
+    break
+  end
+end
+
+p diversity
+
