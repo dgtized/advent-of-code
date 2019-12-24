@@ -20,14 +20,13 @@ def cycle(grid)
   next_grid = grid.to_a
   5.times do |i|
     5.times do |j|
-      cells = surroundings(i,j)
-      alive = grid.element(i,j) > 0
-      adjacent = cells.count { |x,y| grid.element(x,y) > 0 }
+      cells = surroundings(i, j)
+      alive = grid.element(i, j).positive?
+      adjacent = cells.count { |x, y| grid.element(x, y).positive? }
       next_grid[i][j] =
-        case
-        when alive && adjacent == 1
+        if alive && adjacent == 1
           1
-        when !alive && [1,2].include?(adjacent)
+        elsif !alive && [1, 2].include?(adjacent)
           1
         else
           0
