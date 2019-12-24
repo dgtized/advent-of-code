@@ -33,7 +33,7 @@
   (vector-ref (cpu-memory cpu) offset))
 
 (define (store memory offset value)
-  (if (> offset (vector-length memory))
+  (if (>= offset (vector-length memory))
       (let ((newmem (make-vector (exact-floor (* offset 1.5)))))
         (vector-copy! newmem 0 memory 0)
         (vector-set! newmem offset value)
