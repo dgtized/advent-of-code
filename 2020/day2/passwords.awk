@@ -14,7 +14,7 @@
 
   # check if the remaining characters are in range
   if (len >= lower && len <= upper) {
-    valid++
+    validRange++
   }
   # printf "%d %d %s %s %s %d\n", lower, upper, character, password, rule, len
 
@@ -23,12 +23,12 @@
 
   # if just one position matches the expected character
   if(c1 + c2 == 1) {
-    valid2++
+    validPosition++
   }
   # printf "%d %d %s %s %s %s\n", lower, upper, character, password, c1, c2
 }
 
 END {
-  print "Valid: " valid
-  print "Valid By Position: " valid2
+  print "Valid By Range: " validRange
+  print "Valid By Position: " validPosition
 }
