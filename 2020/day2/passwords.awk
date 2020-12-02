@@ -4,8 +4,8 @@
 
 {
   split($1, bounds, /-/)
-  lower = strtonum(bounds[1])
-  upper = strtonum(bounds[2])
+  lower = bounds[1]
+  upper = bounds[2]
   character = gensub(/:/, "", "g", $2)
   password = $3
   rule = gensub("[^" character "]", "", "g", password)
