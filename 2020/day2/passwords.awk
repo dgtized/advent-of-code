@@ -13,8 +13,6 @@
   # printf "%d %d %s %s %s %d\n", lower, upper, character, password, rule, len
   if (len >= lower && len <= upper) {
     valid++
-  } else {
-    invalid++
   }
 
   c1 = substr(password, lower, 1) == character
@@ -29,8 +27,5 @@
 
 END {
   print "Valid: " valid
-  print "Invalid: " invalid
-  print "Total: " valid + invalid
-
   print "Valid By Position: " valid2
 }
