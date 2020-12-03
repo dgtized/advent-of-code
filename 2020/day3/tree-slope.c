@@ -3,9 +3,31 @@
 
 // gcc tree-slope.c -o tree-slope && ./tree-slope input
 
+char lines[400][60];
+
+int arboreal_stops(int width, int height, int dx, int dy) {
+     int px = 0;
+     int py = 0;
+     int trees = 0;
+
+     do {
+          char curr = lines[py][px % width];
+          //printf("%d %d %c\n", px, py, curr);
+          px += dx;
+          py += dy;
+
+          if(curr == '#') {
+               trees++;
+          }
+     } while(py < height);
+
+     printf("trees hit for right %d, down %d: %d\n", dx, dy, trees);
+
+     return trees;
+}
+
 int main(int argc, char **argv) {
      const char *filename = argv[1];
-     char lines[400][60];
      int height = 0;
 
      FILE *file = fopen(filename, "r");
@@ -18,20 +40,5 @@ int main(int argc, char **argv) {
 
      printf("%d %d\n", width, height);
 
-     int px = 0;
-     int py = 0;
-     int trees = 0;
-
-     do {
-          char curr = lines[py][px % width];
-          //printf("%d %d %c\n", px, py, curr);
-          px += 3;
-          py += 1;
-
-          if(curr == '#') {
-               trees++;
-          }
-     } while(py < height);
-
-     printf("trees: %d\n", trees);
+     arboreal_stops(width, height, 3, 1);
 }
