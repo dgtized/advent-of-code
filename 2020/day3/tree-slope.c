@@ -3,9 +3,9 @@
 
 // gcc tree-slope.c -o tree-slope && ./tree-slope input
 
-char lines[400][60];
-
-int arboreal_stops(int width, int height, int dx, int dy) {
+int arboreal_stops(char lines[400][60],
+                   int width, int height,
+                   int dx, int dy) {
      int px = 0;
      int py = 0;
      int trees = 0;
@@ -28,6 +28,7 @@ int arboreal_stops(int width, int height, int dx, int dy) {
 
 int main(int argc, char **argv) {
      const char *filename = argv[1];
+     char lines[400][60];
      int height = 0;
 
      FILE *file = fopen(filename, "r");
@@ -40,13 +41,13 @@ int main(int argc, char **argv) {
 
      printf("%d %d\n", width, height);
 
-     printf("First Star: %d\n\n", arboreal_stops(width, height, 3, 1));
+     printf("First Star: %d\n\n", arboreal_stops(lines, width, height, 3, 1));
 
-     long product = arboreal_stops(width, height, 1, 1);
-     product *= arboreal_stops(width, height, 3, 1);
-     product *= arboreal_stops(width, height, 5, 1);
-     product *= arboreal_stops(width, height, 7, 1);
-     product *= arboreal_stops(width, height, 1, 2);
+     long product = arboreal_stops(lines, width, height, 1, 1);
+     product *= arboreal_stops(lines, width, height, 3, 1);
+     product *= arboreal_stops(lines, width, height, 5, 1);
+     product *= arboreal_stops(lines, width, height, 7, 1);
+     product *= arboreal_stops(lines, width, height, 1, 2);
 
      printf("Product: %ld\n", product);
 }
