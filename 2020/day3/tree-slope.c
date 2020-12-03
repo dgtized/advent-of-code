@@ -40,5 +40,13 @@ int main(int argc, char **argv) {
 
      printf("%d %d\n", width, height);
 
-     arboreal_stops(width, height, 3, 1);
+     printf("First Star: %d\n\n", arboreal_stops(width, height, 3, 1));
+
+     long product = arboreal_stops(width, height, 1, 1);
+     product *= arboreal_stops(width, height, 3, 1);
+     product *= arboreal_stops(width, height, 5, 1);
+     product *= arboreal_stops(width, height, 7, 1);
+     product *= arboreal_stops(width, height, 1, 2);
+
+     printf("Product: %ld\n", product);
 }
