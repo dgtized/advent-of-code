@@ -24,6 +24,7 @@ printf "Valid Passports: %d\n", valid_by_fields.size
 
 fully_valid = valid_by_fields.select do |passport|
   conditions = []
+
   byr = passport['byr'].match(/(\d{4})/)[1].to_i
   conditions << (byr >= 1920 && byr <= 2002)
 
@@ -49,6 +50,8 @@ fully_valid = valid_by_fields.select do |passport|
 
   conditions << %w[amb blu brn gry grn hzl oth].include?(passport['ecl'])
 
+  # Lost ~15 minutes on the single example with >9 digits because I forgot ^$
+  # bounds on my first stab at the condition
   conditions << passport['pid'].match(/^\d{9}$/)
 
   conditions.all?
