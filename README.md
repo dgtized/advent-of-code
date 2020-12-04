@@ -19,3 +19,7 @@ Ruby (24)
 Days solved are in parentheses. As many of the solutions built on the intcode
 interpreter, I continued to re-use my Racket implementation for each of those
 problems.
+
+## 2020
+
+Perl (1), AWK (2), C (3), Ruby (4)
