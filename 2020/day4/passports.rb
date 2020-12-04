@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
-passports = IO.read("input").split("\n\n").map do |raw|
+# usage: ruby passports.rb input
+filename = ARGV[0] || "input"
+
+passports = IO.read(filename).split("\n\n").map do |raw|
   passport = {}
   raw.scan(/([a-z]{3}):(\S+)/).each do |m|
     passport[m[0]] = m[1]
