@@ -1,5 +1,7 @@
 package main
 
+// usage: go run orbital_velocity.go
+
 import (
 	"crypto/sha256"
 	"fmt"
