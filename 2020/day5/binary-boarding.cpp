@@ -2,7 +2,8 @@
 #include <fstream>
 #include <cstdio>
 
-// g++ binary-boarding.cpp -o binary-boarding && ./binary-boarding input | ./missing_seat.sh
+// usage: g++ binary-boarding.cpp -o binary-boarding && ./binary-boarding input | ./missing_seat.sh
+// See missing_seat.sh for second star solution
 
 using namespace std;
 
