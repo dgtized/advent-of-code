@@ -14,7 +14,7 @@ type body struct {
 	dz int
 }
 
-var body_count = 4;
+var body_count = 4
 
 func delta_v(pa *int, pb *int, da *int, db *int) {
 	if *pa > *pb {
@@ -84,7 +84,6 @@ func step2z(bodies *([]body)) {
 	}
 }
 
-
 func abs(v int) int {
 	if v < 0 {
 		return -v
@@ -135,7 +134,7 @@ func find_repeat(bodies []body) {
 		} else {
 			seen[h] = iter
 		}
-		if(iter % 1000000 == 0) {
+		if iter%1000000 == 0 {
 			println(iter)
 		}
 		iter++
@@ -158,7 +157,7 @@ func find_start(bodies []body) {
 			println("seen @", iter, " steps")
 			break
 		}
-		if(iter % 100000000 == 0) {
+		if iter%100000000 == 0 {
 			println(iter)
 			fmt.Println(bodies)
 		}
