@@ -2,7 +2,7 @@
 #include <fstream>
 #include <cstdio>
 
-// g++ binary-boarding.cpp -o binary-boarding && ./binary-boarding input
+// g++ binary-boarding.cpp -o binary-boarding && ./binary-boarding input | ./missing_seat.sh
 
 using namespace std;
 
@@ -48,5 +48,5 @@ int main(int argc, char **argv) {
       max = seat;
   }
 
-  cout << "Highest SeatID: " << max << endl;
+  cerr << "Highest SeatID: " << max << endl;
 }
