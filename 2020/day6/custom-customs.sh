@@ -30,4 +30,6 @@ for g in $(awk NF=NF RS="" FS="\n" OFS=":" $1); do
     ((everyone += v))
 done
 
+rm -f group_answers
+
 echo "Answers From Everyone:" $everyone
