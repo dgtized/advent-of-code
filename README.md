@@ -22,4 +22,4 @@ problems.
 
 ## 2020
 
-Perl (1), AWK (2,5), C (3), Ruby (4), C++ (5)
+Perl (1), AWK (2,5), C (3), Ruby (4), C++ (5), Bash (6)
