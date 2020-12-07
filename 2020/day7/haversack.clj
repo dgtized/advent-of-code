@@ -58,19 +58,33 @@
        distinct
        count))
 
-(defn sumo [container sum]
-  (cl/conde
-   [(contains container "" 0)
-    (cl/== sum 0)]
-   [(cl/fresh [x q t]
-      (contains container x q)
-      (sumo x t)
-      (fd/+ q t sum))]))
+(comment
+  ;; not working at all
+  (defn sumo [container sum]
+    (cl/conde
+     [(contains container nil 0)
+      (cl/== sum 0)]
+     [(cl/fresh [x q t]
+        (contains container x q)
+        (sumo x t)
+        (fd/+ q t sum))]))
+
+  (defn part2 [file start]
+    (pldb/with-db (make-db file)
+      (cl/run* [total]
+        (sumo start total)))))
+
+(defn product [rules bag]
+  (reduce +
+          (for [[container child quantity]
+                (filter (fn [x] (= bag (first x))) rules)]
+            (if (zero? quantity)
+              0
+              (* quantity (inc (product rules child)))))))
 
 (defn part2 [file start]
-  (pldb/with-db (make-db file)
-    (cl/run* [total]
-      (sumo start total))))
+  (let [rules (load-rules file)]
+    (product rules start)))
 
 (comment
   (part1 "example" "shiny gold bag") ;; 4
