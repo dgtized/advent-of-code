@@ -5,62 +5,58 @@
    [clojure.string :as str]
    [clojure.core.logic.pldb :as pldb]))
 
+(pldb/db-rel contains ^:index c ^:index b quantity)
+(pldb/db-rel empty-bag b)
+
 (defn parse-contents [contents]
-  (if (= contents "no other bags") {}
+  (if (= contents "no other bags") [[nil 0]]
       (->> (str/split contents #", ?")
            (map (fn [b]
                   (if-let [[_ n bag] (re-matches #"(\d+) (.* bag)s?" b)]
-                    {bag (read-string n)})))
-           (into {}))))
+                    [bag (read-string n)])))
+           (into []))))
 
 (defn load-rules [file]
   (with-open [rdr (io/reader file)]
-    (into {} (for [line (line-seq rdr)]
-               (let [m (re-seq #"(.* bag)s contain (.*)." line)]
-                 (if-let [[bag contents] (nfirst m)]
-                   {bag (parse-contents contents)}
-                   m))))))
-
-(defn contained-by [rules]
-  (mapcat (fn [[container contents]]
-            (if (seq contents)
-              (for [bag (keys contents)]
-                [bag container])
-              [[container nil]]))
-          rules))
-
-(pldb/db-rel bag b)
-(pldb/db-rel contains ^:index b1 ^:index b2)
-;; (pldb/db-rel contains-none b)
+    (->> (for [line (line-seq rdr)]
+           (let [m (re-seq #"(.* bag)s contain (.*)." line)]
+             (if-let [[bag contents] (nfirst m)]
+               (map (partial cons bag) (parse-contents contents))
+               m)))
+         doall
+         (apply concat)
+         vec)))
 
 (defn facts [rules]
-  (mapcat
-   (fn [[b c]] (if c
-                [[bag b]
-                 [bag c]
-                 [contains b c]]
-                [[bag b]]))
-   rules))
+  (map (fn [[container bag quantity]]
+         (if (zero? quantity)
+           [empty-bag container]
+           [contains container bag quantity]))
+       rules))
 
-(def example-facts (apply pldb/db (facts (contained-by (load-rules "example")))))
-(def input-facts (apply pldb/db (facts (contained-by (load-rules "input")))))
+(defn make-db
+  [file]
+  (->> (load-rules file)
+       facts
+       (apply pldb/db)))
 
 (defn containo [bag goal]
-  (cl/conde
-   [(contains bag goal)]
-   [(cl/fresh [x]
-      (contains bag x)
-      (containo x goal))]))
+  (cl/fresh [q]
+    (cl/conde
+     [(contains bag goal q)]
+     [(cl/fresh [x]
+        (contains bag x q)
+        (containo x goal))])))
 
 (defn all-contain [db goal]
   (pldb/with-db db
     (cl/run* [bag]
-      (containo goal bag))))
+      (containo bag goal))))
 
 (comment
-  (->> (all-contain example-facts "shiny gold bag")
+  (->> (all-contain (make-db "example") "shiny gold bag")
        distinct
        count)
-  (->> (all-contain input-facts "shiny gold bag")
+  (->> (all-contain (make-db "input") "shiny gold bag")
        distinct
        count))
