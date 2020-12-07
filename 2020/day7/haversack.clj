@@ -2,11 +2,11 @@
   (:require
    [clojure.java.io :as io]
    [clojure.core.logic :as cl]
+   [clojure.core.logic.fd :as fd]
    [clojure.string :as str]
    [clojure.core.logic.pldb :as pldb]))
 
 (pldb/db-rel contains ^:index c ^:index b quantity)
-(pldb/db-rel empty-bag b)
 
 (defn parse-contents [contents]
   (if (= contents "no other bags") [[nil 0]]
@@ -30,7 +30,7 @@
 (defn facts [rules]
   (map (fn [[container bag quantity]]
          (if (zero? quantity)
-           [empty-bag container]
+           [contains container "" 0]
            [contains container bag quantity]))
        rules))
 
@@ -53,10 +53,28 @@
     (cl/run* [bag]
       (containo bag goal))))
 
-(comment
-  (->> (all-contain (make-db "example") "shiny gold bag")
-       distinct
-       count)
-  (->> (all-contain (make-db "input") "shiny gold bag")
+(defn part1 [file goal]
+  (->> (all-contain (make-db file) goal)
        distinct
        count))
+
+(defn sumo [container sum]
+  (cl/conde
+   [(contains container "" 0)
+    (cl/== sum 0)]
+   [(cl/fresh [x q t]
+      (contains container x q)
+      (sumo x t)
+      (fd/+ q t sum))]))
+
+(defn part2 [file start]
+  (pldb/with-db (make-db file)
+    (cl/run* [total]
+      (sumo start total))))
+
+(comment
+  (part1 "example" "shiny gold bag") ;; 4
+  (part1 "input" "shiny gold bag") ;; 185
+  (part2 "example" "shiny gold bag") ;; 32
+  (part2 "example2" "shiny gold bag") ;; 126
+  (part2 "input" "shiny gold bag"))
