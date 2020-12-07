@@ -59,7 +59,7 @@
        count))
 
 (comment
-  ;; not working at all
+  ;; not working at all using core.logic
   (defn sumo [container sum]
     (cl/conde
      [(contains container nil 0)
@@ -75,12 +75,13 @@
         (sumo start total)))))
 
 (defn product [rules bag]
-  (reduce +
-          (for [[container child quantity]
-                (filter (fn [x] (= bag (first x))) rules)]
-            (if (zero? quantity)
-              0
-              (* quantity (inc (product rules child)))))))
+  (->>
+   (filter (fn [x] (= bag (first x))) rules)
+   (map (fn [[container child quantity]]
+          (if (zero? quantity)
+            0
+            (* quantity (inc (product rules child))))))
+   (reduce +)))
 
 (defn part2 [file start]
   (let [rules (load-rules file)]
