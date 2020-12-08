@@ -22,11 +22,17 @@ defmodule Halting.CLI do
   end
 
   def run(program) do
-    step(program, 0, 0, %{}, 0)
+    [terminates, acc, nip] = step(program, 0, 0, %{}, 0)
+
+    if terminates do
+      IO.puts("Terminates with acc:#{acc} jumping to #{nip}")
+    else
+      IO.puts("Infinite loop, acc:#{acc} jumping to #{nip}")
+    end
   end
 
   def permute(program, offset) do
-    IO.inspect(["permute", offset])
+    # IO.inspect(["permute", offset])
 
     change =
       Enum.reverse(program)
@@ -36,10 +42,11 @@ defmodule Halting.CLI do
 
     next_change = offset + change
 
-    terminates = step(swap(program, next_change), 0, 0, %{}, 0)
+    [terminates, acc, nip] = step(swap(program, next_change), 0, 0, %{}, 0)
 
     if terminates do
-      IO.puts("done")
+      IO.puts("Permuting @ #{offset}")
+      run(swap(program, next_change))
     else
       permute(program, next_change + 1)
     end
@@ -56,7 +63,7 @@ defmodule Halting.CLI do
         "nop"
       end
 
-    IO.puts("changing to #{s} at #{offset}")
+    # IO.puts("changing to #{s} at #{offset}")
     List.replace_at(program, offset, [s, arg])
   end
 
@@ -68,13 +75,13 @@ defmodule Halting.CLI do
     seen = Map.get(history, nip)
 
     cond do
+      # infinite loop
       seen ->
-        IO.puts("Infinite loop, acc:#{acc} jumping to #{nip}")
-        false
+        [false, acc, nip]
 
+      # terminates
       nip >= length(program) ->
-        IO.puts("Terminates with acc:#{acc} jumping to #{nip}")
-        true
+        [true, acc, nip]
 
       true ->
         step(program, nip, nacc, Map.put(history, ip, order), order + 1)
