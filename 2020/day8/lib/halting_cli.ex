@@ -42,7 +42,7 @@ defmodule Halting.CLI do
 
     next_change = offset + change
 
-    [terminates, acc, nip] = step(swap(program, next_change), 0, 0, %{}, 0)
+    [terminates, _, _] = step(swap(program, next_change), 0, 0, %{}, 0)
 
     if terminates do
       IO.puts("Permuting @ #{offset}")
