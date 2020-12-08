@@ -7,18 +7,14 @@ defmodule Halting.CLI do
       |> String.split("\n")
       |> Enum.map(fn line ->
         [instruction, arg] = String.trim(line) |> String.split(" ")
-        [instruction, to_value(arg)]
+        {value, ""} = Integer.parse(arg)
+        [instruction, value]
       end)
 
     IO.puts("First Star")
     run(program)
     IO.puts("Second Star")
     permute(program, 1)
-  end
-
-  def to_value(arg) do
-    {value, ""} = Integer.parse(arg)
-    value
   end
 
   def run(program) do
