@@ -10,7 +10,10 @@ defmodule Halting.CLI do
         [instruction, to_value(arg)]
       end)
 
+    IO.puts("First Star")
     run(program)
+    IO.puts("Second Star")
+    permute(program, 1)
   end
 
   def to_value(arg) do
@@ -22,10 +25,45 @@ defmodule Halting.CLI do
     step(program, 0, 0, %{}, 0)
   end
 
+  def permute(program, offset) do
+    IO.inspect(["permute", offset])
+
+    change =
+      Enum.reverse(program)
+      |> Enum.drop(offset)
+      |> Enum.take_while(fn [instruction, _] -> instruction == "acc" end)
+      |> length
+
+    next_change = offset + change
+
+    terminates = step(swap(program, next_change), 0, 0, %{}, 0)
+
+    if terminates do
+      IO.puts("done")
+    else
+      permute(program, next_change + 1)
+    end
+  end
+
+  def swap(program, change) do
+    offset = length(program) - change
+    [instruction, arg] = Enum.at(program, offset)
+
+    s =
+      if instruction == "nop" do
+        "jmp"
+      else
+        "nop"
+      end
+
+    IO.puts("changing to #{s} at #{offset}")
+    List.replace_at(program, offset, [s, arg])
+  end
+
   def step(program, ip, acc, history, order) do
     [instruction, arg] = Enum.at(program, ip)
 
-    IO.inspect([instruction, arg, ip, acc, order])
+    # IO.inspect([instruction, arg, ip, acc, order])
     [nip, nacc] = interpret(instruction, arg, ip, acc)
     seen = Map.get(history, nip)
 
