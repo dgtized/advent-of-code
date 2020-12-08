@@ -29,10 +29,17 @@ defmodule Halting.CLI do
     [nip, nacc] = interpret(instruction, arg, ip, acc)
     seen = Map.get(history, nip)
 
-    if seen do
-      IO.puts("Value in Accumulator is #{acc}")
-    else
-      step(program, nip, nacc, Map.put(history, ip, order), order + 1)
+    cond do
+      seen ->
+        IO.puts("Infinite loop, acc:#{acc} jumping to #{nip}")
+        false
+
+      nip >= length(program) ->
+        IO.puts("Terminates with acc:#{acc} jumping to #{nip}")
+        true
+
+      true ->
+        step(program, nip, nacc, Map.put(history, ip, order), order + 1)
     end
   end
 
