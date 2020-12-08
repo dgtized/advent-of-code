@@ -28,8 +28,6 @@ defmodule Halting.CLI do
   end
 
   def permute(program, offset) do
-    # IO.inspect(["permute", offset])
-
     change =
       Enum.reverse(program)
       |> Enum.drop(offset)
@@ -37,7 +35,6 @@ defmodule Halting.CLI do
       |> length
 
     next_change = offset + change
-
     [terminates, _, _] = step(swap(program, next_change), 0, 0, %{}, 0)
 
     if terminates do
@@ -59,24 +56,21 @@ defmodule Halting.CLI do
         "nop"
       end
 
-    # IO.puts("changing to #{s} at #{offset}")
     List.replace_at(program, offset, [s, arg])
   end
 
   def step(program, ip, acc, history, order) do
     [instruction, arg] = Enum.at(program, ip)
-
-    # IO.inspect([instruction, arg, ip, acc, order])
     [nip, nacc] = interpret(instruction, arg, ip, acc)
     seen = Map.get(history, nip)
 
     cond do
-      # infinite loop
       seen ->
+        # infinite loop
         [false, acc, nip]
 
-      # terminates
       nip >= length(program) ->
+        # terminates
         [true, acc, nip]
 
       true ->
