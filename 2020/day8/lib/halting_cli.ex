@@ -18,7 +18,7 @@ defmodule Halting.CLI do
   end
 
   def run(program) do
-    [terminates, acc, nip] = step(program, 0, 0, %{}, 0)
+    [terminates, acc, nip] = step(program)
 
     if terminates do
       IO.puts("Terminates with acc:#{acc} jumping to #{nip}")
@@ -35,7 +35,7 @@ defmodule Halting.CLI do
       |> length
 
     next_change = offset + change
-    [terminates, _, _] = step(swap(program, next_change), 0, 0, %{}, 0)
+    [terminates, _, _] = step(swap(program, next_change))
 
     if terminates do
       IO.puts("Permuting @ #{offset}")
@@ -57,6 +57,10 @@ defmodule Halting.CLI do
       end
 
     List.replace_at(program, offset, [s, arg])
+  end
+
+  def step(program) do
+    step(program, 0, 0, %{}, 0)
   end
 
   def step(program, ip, acc, history, order) do
