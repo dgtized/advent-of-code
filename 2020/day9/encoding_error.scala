@@ -2,7 +2,7 @@
 
 import scala.io.Source
 
-object H {
+object EncodingError {
   def checksum(preceding: List[Long], goal: Long) : Boolean = {
     for(base <- 0 to preceding.length - 2) {
       val a = preceding(base)
@@ -29,19 +29,19 @@ object H {
       }
     }
   }
-}
 
-object EncodingError extends App {
-  val numbers = Source.fromFile(args(0)).getLines.map { _.toLong }.toList
-  val preamble = args(1).toInt
+  def main(args: Array[String]) {
+    val numbers = Source.fromFile(args(0)).getLines.map { _.toLong }.toList
+    val preamble = args(1).toInt
 
-  for(i <- preamble to numbers.length - 1) {
-    val discarded = i - preamble;
-    val preceding = numbers.drop(discarded).take(preamble)
-    if(!H.checksum(preceding, numbers(i))) {
-      println("Checksum Error: " + numbers(i))
+    for(i <- preamble to numbers.length - 1) {
+      val discarded = i - preamble;
+      val preceding = numbers.drop(discarded).take(preamble)
+      if(!checksum(preceding, numbers(i))) {
+        println("Checksum Error: " + numbers(i))
 
-      H.contiguous(numbers, numbers(i), i)
+        contiguous(numbers, numbers(i), i)
+      }
     }
   }
 }
