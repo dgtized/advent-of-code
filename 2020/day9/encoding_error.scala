@@ -18,14 +18,16 @@ object EncodingError {
   def contiguous(numbers: List[Long], goal: Long, offset: Int) : Unit = {
     for(n <- 0 to offset - 2 ) {
       val base = numbers.drop(n)
-      var total : Long = 0
-      for(u <- n + 1 to offset - 1) {
-        val chunk = base.take(u - n)
-        val sum = chunk.sum
-        if(sum == goal) {
-          println("Weakness: " + (chunk.min + chunk.max))
-          return
+      val chunk = base.takeWhile( { var total : Long = 0;
+        x => {
+          total += x
+          total <= goal
         }
+      })
+
+      if(chunk.sum == goal) {
+        println("Weakness: " + (chunk.min + chunk.max))
+        return
       }
     }
   }
