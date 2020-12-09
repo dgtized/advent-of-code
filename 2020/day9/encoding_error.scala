@@ -10,21 +10,20 @@ object EncodingError {
       checksum(rest, goal)
   }
 
-  def contiguous(window: List[Long], goal: Long) : List[Long] =
-    window match {
-      case Nil => List()
-      case _ :: remainder =>
-        val chunk = window.takeWhile( {
-          var total = 0L;
-          x => {
-            total += x
-            total <= goal
-          }
-        })
+  def contiguous(window: List[Long], goal: Long) : List[Long] = window match {
+    case Nil => List()
+    case _ :: remainder =>
+      val chunk = window.takeWhile({
+        var total = 0L
+        x => {
+          total += x
+          total <= goal
+        }
+      })
 
-        if(chunk.sum == goal)
-          return chunk
-
+      if(chunk.sum == goal)
+        return chunk
+      else
         contiguous(remainder, goal)
     }
 
