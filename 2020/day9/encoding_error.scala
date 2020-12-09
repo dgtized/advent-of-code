@@ -6,10 +6,8 @@ object EncodingError {
   def checksum(window: List[Long], goal: Long) : Boolean = window match {
     case Nil => false
     case head :: rest =>
-      if(rest.exists( _ + head == goal ))
-        return true
-      else
-        checksum(rest, goal)
+      rest.exists( _ + head == goal ) ||
+      checksum(rest, goal)
   }
 
   def contiguous(window: List[Long], goal: Long) : List[Long] =
