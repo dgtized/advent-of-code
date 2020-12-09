@@ -23,8 +23,8 @@ object EncodingError {
         val chunk = base.take(u - n)
         val sum = chunk.sum
         if(sum == goal) {
-          println(chunk)
           println("Weakness: " + (chunk.min + chunk.max))
+          return
         }
       }
     }
