@@ -11,10 +11,9 @@ object EncodingError {
     }
   }
 
-  def contiguous(numbers: List[Long], goal: Long, offset: Int) : List[Long] = {
-    (0 until offset).dropWhile { n =>
-      val base = numbers.drop(n)
-      val chunk = base.takeWhile( {
+  def contiguous(window: List[Long], goal: Long) : List[Long] = {
+    window.indices.find { n =>
+      val chunk = window.drop(n).takeWhile( {
         var total : Long = 0;
         x => {
           total += x
@@ -25,7 +24,7 @@ object EncodingError {
       if(chunk.sum == goal) {
         return chunk
       }
-      chunk.sum != goal
+      chunk.sum == goal
     }
     return List()
   }
@@ -40,7 +39,7 @@ object EncodingError {
       if(!checksum(preceding, numbers(i))) {
         println("Checksum Error: " + numbers(i))
 
-        val chunk = contiguous(numbers, numbers(i), i)
+        val chunk = contiguous(numbers.take(i), numbers(i))
         println("Weakness: " + (chunk.min + chunk.max))
       }
     }
