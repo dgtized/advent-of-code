@@ -3,12 +3,13 @@
 import scala.io.Source
 
 object EncodingError {
-  def checksum(window: List[Long], goal: Long) : Boolean = {
-    window.indices.dropRight(1).exists { base =>
-      window.drop(base).exists { x =>
-        window(base) + x == goal
-      }
-    }
+  def checksum(window: List[Long], goal: Long) : Boolean = window match {
+    case Nil => false
+    case head :: rest =>
+      if(rest.exists( _ + head == goal ))
+        return true
+      else
+        checksum(rest, goal)
   }
 
   def contiguous(window: List[Long], goal: Long) : List[Long] =
