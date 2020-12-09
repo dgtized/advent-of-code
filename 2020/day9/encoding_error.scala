@@ -33,14 +33,15 @@ object EncodingError {
     val numbers = Source.fromFile(args(0)).getLines.map { _.toLong }.toList
     val preamble = args(1).toInt
 
-    for(i <- preamble to numbers.length - 1) {
-      val discarded = i - preamble;
-      val preceding = numbers.drop(discarded).take(preamble)
-      if(!checksum(preceding, numbers(i))) {
-        println("Checksum Error: " + numbers(i))
+    numbers.sliding(preamble + 1, 1).foreach { window =>
+      val current = window.last
+      if(!checksum(window.dropRight(1), current)) {
+        println("Checksum Error: " + current)
 
-        val chunk = contiguous(numbers.take(i), numbers(i))
+        val chunk = contiguous(numbers.takeWhile(_ < current), current)
         println("Weakness: " + (chunk.min + chunk.max))
+
+        return
       }
     }
   }
