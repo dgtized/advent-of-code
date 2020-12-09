@@ -13,7 +13,7 @@ object EncodingError {
   def contiguous(window: List[Long], goal: Long) : List[Long] =
     window match {
       case Nil => List()
-      case _ =>
+      case _ :: remainder =>
         val chunk = window.takeWhile( {
           var total = 0L;
           x => {
@@ -25,7 +25,7 @@ object EncodingError {
         if(chunk.sum == goal)
           return chunk
 
-        contiguous(window.drop(1), goal)
+        contiguous(remainder, goal)
     }
 
   def main(args: Array[String]) {
