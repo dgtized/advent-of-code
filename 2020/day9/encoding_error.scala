@@ -11,23 +11,23 @@ object EncodingError {
     }
   }
 
-  def contiguous(window: List[Long], goal: Long) : List[Long] = {
-    window.indices.find { n =>
-      val chunk = window.drop(n).takeWhile( {
-        var total = 0L;
-        x => {
-          total += x
-          total <= goal
-        }
-      })
+  def contiguous(window: List[Long], goal: Long) : List[Long] =
+    window match {
+      case Nil => List()
+      case _ =>
+        val chunk = window.takeWhile( {
+          var total = 0L;
+          x => {
+            total += x
+            total <= goal
+          }
+        })
 
-      if(chunk.sum == goal) {
-        return chunk
-      }
-      chunk.sum == goal
+        if(chunk.sum == goal)
+          return chunk
+
+        contiguous(window.drop(1), goal)
     }
-    return List()
-  }
 
   def main(args: Array[String]) {
     val numbers = Source.fromFile(args(0)).getLines.map { _.toLong }.toList
