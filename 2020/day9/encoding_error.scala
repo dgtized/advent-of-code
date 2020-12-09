@@ -3,16 +3,12 @@
 import scala.io.Source
 
 object EncodingError {
-  def checksum(preceding: List[Long], goal: Long) : Boolean = {
-    for(base <- 0 to preceding.length - 2) {
-      val a = preceding(base)
-      for(ahead <- base + 1 to preceding.length - 1) {
-        if(a + preceding(ahead) == goal) {
-          return true
-        }
+  def checksum(window: List[Long], goal: Long) : Boolean = {
+    window.indices.dropRight(1).exists { base =>
+      window.drop(base).exists { x =>
+        window(base) + x == goal
       }
     }
-    return false
   }
 
   def contiguous(numbers: List[Long], goal: Long, offset: Int) : List[Long] = {
