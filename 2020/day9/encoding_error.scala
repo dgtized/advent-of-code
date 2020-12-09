@@ -14,7 +14,7 @@ object EncodingError {
   def contiguous(window: List[Long], goal: Long) : List[Long] = {
     window.indices.find { n =>
       val chunk = window.drop(n).takeWhile( {
-        var total : Long = 0;
+        var total = 0L;
         x => {
           total += x
           total <= goal
