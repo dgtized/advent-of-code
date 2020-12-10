@@ -53,7 +53,7 @@ more than last adapter used."
          ;; that size how many permutations are possible.
          (permutations (cl-loop for group in sets
                                 collect (cases (length group)))))
-    ;; Calculate the product of each group with permutations
+    ;; Calculate the product of each permutation group
     (-reduce '* permutations)))
 
 ;; (second-star "example.1") ;; 8
