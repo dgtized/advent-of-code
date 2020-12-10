@@ -8,9 +8,10 @@
         #'<))
 
 (defun jolt-differences (adapters)
-  (cl-loop for a in (cons 0 adapters)
-           for b in adapters
-           collect (- b a)))
+  (let ((built-in (+ (car (last adapters)) 3)))
+    (cl-loop for a in (cons 0 adapters)
+             for b in (-snoc adapters built-in)
+             collect (- b a))))
 
 (defun count-frequencies (amt differences)
   (cl-loop for d in differences
@@ -18,11 +19,11 @@
 
 (defun first-star (filename)
   (let* ((adapters (read-adapters filename))
-         (built-in (+ (car (last adapters)) 3))
-         (differences (jolt-differences (-snoc adapters built-in)))
+         (differences (jolt-differences adapters))
          (ones (count-frequencies 1 differences))
+         (twos (count-frequencies 2 differences))
          (threes (count-frequencies 3 differences)))
-    (list ones threes (* ones threes))))
+    (list ones twos threes (* ones threes))))
 
 ;; (count-frequencies 1 (jolt-differences (read-adapters "example.1")))
 ;; (jolt-differences (read-adapters "example.2"))
