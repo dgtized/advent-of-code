@@ -32,9 +32,6 @@ more than last adapter used."
          (threes (count-frequencies 3 differences)))
     (list ones threes (* ones threes))))
 
-;; (count-frequencies 1 (jolt-differences (read-adapters "example.1")))
-;; (jolt-differences (read-adapters "example.2"))
-
 ;; (first-star "example.1") ;; => (7 5 35)
 ;; (first-star "example.2") ;; => (22 10 220)
 ;; (first-star "input") ;; => (71 31 2201)
