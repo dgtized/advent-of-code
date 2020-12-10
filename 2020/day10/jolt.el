@@ -21,16 +21,15 @@
   (let* ((adapters (read-adapters filename))
          (differences (jolt-differences adapters))
          (ones (count-frequencies 1 differences))
-         (twos (count-frequencies 2 differences))
          (threes (count-frequencies 3 differences)))
-    (list ones twos threes (* ones threes))))
+    (list ones threes (* ones threes))))
 
 ;; (count-frequencies 1 (jolt-differences (read-adapters "example.1")))
 ;; (jolt-differences (read-adapters "example.2"))
 
-;; (first-star "example.1")
-;; (first-star "example.2")
-;; (first-star "input")
+;; (first-star "example.1") ;; => (7 5 35)
+;; (first-star "example.2") ;; => (22 10 220)
+;; (first-star "input") ;; => (71 31 2201)
 
 (defun cases (n)
   (cl-case n
@@ -48,4 +47,4 @@
 
 ;; (second-star "example.1") ;; 8
 ;; (second-star "example.2") ;; 19208
-;; (second-star "input")
+;; (second-star "input") ;; 169255295254528
