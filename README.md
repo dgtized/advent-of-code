@@ -25,5 +25,5 @@ problems.
 
 ```
 Perl (1), AWK (2,5), C (3), Ruby (4), C++ (5), Bash (6),
-Clojure (7), Elixir (8)
+Clojure (7), Elixir (8), Scala (9), Emacs Lisp (10)
 ```
