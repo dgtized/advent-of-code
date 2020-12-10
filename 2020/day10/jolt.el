@@ -31,3 +31,21 @@
 ;; (first-star "example.1")
 ;; (first-star "example.2")
 ;; (first-star "input")
+
+(defun cases (n)
+  (cl-case n
+    (1 1)
+    (2 2)
+    (3 4)
+    (4 7)))
+
+(defun second-star (filename)
+  (let* ((adapters (read-adapters filename))
+         (sets (-split-on 3 (jolt-differences adapters)))
+         (permutations (cl-loop for group in sets
+                                collect (cases (length group)))))
+    (-reduce '* permutations)))
+
+;; (second-star "example.1") ;; 8
+;; (second-star "example.2") ;; 19208
+;; (second-star "input")
