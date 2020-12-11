@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Arrays;
 
 public class SeatingSystem {
   public int width;
@@ -22,15 +21,15 @@ public class SeatingSystem {
       y++;
     }
 
-    first_star(copy(seating));
-    second_star(copy(seating));
+    first_star(seating); // 2183
+    second_star(seating); // 1990
   }
 
   public void first_star(char [][] seating) {
     char[][] last;
 
     do {
-      last = copy(seating);
+      last = seating;
       seating = step(seating);
     } while(!steady_state(seating, last));
 
@@ -41,15 +40,11 @@ public class SeatingSystem {
     char[][] last;
 
     do {
-      last = copy(seating);
+      last = seating;
       seating = step_line_of_sight(seating);
     } while(!steady_state(seating, last));
 
     System.out.println("Star 2, Occupied @ steady state: " + occupied(seating));
-  }
-
-  public char[][] copy(char [][] src) {
-    return Arrays.stream(src).map(char[]::clone).toArray(char[][]::new);
   }
 
   public int occupied(char [][] seating) {
