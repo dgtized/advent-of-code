@@ -22,19 +22,34 @@ public class SeatingSystem {
       y++;
     }
 
-    int iter = 0;
+    first_star(copy(seating));
+    second_star(copy(seating));
+  }
+
+  public void first_star(char [][] seating) {
     char[][] last;
 
-    //display(seating);
     do {
       last = copy(seating);
       seating = step(seating);
-      // System.out.println(iter);
-      // display(seating);
-      iter++;
     } while(!steady_state(seating, last));
 
-    System.out.println("Occupied @ steady state: " + occupied(seating));
+    System.out.println("Star 1, Occupied @ steady state: " + occupied(seating));
+  }
+
+  public void second_star(char [][] seating) {
+    char[][] last;
+
+    // display(seating);
+    // System.out.println();
+    do {
+      last = copy(seating);
+      seating = step_line_of_sight(seating);
+      //display(seating);
+      //System.out.println();
+    } while(!steady_state(seating, last));
+
+    System.out.println("Star 2, Occupied @ steady state: " + occupied(seating));
   }
 
   public char[][] copy(char [][] src) {
@@ -68,6 +83,37 @@ public class SeatingSystem {
     return occupied;
   }
 
+  public int neighbor_on_axis(char [][] seating, int x, int dx, int y, int dy) {
+    //System.out.println(x + " " + y + " " + dx + " " + dy);
+    x += dx;
+    y += dy;
+    if(x >= 0 && x < width &&
+       y >= 0 && y < height) {
+      char cell = seating[y][x];
+      if(cell == '#') {
+        return 1;
+      } else if(cell == 'L')
+        return 0;
+      else {
+        return neighbor_on_axis(seating, x, dx, y, dy);
+      }
+    } else {
+      return 0;
+    }
+  }
+
+  public int neighbors_in_sight(char [][] seating, int x, int y) {
+    int occupied = 0;
+    for(int dy = -1; dy <= 1; dy ++) {
+      for(int dx = -1; dx <= 1; dx++) {
+        if(dy == 0 && dx == 0) continue;
+        //System.out.println("axis: " + x + " " + y + " " + dx + " " + dy);
+        occupied += neighbor_on_axis(seating, x, dx, y, dy);
+      }
+    }
+    return occupied;
+  }
+
   public boolean steady_state(char [][] next, char [][] seating) {
     for(int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
@@ -93,6 +139,25 @@ public class SeatingSystem {
         next[y][x] = cell;
       }
     }
+    return next;
+  }
+
+  public char[][] step_line_of_sight(char [][] seating) {
+    char [][]next = new char[height][width];
+    for(int y = 0; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+        char cell = seating[y][x];
+        int n = neighbors_in_sight(seating, x, y);
+        //System.out.print(n + " ");
+        if(cell == 'L' && n == 0) {
+          cell = '#';
+        } else if(cell == '#' && n >= 5) {
+          cell = 'L';
+        }
+        next[y][x] = cell;
+      }
+    }
+    //System.out.println();
     return next;
   }
 
