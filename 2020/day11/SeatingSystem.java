@@ -21,30 +21,20 @@ public class SeatingSystem {
       y++;
     }
 
-    first_star(seating); // 2183
-    second_star(seating); // 1990
+    System.out.println("Star 1, Occupied @ steady state: " +
+                       converge(seating, 4)); // 2183
+    System.out.println("Star 2, Occupied @ steady state: " +
+                       converge(seating, 5)); // 1990
   }
 
-  public void first_star(char [][] seating) {
-    char[][] last;
-
+  public int converge(char [][] seating, int crowded) {
+    char [][] last;
     do {
       last = seating;
-      seating = step(seating);
+      seating = step(seating, crowded);
     } while(!steady_state(seating, last));
 
-    System.out.println("Star 1, Occupied @ steady state: " + occupied(seating));
-  }
-
-  public void second_star(char [][] seating) {
-    char[][] last;
-
-    do {
-      last = seating;
-      seating = step_line_of_sight(seating);
-    } while(!steady_state(seating, last));
-
-    System.out.println("Star 2, Occupied @ steady state: " + occupied(seating));
+    return occupied(seating);
   }
 
   public int occupied(char [][] seating) {
@@ -114,40 +104,26 @@ public class SeatingSystem {
     return true;
   }
 
-  public char[][] step(char [][] seating) {
+  public char[][] step(char [][] seating, int crowded) {
     char [][]next = new char[height][width];
     for(int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
         char cell = seating[y][x];
-        int n = neighbors(seating, x, y);
+
+        int n;
+        if(crowded == 4) // first star
+          n = neighbors(seating, x, y);
+        else // second star
+          n = neighbors_in_sight(seating, x, y);
+
         if(cell == 'L' && n == 0) {
           cell = '#';
-        } else if(cell == '#' && n >= 4) {
+        } else if(cell == '#' && n >= crowded) {
           cell = 'L';
         }
         next[y][x] = cell;
       }
     }
-    return next;
-  }
-
-  public char[][] step_line_of_sight(char [][] seating) {
-    char [][]next = new char[height][width];
-
-    for(int y = 0; y < height; y++) {
-      for(int x = 0; x < width; x++) {
-        char cell = seating[y][x];
-        int n = neighbors_in_sight(seating, x, y);
-
-        if(cell == 'L' && n == 0) {
-          cell = '#';
-        } else if(cell == '#' && n >= 5) {
-          cell = 'L';
-        }
-        next[y][x] = cell;
-      }
-    }
-
     return next;
   }
 
