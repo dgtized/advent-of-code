@@ -19,6 +19,12 @@ func parseFile(file string) []string {
 	return strings.Split(string(input), "\n")
 }
 
+func parseCommand(line string) (string, int) {
+	dir := line[0:1]
+	value, _ := strconv.Atoi(line[1:])
+	return dir, value
+}
+
 type Position struct {
 	x int
 	y int
@@ -30,8 +36,7 @@ func firstStar(lines []string) {
 
 	for _, line := range lines {
 		if line == "" {break}
-		dir := line[0:1]
-		value, _ := strconv.Atoi(line[1:])
+		dir, value := parseCommand(line)
 		switch dir {
 		case "N":
 			pos.y += value
@@ -84,8 +89,7 @@ func secondStar(lines []string) {
 
 	for i, line := range lines {
 		if line == "" {break}
-		dir := line[0:1]
-		value, _ := strconv.Atoi(line[1:])
+		dir, value := parseCommand(line)
 		switch dir {
 		case "N":
 			waypoint.y += value
