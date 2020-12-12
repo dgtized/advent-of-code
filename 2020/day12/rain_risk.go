@@ -70,7 +70,6 @@ func firstStar(lines []string) {
 			pos.x += value * cos(pos.heading)
 			pos.y += value * sin(pos.heading)
 		}
-
 		//fmt.Println(dir, value, pos)
 	}
 
