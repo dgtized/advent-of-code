@@ -20,21 +20,18 @@ func parseFile(file string) []string {
 }
 
 type Position struct {
-	x float64
-	y float64
+	x int
+	y int
 	heading float64
 }
 
-func main() {
-	lines := parseFile(os.Args[1])
-
+func firstStar(lines []string) {
 	pos := Position{0.0,0.0,0.0}
 
 	for i, line := range lines {
 		if line == "" {break}
 		dir := line[0:1]
-		amount, _ := strconv.Atoi(line[1:])
-		value := float64(amount)
+		value, _ := strconv.Atoi(line[1:])
 		switch dir {
 		case "N":
 			pos.y += value
@@ -45,15 +42,20 @@ func main() {
 		case "W":
 			pos.x -= value
 		case "L":
-			pos.heading += value * math.Pi / 180
+			pos.heading += float64(value) * math.Pi / 180
 		case "R":
-			pos.heading -= value * math.Pi / 180
+			pos.heading -= float64(value) * math.Pi / 180
 		case "F":
-			pos.x += value * math.Cos(pos.heading)
-			pos.y += value * math.Sin(pos.heading)
+			pos.x += int(float64(value) * math.Cos(pos.heading))
+			pos.y += int(float64(value) * math.Sin(pos.heading))
 		}
 		fmt.Println(i, dir, value, pos)
 	}
 
-	fmt.Println("Star 1 Distance: ", math.Abs(pos.x) + math.Abs(pos.y))
+	fmt.Println("Star 1 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
+}
+
+func main() {
+	lines := parseFile(os.Args[1])
+	firstStar(lines)
 }
