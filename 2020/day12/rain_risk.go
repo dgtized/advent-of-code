@@ -26,9 +26,9 @@ type Position struct {
 }
 
 func firstStar(lines []string) {
-	pos := Position{0.0,0.0,0.0}
+	pos := Position{0,0,0.0}
 
-	for i, line := range lines {
+	for _, line := range lines {
 		if line == "" {break}
 		dir := line[0:1]
 		value, _ := strconv.Atoi(line[1:])
@@ -49,7 +49,8 @@ func firstStar(lines []string) {
 			pos.x += int(float64(value) * math.Cos(pos.heading))
 			pos.y += int(float64(value) * math.Sin(pos.heading))
 		}
-		fmt.Println(i, dir, value, pos)
+
+		//fmt.Println(i, dir, value, pos)
 	}
 
 	fmt.Println("Star 1 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
