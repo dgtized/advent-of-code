@@ -87,7 +87,7 @@ func secondStar(lines []string) {
 	pos := Vector{0,0}
 	waypoint := Vector{10,1}
 
-	for i, line := range lines {
+	for _, line := range lines {
 		if line == "" {break}
 		dir, value := parseCommand(line)
 		switch dir {
@@ -107,7 +107,7 @@ func secondStar(lines []string) {
 			pos.x += value * waypoint.x
 			pos.y += value * waypoint.y
 		}
-		fmt.Println(i, dir, value, pos, waypoint)
+		// fmt.Println(i, dir, value, pos, waypoint)
 	}
 
 	fmt.Println("Star 2 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
