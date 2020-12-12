@@ -22,11 +22,11 @@ func parseFile(file string) []string {
 type Position struct {
 	x int
 	y int
-	heading float64
+	heading int
 }
 
 func firstStar(lines []string) {
-	pos := Position{0,0,0.0}
+	pos := Position{0,0,0}
 
 	for _, line := range lines {
 		if line == "" {break}
@@ -42,12 +42,12 @@ func firstStar(lines []string) {
 		case "W":
 			pos.x -= value
 		case "L":
-			pos.heading += float64(value) * math.Pi / 180
+			pos.heading += value
 		case "R":
-			pos.heading -= float64(value) * math.Pi / 180
+			pos.heading -= value
 		case "F":
-			pos.x += int(float64(value) * math.Cos(pos.heading))
-			pos.y += int(float64(value) * math.Sin(pos.heading))
+			pos.x += int(float64(value) * math.Cos(float64(pos.heading) * math.Pi / 180))
+			pos.y += int(float64(value) * math.Sin(float64(pos.heading) * math.Pi / 180))
 		}
 
 		//fmt.Println(i, dir, value, pos)
