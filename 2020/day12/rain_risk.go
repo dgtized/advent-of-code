@@ -29,6 +29,14 @@ func radians(degrees int) float64 {
 	return float64(degrees) * math.Pi / 180
 }
 
+func cos(degrees int) int {
+	return int(math.Cos(radians(degrees)))
+}
+
+func sin(degrees int) int {
+	return int(math.Sin(radians(degrees)))
+}
+
 func manhattan(x int, y int) int {
 	return int(math.Abs(float64(x)) + math.Abs(float64(y)))
 }
@@ -59,8 +67,8 @@ func firstStar(lines []string) {
 		case "R":
 			pos.heading -= value
 		case "F":
-			pos.x += int(float64(value) * math.Cos(radians(pos.heading)))
-			pos.y += int(float64(value) * math.Sin(radians(pos.heading)))
+			pos.x += value * cos(pos.heading)
+			pos.y += value * sin(pos.heading)
 		}
 
 		//fmt.Println(dir, value, pos)
@@ -82,12 +90,9 @@ type Vector struct {
 // and skip using cos/sin. That would also keep the rotation positions integers,
 // and skip the need to account for floating point error propagation.
 func rotate(degrees int, waypoint Vector) Vector {
-	theta := radians(degrees)
-	x := float64(waypoint.x)
-	y := float64(waypoint.y)
 	return Vector{
-		int(math.Round(x * math.Cos(theta) - y * math.Sin(theta))),
-		int(math.Round(x * math.Sin(theta) + y * math.Cos(theta))),
+		waypoint.x * cos(degrees) - waypoint.y * sin(degrees),
+		waypoint.x * sin(degrees) + waypoint.y * cos(degrees),
 	};
 }
 
