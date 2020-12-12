@@ -57,8 +57,8 @@ func firstStar(lines []string) {
 }
 
 type Vector struct {
-	x float64
-	y float64
+	x int
+	y int
 }
 
 // Rotate waypoint around the spaceship using a rotation matrix
@@ -73,8 +73,8 @@ func rotate(degrees int, waypoint Vector) Vector {
 	x := float64(waypoint.x)
 	y := float64(waypoint.y)
 	return Vector{
-		math.Round(x * math.Cos(theta) - y * math.Sin(theta)),
-		math.Round(x * math.Sin(theta) + y * math.Cos(theta)),
+		int(math.Round(x * math.Cos(theta) - y * math.Sin(theta))),
+		int(math.Round(x * math.Sin(theta) + y * math.Cos(theta))),
 	};
 }
 
@@ -85,8 +85,7 @@ func secondStar(lines []string) {
 	for i, line := range lines {
 		if line == "" {break}
 		dir := line[0:1]
-		amount, _ := strconv.Atoi(line[1:])
-		value := float64(amount)
+		value, _ := strconv.Atoi(line[1:])
 		switch dir {
 		case "N":
 			waypoint.y += value
@@ -97,17 +96,17 @@ func secondStar(lines []string) {
 		case "W":
 			waypoint.x -= value
 		case "L":
-			waypoint = rotate(+amount, waypoint)
+			waypoint = rotate(+value, waypoint)
 		case "R":
-			waypoint = rotate(-amount, waypoint)
+			waypoint = rotate(-value, waypoint)
 		case "F":
-			pos.x += math.Round(value * waypoint.x)
-			pos.y += math.Round(value * waypoint.y)
+			pos.x += value * waypoint.x
+			pos.y += value * waypoint.y
 		}
 		fmt.Println(i, dir, value, pos, waypoint)
 	}
 
-	fmt.Println("Star 2 Distance: ", int(math.Abs(pos.x) + math.Abs(pos.y)))
+	fmt.Println("Star 2 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
 }
 
 func main() {
