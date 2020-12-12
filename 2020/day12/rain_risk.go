@@ -25,6 +25,10 @@ func parseCommand(line string) (string, int) {
 	return dir, value
 }
 
+func manhattan(x int, y int) int {
+	return int(math.Abs(float64(x)) + math.Abs(float64(y)))
+}
+
 type Position struct {
 	x int
 	y int
@@ -58,7 +62,7 @@ func firstStar(lines []string) {
 		//fmt.Println(dir, value, pos)
 	}
 
-	fmt.Println("Star 1 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
+	fmt.Println("Star 1 Distance: ", manhattan(pos.x, pos.y))
 }
 
 type Vector struct {
@@ -110,7 +114,7 @@ func secondStar(lines []string) {
 		// fmt.Println(dir, value, pos, waypoint)
 	}
 
-	fmt.Println("Star 2 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
+	fmt.Println("Star 2 Distance: ", manhattan(pos.x, pos.y))
 }
 
 func main() {
