@@ -55,7 +55,7 @@ func firstStar(lines []string) {
 			pos.y += int(float64(value) * math.Sin(float64(pos.heading) * math.Pi / 180))
 		}
 
-		//fmt.Println(i, dir, value, pos)
+		//fmt.Println(dir, value, pos)
 	}
 
 	fmt.Println("Star 1 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
@@ -107,7 +107,7 @@ func secondStar(lines []string) {
 			pos.x += value * waypoint.x
 			pos.y += value * waypoint.y
 		}
-		// fmt.Println(i, dir, value, pos, waypoint)
+		// fmt.Println(dir, value, pos, waypoint)
 	}
 
 	fmt.Println("Star 2 Distance: ", int(math.Abs(float64(pos.x)) + math.Abs(float64(pos.y))))
