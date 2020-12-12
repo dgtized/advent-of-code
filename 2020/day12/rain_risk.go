@@ -61,6 +61,13 @@ type Vector struct {
 	y float64
 }
 
+// Rotate waypoint around the spaceship using a rotation matrix
+// https://en.wikipedia.org/wiki/Rotation_matrix
+//
+// Pretty sure there is a nice simplification here though as all angles are
+// multiples of 90 degrees, so could just use fixed matrices for each direction
+// and skip using cos/sin. That would also keep the rotation positions integers,
+// and skip the need to account for floating point error propagation.
 func rotate(degrees int, waypoint Vector) Vector {
 	theta := float64(degrees) * math.Pi / 180
 	x := float64(waypoint.x)
