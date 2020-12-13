@@ -25,18 +25,31 @@ console.log("** First Star");
 console.log(firstStar(example),295);
 console.log(firstStar(input),296);
 
-function gcd(a, b) {
-  while(b) {
-    var t = b;
-    b = a % b;
-    a = t;
+// derived from https://github.com/pnicorelli/nodejs-chinese-remainder/blob/master/chinese_remainder.js
+// and https://rosettacode.org/wiki/Chinese_remainder_theorem#Coffeescript
+function mul_inv(a, b){
+  let b0 = b;
+  [x0, x1] = [0, 1];
+  if( b == 1 ) return 1;
+  while(a > 1){
+    let q = (a / b) >> 0;
+    [a, b] = [b, a % b];
+    [x0, x1] = [x1 - (q * x0), x0];
   }
-
-  return a;
+  if( x1 < 0 )
+    return x1 + b0;
+  else
+    return x1;
 }
 
-function lcm(a, b) {
-  return a * b / gcd(a,b);
+function chineseRemainder(a, n){
+  let product = n.reduce((a,x) => a * x);
+  let sum = 0;
+  for(var i=0; i < n.length; i++){
+    let p = product / n[i];
+    sum += ( a[i] * mul_inv(p, n[i]) * p );
+  }
+  return sum % product;
 }
 
 function solve(base, busOffset) {
@@ -58,27 +71,21 @@ function secondStar(contents) {
       map(item => [parseInt(item), allBusses.indexOf(item)]);
 
   console.log(busOffset);
-  let upper = busOffset.map(item => item[0]).reduce((acc, item) => acc * item);
+  let product = busOffset.map(item => item[0]).reduce((acc, item) => acc * item);
+  let remainder = chineseRemainder(busOffset.map(x => x[1]), busOffset.map(x => x[0]));
+  let solution = product - remainder;
 
-  let mult = busOffset[0][0];
-  let base = busOffset.slice(0,-1).map(item => item[0]).reduce((acc, item) => acc * item);
+  console.log(product, remainder, solve(solution, busOffset));
 
-  if(upper > 1202161486) return 0;
-  while(!solve(base, busOffset.slice(1)) && base < upper) {
-    base += mult;
-    if((base / mult) % 10000000 == 0) {
-      console.log(base);
-    }
-  }
-
-  return base;
+  return solution;
 }
 
 console.log("** Second Star");
+console.log(secondStar('1\n17,x,13'), 102);
 console.log(secondStar('1\n17,x,13,19'), 3417);
 console.log(secondStar('1\n67,7,59,61'), 754018);
 console.log(secondStar('1\n67,x,7,59,61'), 779210);
 console.log(secondStar('1\n67,7,x,59,61'), 1261476);
 console.log(secondStar('1\n1789,37,47,1889'), 1202161486);
-console.log(secondStar(example), 1068788);
-console.log(secondStar(input));
+console.log(secondStar(example), 1068781);
+console.log(secondStar(input), 535296695251210);
