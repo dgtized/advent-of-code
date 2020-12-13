@@ -27,6 +27,7 @@ console.log(firstStar(input),296);
 
 // derived from https://github.com/pnicorelli/nodejs-chinese-remainder/blob/master/chinese_remainder.js
 // and https://rosettacode.org/wiki/Chinese_remainder_theorem#Coffeescript
+// WARNING something in either mul_inv or chineseRemainder has an arithmetic error
 function mul_inv(a, b){
   let b0 = b;
   [x0, x1] = [0, 1];
@@ -56,7 +57,6 @@ function verify(base, busOffset) {
   for(i = 0; i < busOffset.length; i++) {
     let bus = busOffset[i][0];
     let offset = busOffset[i][1];
-    //console.log(base, bus, offset, (base + offset) % bus);
     if((base + offset) % bus != 0) {
       return false;
     }
