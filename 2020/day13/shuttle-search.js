@@ -39,21 +39,47 @@ function lcm(a, b) {
   return a * b / gcd(a,b);
 }
 
-function secondStar(contents) {
-  let allBusses = contents.split("\n")[1].split(",")
-
-  return allBusses.filter(item => item != "x").
-    map(item => [parseInt(item), allBusses.indexOf(item)]);
+function solve(base, busOffset) {
+  for(i = 0; i < busOffset.length; i++) {
+    let bus = busOffset[i][0];
+    let offset = busOffset[i][1];
+    //console.log(base, bus, offset, (base + offset) % bus);
+    if((base + offset) % bus != 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
-console.log("experiments")
+function secondStar(contents) {
+  let allBusses = contents.split("\n")[1].split(",");
 
+  let busOffset = allBusses.filter(item => item != "x").
+      map(item => [parseInt(item), allBusses.indexOf(item)]);
+
+  console.log(busOffset);
+  let upper = busOffset.map(item => item[0]).reduce((acc, item) => acc * item);
+
+  let mult = busOffset[0][0];
+  let base = busOffset.slice(0,-1).map(item => item[0]).reduce((acc, item) => acc * item);
+  while(!solve(base, busOffset.slice(1)) && base < upper) {
+    base += mult;
+    if((base / mult) % 10000000 == 0) {
+      console.log(base);
+    }
+  }
+
+  console.log("lcm", busOffset.map(item => item[0]).reduce((acc, item) => lcm(acc, item)));
+  console.log("upper", upper);
+
+  return base;
+}
 
 console.log("** Second Star");
-console.log(secondStar('1\n17,x,13,19'), 317);
+console.log(secondStar('1\n17,x,13,19'), 3417);
 console.log(secondStar('1\n67,7,59,61'), 754018);
 console.log(secondStar('1\n67,x,7,59,61'), 779210);
 console.log(secondStar('1\n67,7,x,59,61'), 1261476);
 console.log(secondStar('1\n1789,37,47,1889'), 1202161486);
 console.log(secondStar(example), 1068788);
-console.log(secondStar(input));
+//console.log(secondStar(input));
