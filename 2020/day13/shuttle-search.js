@@ -62,15 +62,17 @@ function secondStar(contents) {
 
   let mult = busOffset[0][0];
   let base = busOffset.slice(0,-1).map(item => item[0]).reduce((acc, item) => acc * item);
+
+  // tried using wolfram alpha, didn't work
+  console.log("solve " + busOffset.map(item => item[1] + " = x mod " + item[0]).join(" and "));
+
+  if(upper > 1202161486) return 0;
   while(!solve(base, busOffset.slice(1)) && base < upper) {
     base += mult;
     if((base / mult) % 10000000 == 0) {
       console.log(base);
     }
   }
-
-  console.log("lcm", busOffset.map(item => item[0]).reduce((acc, item) => lcm(acc, item)));
-  console.log("upper", upper);
 
   return base;
 }
@@ -82,4 +84,4 @@ console.log(secondStar('1\n67,x,7,59,61'), 779210);
 console.log(secondStar('1\n67,7,x,59,61'), 1261476);
 console.log(secondStar('1\n1789,37,47,1889'), 1202161486);
 console.log(secondStar(example), 1068788);
-//console.log(secondStar(input));
+console.log(secondStar(input));
