@@ -63,9 +63,6 @@ function secondStar(contents) {
   let mult = busOffset[0][0];
   let base = busOffset.slice(0,-1).map(item => item[0]).reduce((acc, item) => acc * item);
 
-  // tried using wolfram alpha, didn't work
-  console.log("solve " + busOffset.map(item => item[1] + " = x mod " + item[0]).join(" and "));
-
   if(upper > 1202161486) return 0;
   while(!solve(base, busOffset.slice(1)) && base < upper) {
     base += mult;
