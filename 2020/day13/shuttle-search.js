@@ -52,7 +52,7 @@ function chineseRemainder(a, n){
   return sum % product;
 }
 
-function solve(base, busOffset) {
+function verify(base, busOffset) {
   for(i = 0; i < busOffset.length; i++) {
     let bus = busOffset[i][0];
     let offset = busOffset[i][1];
@@ -75,7 +75,7 @@ function secondStar(contents) {
   let remainder = chineseRemainder(busOffset.map(x => x[1]), busOffset.map(x => x[0]));
   let solution = product - remainder;
 
-  console.log(product, remainder, solve(solution, busOffset));
+  console.log(product, remainder, verify(solution, busOffset));
 
   return solution;
 }
@@ -88,4 +88,7 @@ console.log(secondStar('1\n67,x,7,59,61'), 779210);
 console.log(secondStar('1\n67,7,x,59,61'), 1261476);
 console.log(secondStar('1\n1789,37,47,1889'), 1202161486);
 console.log(secondStar(example), 1068781);
+// Solution from input is off by ~13, possibly due to numeric error since every
+// other example checks out. See chinese-remainder.lisp for correctly working
+// numeric solution.
 console.log(secondStar(input), 535296695251210);
