@@ -22,22 +22,29 @@
              (string->number address)
              (~r (string->number value) #:base 2 #:min-width 36 #:pad-string "0"))])))
 
-(define (run-program memory mask program)
+(define (bitmask-set memory mask address value)
+  (hash-set memory address (apply-mask value mask)))
+
+(define (run-program memory mem-set mask program)
   (if (null? program)
       memory
       (match (first program)
         [(list 'mem address value)
-         (run-program (hash-set memory address (apply-mask value mask))
+         (run-program (mem-set memory mask address value)
+                      mem-set
                       mask
                       (rest program))]
         [(list 'mask new-mask)
-         (run-program memory new-mask (rest program))])))
+         (run-program memory mem-set new-mask (rest program))])))
+
+(define (memory-sum memory)
+  (apply + (map (lambda (x) (string->number x 2)) (hash-values memory))))
 
 (define (first-star filename)
-  (let ((memory (run-program (make-immutable-hash)
-                             (make-string 36 #\X)
-                             (load-program filename))))
-    (apply + (map (lambda (x) (string->number x 2)) (hash-values memory)))))
+  (memory-sum (run-program (make-immutable-hash)
+                           bitmask-set
+                           (make-string 36 #\X)
+                           (load-program filename))))
 
 (module+ test
   (require rackunit)
@@ -51,6 +58,7 @@
                   (mem 8 "000000000000000000000000000000000000")))
 
   (check-equal? (run-program (make-immutable-hash)
+                             bitmask-set
                              (make-string 36 #\X)
                              (load-program "example"))
                 '#hash((7 . "000000000000000000000000000001100101")
