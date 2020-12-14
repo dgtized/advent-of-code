@@ -18,15 +18,6 @@
        [#\1 #\1]
        [#\0 #\0]))))
 
-(define (decoder-mask address mask)
-  (list->string
-   (for/list ([a (in-string address)]
-              [m (in-string mask)])
-    (match m
-      [#\X #\X]
-      [#\1 #\1]
-      [#\0 a]))))
-
 (define (add-to-all elem lists)
   (if (empty? lists)
       empty
@@ -46,11 +37,13 @@
 
 (define (expanded-addresses address mask)
   (map list->string
-       (generate-combinations (for/list ([digit (decoder-mask address mask)])
-                                (match digit
-      [#\X '(#\0 #\1)]
-      [#\1 #\1]
-      [#\0 #\0])))))
+       (generate-combinations
+        (for/list ([a (in-string address)]
+                   [m (in-string mask)])
+          (match m
+            [#\X '(#\0 #\1)]
+            [#\1 #\1]
+            [#\0 a])))))
 
 (define (decoded-addresses address mask)
   (map binary-string->number
@@ -104,7 +97,6 @@
   (check-equal? (apply-mask "01100101" "X1XXXX0X") "01100101")
   (check-equal? (apply-mask "00001011" "X1XXXX0X") "01001001")
 
-  (check-equal? (decoder-mask "101010" "X1001X") "X1101X")
   (check-equal?
    (expanded-addresses (number->binary-string 42)
                        "000000000000000000000000000000X1001X")
