@@ -3,6 +3,12 @@
 (require racket/string)
 (require racket/match)
 
+(define (number->binary-string n)
+  (~r n #:base 2 #:min-width 36 #:pad-string "0"))
+
+(define (binary-string->number str)
+  (string->number str 2))
+
 (define (apply-mask n mask)
   (list->string
    (for/list ([e (in-string n)]
@@ -20,9 +26,6 @@
       [#\X #\X]
       [#\1 #\1]
       [#\0 a]))))
-
-(define (number->binary-string n)
-  (~r n #:base 2 #:min-width 36 #:pad-string "0"))
 
 (define (add-to-all elem lists)
   (if (empty? lists)
@@ -50,7 +53,8 @@
       [#\0 #\0])))))
 
 (define (decoded-addresses address mask)
-  (map (lambda (x) (string->number x 2)) (expanded-addresses (number->binary-string address) mask)))
+  (map binary-string->number
+       (expanded-addresses (number->binary-string address) mask)))
 
 (define (load-program filename)
   (for/list ([line (file->lines filename)])
@@ -87,7 +91,7 @@
   (runner (make-immutable-hash) (make-string 36 #\X) program))
 
 (define (memory-sum memory)
-  (apply + (map (lambda (x) (string->number x 2)) (hash-values memory))))
+  (apply + (map binary-string->number (hash-values memory))))
 
 (define (first-star filename)
   (memory-sum (run-program bitmask-set (load-program filename))))
