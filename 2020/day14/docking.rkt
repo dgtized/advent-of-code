@@ -25,15 +25,15 @@
             (add-to-all elem (rest lists)))))
 
 (define (generate-combinations pattern)
-  (cond [(empty? pattern) (list empty)]
-        [(pair? (first pattern))
-         (match (first pattern)
-           [(list a b)
-            (let ((results (generate-combinations (rest pattern))))
-              (append
-               (add-to-all a results)
-               (add-to-all b results)))])]
-        [else (add-to-all (first pattern) (generate-combinations (rest pattern)))]))
+  (if (empty? pattern)
+      (list empty)
+      (match (first pattern)
+        [(list a b)
+         (let ((results (generate-combinations (rest pattern))))
+           (append
+            (add-to-all a results)
+            (add-to-all b results)))]
+        [elem (add-to-all elem (generate-combinations (rest pattern)))])))
 
 (define (expanded-addresses address mask)
   (map list->string
