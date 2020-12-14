@@ -1,0 +1,46 @@
+#lang racket
+
+(require racket/string)
+(require racket/match)
+
+(define (apply-mask n mask)
+  (list->string
+   (for/list ([e (in-string n)]
+              [m (in-string mask)])
+     (match m
+       [#\X e]
+       [#\1 #\1]
+       [#\0 #\0]))))
+
+;; (apply-mask "01100101" "X1XXXX0X")
+;; (apply-mask "00001011" "X1XXXX0X")
+
+(define (load-program filename)
+  (for/list ([line (file->lines filename)])
+    (match line
+      [(pregexp "mask = (.+)$" (list _ m))
+       (list 'mask m)]
+      [(pregexp "mem\\[(\\d+)\\] = (\\d+)$" (list _ address value))
+       (list 'mem
+             (string->number address)
+             (~r (string->number value) #:base 2 #:min-width 36 #:pad-string "0"))])))
+
+(define (run-program memory mask program)
+  (if (null? program)
+      memory
+      (match (first program)
+        [(list 'mem address value)
+         (run-program (hash-set memory address (apply-mask value mask))
+                      mask
+                      (rest program))]
+        [(list 'mask new-mask)
+         (run-program memory new-mask (rest program))])))
+
+(define (first-star filename)
+  (let ((memory (run-program (make-immutable-hash)
+                             (make-string 36 #\X)
+                             (load-program filename))))
+    (apply + (map (lambda (x) (string->number x 2)) (hash-values memory)))))
+
+(first-star "example") ;; 165
+(first-star "input") ;; 14954914379452
