@@ -27,13 +27,13 @@
 (define (generate-combinations pattern)
   (if (empty? pattern)
       (list empty)
-      (match (first pattern)
-        [(list a b)
-         (let ((results (generate-combinations (rest pattern))))
-           (append
-            (add-to-all a results)
-            (add-to-all b results)))]
-        [elem (add-to-all elem (generate-combinations (rest pattern)))])))
+      (let ((remaining (generate-combinations (rest pattern))))
+        (match (first pattern)
+          [(list elems ...)
+           (apply append
+                  (map (lambda (e) (add-to-all e remaining))
+                       elems))]
+          [elem (add-to-all elem remaining)]))))
 
 (define (expanded-addresses address mask)
   (map list->string
@@ -103,6 +103,11 @@
   (check-equal? (generate-combinations '((0 1) 0 1))
                 '((0 0 1)
                   (1 0 1)))
+  ;; not needed for problem, but a good generalization
+  (check-equal? (generate-combinations '((0 1 2) 0 1))
+                '((0 0 1)
+                  (1 0 1)
+                  (2 0 1)))
   (check-equal? (generate-combinations '((0 1) 0 (0 1)))
                 '((0 0 0)
                   (0 0 1)
