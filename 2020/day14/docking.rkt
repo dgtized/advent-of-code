@@ -94,6 +94,21 @@
 
 (module+ test
   (require rackunit)
+
+  (check-equal? (add-to-all 'x (list empty))
+                '((x)))
+  (check-equal? (add-to-all 'x (list '(a) '(b)))
+                '((x a) (x b)))
+
+  (check-equal? (generate-combinations '((0 1) 0 1))
+                '((0 0 1)
+                  (1 0 1)))
+  (check-equal? (generate-combinations '((0 1) 0 (0 1)))
+                '((0 0 0)
+                  (0 0 1)
+                  (1 0 0)
+                  (1 0 1)))
+
   (check-equal? (apply-mask "01100101" "X1XXXX0X") "01100101")
   (check-equal? (apply-mask "00001011" "X1XXXX0X") "01001001")
 
