@@ -84,7 +84,8 @@
   (runner (make-immutable-hash) (make-string 36 #\X) program))
 
 (define (memory-sum memory)
-  (apply + (map binary-string->number (hash-values memory))))
+  (for/sum ([x (hash-values memory)])
+    (binary-string->number x)))
 
 (define (first-star filename)
   (memory-sum (run-program bitmask-set (load-program filename))))
