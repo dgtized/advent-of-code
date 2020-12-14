@@ -12,9 +12,6 @@
        [#\1 #\1]
        [#\0 #\0]))))
 
-;; (apply-mask "01100101" "X1XXXX0X")
-;; (apply-mask "00001011" "X1XXXX0X")
-
 (define (load-program filename)
   (for/list ([line (file->lines filename)])
     (match line
@@ -42,5 +39,22 @@
                              (load-program filename))))
     (apply + (map (lambda (x) (string->number x 2)) (hash-values memory)))))
 
-(first-star "example") ;; 165
-(first-star "input") ;; 14954914379452
+(module+ test
+  (require rackunit)
+  (check-equal? (apply-mask "01100101" "X1XXXX0X") "01100101")
+  (check-equal? (apply-mask "00001011" "X1XXXX0X") "01001001")
+
+  (check-equal? (load-program "example")
+                '((mask "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X")
+                  (mem 8 "000000000000000000000000000000001011")
+                  (mem 7 "000000000000000000000000000001100101")
+                  (mem 8 "000000000000000000000000000000000000")))
+
+  (check-equal? (run-program (make-immutable-hash)
+                             (make-string 36 #\X)
+                             (load-program "example"))
+                '#hash((7 . "000000000000000000000000000001100101")
+                       (8 . "000000000000000000000000000001000000")))
+
+  (check-equal? (first-star "example") 165)
+  (check-equal? (first-star "input") 14954914379452))
