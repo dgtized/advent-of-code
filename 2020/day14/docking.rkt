@@ -9,6 +9,16 @@
 (define (binary-string->number str)
   (string->number str 2))
 
+(define (load-program filename)
+  (for/list ([line (file->lines filename)])
+    (match line
+      [(pregexp "mask = (.+)$" (list _ m))
+       (list 'mask m)]
+      [(pregexp "mem\\[(\\d+)\\] = (\\d+)$" (list _ address value))
+       (list 'mem
+             (string->number address)
+             (number->binary-string (string->number value)))])))
+
 (define (apply-mask n mask)
   (list->string
    (for/list ([e (in-string n)]
@@ -48,16 +58,6 @@
 (define (decoded-addresses address mask)
   (map binary-string->number
        (expanded-addresses (number->binary-string address) mask)))
-
-(define (load-program filename)
-  (for/list ([line (file->lines filename)])
-    (match line
-      [(pregexp "mask = (.+)$" (list _ m))
-       (list 'mask m)]
-      [(pregexp "mem\\[(\\d+)\\] = (\\d+)$" (list _ address value))
-       (list 'mem
-             (string->number address)
-             (number->binary-string (string->number value)))])))
 
 (define (bitmask-set memory mask address value)
   (hash-set memory address (apply-mask value mask)))
