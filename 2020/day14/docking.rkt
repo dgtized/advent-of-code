@@ -92,6 +92,15 @@
 (define (second-star filename)
   (memory-sum (run-program decoder-set (load-program filename))))
 
+(define (solve filename)
+  (printf "Star 1: ~a~n" (first-star filename))
+  (printf "Star 2: ~a~n" (second-star filename)))
+
+;; usage: racket docking.rkt input
+(match (current-command-line-arguments)
+  [(vector filename) (solve filename)]
+  ['#() empty])
+
 (module+ test
   (require rackunit)
 
