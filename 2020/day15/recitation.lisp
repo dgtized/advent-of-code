@@ -35,6 +35,12 @@
 (princ (car (solve-to-n (reverse '(0 5 4 1 10 14 7)) 2020)))
 (terpri)
 
+;; Somethign is wrong here, if I run the first example on a fresh repl instance,
+;; I can get an answer in 3s, but trying to run it again hangs. If I try the
+;; second example it just hangs. As comparison, the racket solution is
+;; consistant at around 54s or so for a 30,000,000 iteration run. I don't know
+;; if there is just a garbage collection limit or it optimizes on the second run
+;; or what.
 (defun run-test ()
   (princ "Test Example @ 30000000: ")
   (time (princ (= 175594 (car (solve-to-n (reverse '(0 3 6)) 30000000)))))
