@@ -1,14 +1,21 @@
-(defun solve-next-lookup (lst iter seen)
-  (let ((previous (gethash (car lst) seen)))
-    (if previous
-        (- iter previous)
-        0)))
+(defun solve-next-lookup (last iter seen)
+  (declare (type fixnum iter last))
+  (declare (optimize (speed 3)))
+  (let ((previous (gethash last seen 0)))
+    (declare (type fixnum previous))
+    (if (= previous 0)
+        0
+        (- iter previous))))
 
 (defun solve-up-to (lst seen iter n)
+  (declare (type list lst))
+  (declare (type fixnum iter n))
+  (declare (optimize (speed 3)))
   (if (= iter n)
       lst
-      (let* ((next (solve-next-lookup lst iter seen)))
-        (setf (gethash (car lst) seen) iter)
+      (let* ((last (car lst))
+             (next (solve-next-lookup last iter seen)))
+        (setf (gethash last seen) iter)
         (solve-up-to (cons next lst) seen (1+ iter) n))))
 
 (defun solve-to-n (lst n)
