@@ -18,32 +18,42 @@
   (fn [x]
     (and (>= x lower) (<= x upper))))
 
-(defn field-matches [constraints]
+(defn field-matches
+  "For a list of ranges, returns an fn(x) that is true if any range covers."
+  [constraints]
   (apply some-fn (map between? constraints)))
 
-(defn valid-ranges [{:keys [rules]}]
+(defn valid-ranges
+  "For all the valid ranges, return fn(x) that is true if any range covers."
+  [{:keys [rules]}]
   (field-matches (mapcat identity (vals rules))))
 
 (defn invalid-fields
+  "Returns a fn(ticket) that returns any invalid field values."
   [input]
   (let [valid-field? (valid-ranges input)]
     (fn [ticket]
       (filter (complement valid-field?) ticket))))
 
 (defn valid-ticket
+  "Returns a fn(ticket), that returns true if ticket has no invalid fields."
   [input]
-  (let [invalid (invalid-fields input)]
+  (let [bad-fields (invalid-fields input)]
     (fn [ticket]
-      (empty? (invalid ticket)))))
+      (empty? (bad-fields ticket)))))
 
-(defn scanning-error-rate [filename]
+(defn scanning-error-rate
+  "Answer to first star, sum of all invalid fields values in all tickets."
+  [filename]
   (let [input (parse filename)]
     (->> (:tickets input)
          (map (invalid-fields input))
          flatten
          (apply +))))
 
-(defn possible-rules [rules]
+(defn possible-rules
+  "Returns a list of fn(n) => field name if n is within ranges for that field."
+  [rules]
   (for [[field constraints] rules
         :let [rule-applies (field-matches constraints)]]
     (fn [n] (when (rule-applies n) field))))
@@ -53,6 +63,7 @@
   (= ((first (possible-rules {:r [[1 2] [3 4]]})) 1) :r))
 
 (defn rule-match->fields
+  "Return a fn(n) => the set of valid fields for n."
   [{:keys [rules]}]
   (let [possibilities (possible-rules rules)]
     (fn [n] (into #{} (keep (fn [r] (r n)) possibilities)))))
@@ -64,12 +75,13 @@
 (defn transpose [m]
   (apply mapv vector m))
 
-(comment
-  (transpose [[1 2] [3 4]]))
-
-(defn collapse-possibilities [columns]
+(defn collapse-possibilities
+  "Collapse a list of sets of valid fields into a list of string fields. "
+  [columns]
   (if (every? string? columns)
     columns
+    ;; Find a single element set, replace with it's field name, and remove that
+    ;; as a possibility from all other field sets.
     (let [singleton (some (fn [x] (when (= (count x) 1) x)) columns)
           element (first singleton)]
       (recur (for [x columns]
@@ -81,7 +93,9 @@
   (= (collapse-possibilities '(#{"row"} #{"class" "row"} #{"class" "row" "seat"}))
      ["row" "class" "seat"]))
 
-(defn field-columns [filename]
+(defn field-columns
+  "Map of fields to the users ticket values from a given input."
+  [filename]
   (let [input (parse filename)
         tickets (filter (valid-ticket input) (:tickets input))
         columns (transpose tickets)
