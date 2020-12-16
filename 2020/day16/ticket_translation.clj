@@ -18,15 +18,14 @@
     (and (>= x lower) (<= x upper))))
 
 (defn valid-ranges [{:keys [rules]}]
-  (apply some-fn
-         (map (fn [[l u]] (between? l u))
-              (mapcat identity (vals rules)))))
+  (map (fn [[l u]] (between? l u))
+       (mapcat identity (vals rules))))
 
 (defn scanning-error-rate [filename]
   (let [input (parse filename)]
     (->> (:tickets input)
          (map (fn [ticket]
-                (filter (complement (valid-ranges input)) ticket)))
+                (filter (complement (apply some-fn (valid-ranges input))) ticket)))
          flatten
          (apply +))))
 
