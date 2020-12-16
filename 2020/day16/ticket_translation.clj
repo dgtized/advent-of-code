@@ -21,11 +21,16 @@
   (map (fn [[l u]] (between? l u))
        (mapcat identity (vals rules))))
 
+(defn invalid-field?
+  [input]
+  (fn [ticket]
+    (filter (complement (apply some-fn (valid-ranges input)))
+            ticket)))
+
 (defn scanning-error-rate [filename]
   (let [input (parse filename)]
     (->> (:tickets input)
-         (map (fn [ticket]
-                (filter (complement (apply some-fn (valid-ranges input))) ticket)))
+         (map (invalid-field? input))
          flatten
          (apply +))))
 
