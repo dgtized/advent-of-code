@@ -18,13 +18,15 @@
   (fn [x]
     (and (>= x lower) (<= x upper))))
 
+(defn field-matches [constraints]
+  (apply some-fn (map between? constraints)))
+
 (defn valid-ranges [{:keys [rules]}]
-  (map between?
-       (mapcat identity (vals rules))))
+  (field-matches (mapcat identity (vals rules))))
 
 (defn invalid-fields
   [input]
-  (let [valid-field? (apply some-fn (valid-ranges input))]
+  (let [valid-field? (valid-ranges input)]
     (fn [ticket]
       (filter (complement valid-field?) ticket))))
 
@@ -43,11 +45,11 @@
 
 (defn possible-rules [rules]
   (for [[field constraints] rules
-        :let [rule-applies (apply some-fn (map between? constraints))]]
+        :let [rule-applies (field-matches constraints)]]
     (fn [n] (when (rule-applies n) field))))
 
 (comment
-  (not ((apply some-fn (map between? [[1 2] [4 5]])) 3))
+  (not ((field-matches [[1 2] [4 5]]) 3))
   (= ((first (possible-rules {:r [[1 2] [3 4]]})) 1) :r))
 
 (defn rule-match->fields
