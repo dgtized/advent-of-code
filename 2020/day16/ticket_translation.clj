@@ -24,8 +24,11 @@
 
 (defn scanning-error-rate [filename]
   (let [input (parse filename)]
-    (apply + (flatten (for [ticket (:tickets input)]
-                        (filter (complement (valid-ranges input)) ticket))))))
+    (->> (:tickets input)
+         (map (fn [ticket]
+                (filter (complement (valid-ranges input)) ticket)))
+         flatten
+         (apply +))))
 
 (comment
   (= (scanning-error-rate "example") 71)
