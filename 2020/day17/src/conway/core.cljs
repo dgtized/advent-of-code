@@ -46,9 +46,10 @@
   (into {} (for [p points] [p p])))
 
 (defn neighbors-of [point points-lookup]
-  (keep identity
-        (for [neighbor-point (neighbor-coords point)]
-          (get points-lookup neighbor-point nil))))
+  (for [neighbor-point (neighbor-coords point)
+        :let [neighbor (get points-lookup neighbor-point nil)]
+        :when neighbor]
+    neighbor))
 
 (defn cube-bounds [points]
   (let [positions points]
@@ -60,20 +61,24 @@
          (neighbors-of [1 1 0 0] (index-points (parse example)))
          (cube-bounds (parse example)))
 
+(defn active-point [position points-index]
+  (let [current-point (get points-index position)
+        neighbors (neighbors-of position points-index)]
+    (cond (and current-point (#{2 3} (count neighbors)))
+          current-point
+          (and (not current-point) (= 3 (count neighbors)))
+          position)))
+
 (defn next-state [points]
   (let [points-index (index-points points)
         bounds (cube-bounds points)]
-    (keep identity (for [x (apply range (nth bounds 0))
-                         y (apply range (nth bounds 1))
-                         z (apply range (nth bounds 2))
-                         w (apply range (nth bounds 3))
-                         :let [position [x y z w]
-                               current-point (get points-index position)
-                               neighbors (neighbors-of position points-index)]]
-                     (cond (and current-point (#{2 3} (count neighbors)))
-                           current-point
-                           (and (not current-point) (= 3 (count neighbors)))
-                           position)))))
+    (for [x (apply range (nth bounds 0))
+          y (apply range (nth bounds 1))
+          z (apply range (nth bounds 2))
+          w (apply range (nth bounds 3))
+          :let [point (active-point [x y z w] points-index)]
+          :when point]
+      point)))
 
 (comment ;; solution
   ;; note this is broken up because of timeout problems
