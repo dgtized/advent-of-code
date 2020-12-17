@@ -51,11 +51,9 @@
 
 (defn neighbors-of
   "For a given point, return all neighboring points that are active in index"
-  [point points-lookup]
-  (for [neighbor-point (neighbor-coords point)
-        :let [neighbor (get points-lookup neighbor-point nil)]
-        :when neighbor]
-    neighbor))
+  [point points]
+  (filter (fn [coord] (get points coord))
+          (neighbor-coords point)))
 
 (defn cube-bounds
   "Calculate the upper and lower bounds for each axis"
