@@ -22,7 +22,9 @@
 ..#
 ###")
 
-(defn parse [s]
+(defn parse
+  "Parse grid string `s` into list of active points."
+  [s]
   (let [lines (str/split-lines s)
         size (count lines)]
     (for [y (range 0 size)
@@ -34,7 +36,9 @@
 (comment (parse example)
          (parse input))
 
-(defn neighbor-coords [[x y z w]]
+(defn neighbor-coords
+  "Generate all the neighboring coordinates of a point."
+  [[x y z w]]
   (for [dx (range -1 2)
         dy (range -1 2)
         dz (range -1 2)
@@ -45,13 +49,17 @@
 (defn index-points [points]
   (into {} (for [p points] [p p])))
 
-(defn neighbors-of [point points-lookup]
+(defn neighbors-of
+  "For a given point, return all neighboring points that are active in index"
+  [point points-lookup]
   (for [neighbor-point (neighbor-coords point)
         :let [neighbor (get points-lookup neighbor-point nil)]
         :when neighbor]
     neighbor))
 
-(defn cube-bounds [points]
+(defn cube-bounds
+  "Calculate the upper and lower bounds for each axis"
+  [points]
   (let [positions points]
     (for [idx (range 0 4)]
       [(dec ((apply min-key #(nth % idx) positions) idx))
@@ -61,7 +69,9 @@
          (neighbors-of [1 1 0 0] (index-points (parse example)))
          (cube-bounds (parse example)))
 
-(defn active-point [position points-index]
+(defn active-point
+  "For a given position, return a position if it should be active from current state."
+  [position points-index]
   (let [current-point (get points-index position)
         neighbors (neighbors-of position points-index)]
     (cond (and current-point (#{2 3} (count neighbors)))
@@ -69,7 +79,9 @@
           (and (not current-point) (= 3 (count neighbors)))
           position)))
 
-(defn next-state [points]
+(defn next-state
+  "Calculate next set of active points."
+  [points]
   (let [points-index (index-points points)
         bounds (cube-bounds points)]
     (for [x (apply range (nth bounds 0))
@@ -92,6 +104,7 @@
   ;; something unhappy about lazy evaluation, blows stack
   (= 2296 (count (next-state i5))))
 
+;; Visualization using Quil
 (defn setup []
   {:points (parse input)})
 
