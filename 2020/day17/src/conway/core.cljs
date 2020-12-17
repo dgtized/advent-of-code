@@ -34,8 +34,10 @@
                  :when (= v "#")]
              [x y 0 0]))))
 
-(comment (parse example)
-         (parse input))
+(comment (= (parse example)
+            #{[1 0 0 0] [0 2 0 0] [2 2 0 0] [1 2 0 0] [2 1 0 0]})
+         (= (count (parse input))
+            42))
 
 (defn neighbor-coords
   "Generate all the neighboring coordinates of a point."
@@ -63,9 +65,11 @@
       [(dec ((apply min-key #(nth % idx) positions) idx))
        (inc (inc ((apply max-key #(nth % idx) positions) idx)))])))
 
-(comment (count (neighbor-coords [0 0 0 0]))
-         (neighbors-of [1 1 0 0] (parse example))
-         (cube-bounds (parse example)))
+(comment (= 80 (count (neighbor-coords [0 0 0 0])))
+         (= (neighbors-of [1 1 0 0] (parse example))
+            [[0 2 0 0] [1 0 0 0] [1 2 0 0] [2 1 0 0] [2 2 0 0]])
+         (= (cube-bounds (parse example))
+            [[-1 4] [-1 4] [-1 2] [-1 2]]))
 
 (defn active-point
   "For a given position, return a position if it should be active from current state."
