@@ -75,10 +75,10 @@
   "For a given position, return a position if it should be active from current state."
   [position points]
   (let [current-point (get points position)
-        neighbors (neighbors-of position points)]
-    (cond (and current-point (#{2 3} (count neighbors)))
+        neighbors (count (neighbors-of position points))]
+    (cond (and current-point (#{2 3} neighbors))
           current-point
-          (and (not current-point) (= 3 (count neighbors)))
+          (and (not current-point) (= 3 neighbors))
           position)))
 
 (defn next-state
@@ -96,9 +96,9 @@
 
 (comment ;; solution
   ;; note this is broken up because of timeout problems
-  (def e5 (nth (iterate next-state (parse example)) 5))
-  (count e5)
-  (= 848 (count (next-state e5)))
+  (time (def e5 (nth (iterate next-state (parse example)) 5)))
+  (time (count e5))
+  (time (= 848 (count (next-state e5))))
 
   ;; problems with timeout, works when clicking n 6 times for displayed example
   (def i5 (nth (iterate next-state (parse input)) 5))
