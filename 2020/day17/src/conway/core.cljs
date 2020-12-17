@@ -58,10 +58,9 @@
 (defn cube-bounds
   "Calculate the upper and lower bounds for each axis"
   [points]
-  (let [positions points]
-    (for [idx (range 0 4)]
-      [(dec ((apply min-key #(nth % idx) positions) idx))
-       (inc (inc ((apply max-key #(nth % idx) positions) idx)))])))
+  (for [idx (range 0 4)]
+    [(dec ((apply min-key #(nth % idx) points) idx))
+     (+ 2 ((apply max-key #(nth % idx) points) idx))]))
 
 (comment (= 80 (count (neighbor-coords [0 0 0 0])))
          (= (neighbors-of [1 1 0 0] (parse example))
