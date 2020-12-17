@@ -29,17 +29,18 @@
           x (range 0 size)
           :let [v (subs (nth lines y) x (+ x 1))]
           :when (= v "#")]
-      [x y 0])))
+      [x y 0 0])))
 
 (comment (parse example)
          (parse input))
 
-(defn neighbor-coords [[x y z]]
+(defn neighbor-coords [[x y z w]]
   (for [dx (range -1 2)
         dy (range -1 2)
         dz (range -1 2)
-        :when (not= dx dy dz 0)]
-    [(+ x dx) (+ y dy) (+ z dz)]))
+        dw (range -1 2)
+        :when (not= dx dy dz dw 0)]
+    [(+ x dx) (+ y dy) (+ z dz) (+ w dw)]))
 
 (defn index-points [points]
   (into {} (for [p points] [p p])))
@@ -51,12 +52,12 @@
 
 (defn cube-bounds [points]
   (let [positions points]
-    (for [idx (range 0 3)]
+    (for [idx (range 0 4)]
       [(dec ((apply min-key #(nth % idx) positions) idx))
        (inc (inc ((apply max-key #(nth % idx) positions) idx)))])))
 
-(comment (neighbor-coords [0 0 0])
-         (neighbors-of [1 1 0] (index-points (parse example)))
+(comment (count (neighbor-coords [0 0 0 0]))
+         (neighbors-of [1 1 0 0] (index-points (parse example)))
          (cube-bounds (parse example)))
 
 (defn next-state [points]
@@ -65,7 +66,8 @@
     (keep identity (for [x (apply range (nth bounds 0))
                          y (apply range (nth bounds 1))
                          z (apply range (nth bounds 2))
-                         :let [position [x y z]
+                         w (apply range (nth bounds 3))
+                         :let [position [x y z w]
                                current-point (get points-index position)
                                neighbors (neighbors-of position points-index)]]
                      (cond (and current-point (#{2 3} (count neighbors)))
@@ -73,7 +75,17 @@
                            (and (not current-point) (= 3 (count neighbors)))
                            position)))))
 
-(comment (count (next-state (parse example))))
+(comment ;; solution
+  ;; note this is broken up because of timeout problems
+  (def e5 (nth (iterate next-state (parse example)) 5))
+  (count e5)
+  (= 848 (count (next-state e5)))
+
+  ;; problems with timeout, works when clicking n 6 times for displayed example
+  (def i5 (nth (iterate next-state (parse input)) 5))
+  (= 2812 (count i5))
+  ;; something unhappy about lazy evaluation, blows stack
+  (= 2296 (count (next-state i5))))
 
 (defn setup []
   {:points (parse input)})
@@ -93,7 +105,7 @@
   (q/scale 20)
   (q/translate 10 10 -20)
   (doseq [p points]
-    (apply q/point p)))
+    (apply q/point (butlast p))))
 
 (q/defsketch conway
   :host "quil-host"
