@@ -27,11 +27,12 @@
   [s]
   (let [lines (str/split-lines s)
         size (count lines)]
-    (for [y (range 0 size)
-          x (range 0 size)
-          :let [v (subs (nth lines y) x (+ x 1))]
-          :when (= v "#")]
-      [x y 0 0])))
+    (apply sorted-set
+           (for [y (range 0 size)
+                 x (range 0 size)
+                 :let [v (subs (nth lines y) x (+ x 1))]
+                 :when (= v "#")]
+             [x y 0 0]))))
 
 (comment (parse example)
          (parse input))
@@ -45,9 +46,6 @@
         dw (range -1 2)
         :when (not= dx dy dz dw 0)]
     [(+ x dx) (+ y dy) (+ z dz) (+ w dw)]))
-
-(defn index-points [points]
-  (into {} (for [p points] [p p])))
 
 (defn neighbors-of
   "For a given point, return all neighboring points that are active in index"
@@ -66,14 +64,14 @@
        (inc (inc ((apply max-key #(nth % idx) positions) idx)))])))
 
 (comment (count (neighbor-coords [0 0 0 0]))
-         (neighbors-of [1 1 0 0] (index-points (parse example)))
+         (neighbors-of [1 1 0 0] (parse example))
          (cube-bounds (parse example)))
 
 (defn active-point
   "For a given position, return a position if it should be active from current state."
-  [position points-index]
-  (let [current-point (get points-index position)
-        neighbors (neighbors-of position points-index)]
+  [position points]
+  (let [current-point (get points position)
+        neighbors (neighbors-of position points)]
     (cond (and current-point (#{2 3} (count neighbors)))
           current-point
           (and (not current-point) (= 3 (count neighbors)))
@@ -82,15 +80,15 @@
 (defn next-state
   "Calculate next set of active points."
   [points]
-  (let [points-index (index-points points)
-        bounds (cube-bounds points)]
-    (for [x (apply range (nth bounds 0))
-          y (apply range (nth bounds 1))
-          z (apply range (nth bounds 2))
-          w (apply range (nth bounds 3))
-          :let [point (active-point [x y z w] points-index)]
-          :when point]
-      point)))
+  (let [bounds (cube-bounds points)]
+    (apply sorted-set
+           (for [x (apply range (nth bounds 0))
+                 y (apply range (nth bounds 1))
+                 z (apply range (nth bounds 2))
+                 w (apply range (nth bounds 3))
+                 :let [point (active-point [x y z w] points)]
+                 :when point]
+             point))))
 
 (comment ;; solution
   ;; note this is broken up because of timeout problems
