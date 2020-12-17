@@ -110,7 +110,7 @@
 
 (defn keypress [state event]
   (cond (= :n (:key event))
-        (let [state (update-in state [:points] next-state)]
+        (let [state (time (update-in state [:points] next-state))]
           (println "Points: " (count (:points state)))
           state)
         :else state))
