@@ -35,7 +35,6 @@ number = #'[\\d]+'
   (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
 
   (insta/parses adv-left-parser "1 + 2 * 3 + 4 * 5 + 6")
-  (insta/parse adv-left-parser "2 * 3 + (4 * 5)")
   (insta/parses adv-left-parser "2 * 3 + (4 * 5)"))
 
 (defn read-eval [parser line]
