@@ -1,8 +1,10 @@
 (ns operation-order
   (:require [instaparse.core :as insta]
             [clojure.string :as str]))
-;; See https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/readme and
-;; https://samrat.me/posts/2014-03-15-arithmetic-with-instaparse/ for details on instaparse.
+;; For details on instaparse;
+;; https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/readme
+;; https://samrat.me/posts/2014-03-15-arithmetic-with-instaparse/
+;; https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/instaparse-experimental-features#predefined-whitespace-parsers
 
 ;; Use an ABNF parser generator with left associative rules
 ;; parens precedence is encoded in the grammar
