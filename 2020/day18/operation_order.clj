@@ -8,21 +8,20 @@
 ;; parens precedence is encoded in the grammar
 (def left-parser (insta/parser "P = expr
 <expr> = parens | add | multiply | number
-add = expr <whitespace> <'+'> <whitespace> (number | parens)
-multiply = expr <whitespace> <'*'> <whitespace> (number | parens)
-<parens> = <'('> <whitespace> expr <whitespace> <')'>
-whitespace = #'\\s*'
+add = expr <'+'> (number | parens)
+multiply = expr <'*'> (number | parens)
+<parens> = <'('> expr <')'>
 number = #'[\\d]+'
-"))
+" :auto-whitespace :standard))
 
 ;; Adjust original grammar to ensure addition is a higher precedence
 (def adv-left-parser (insta/parser "P = expr
 <expr> = parens | multiply | add | number
-<parens> = <#'\\(\\s*\\s*'> expr <#'\\s*\\)\\s*'>
-add = (number | parens) (<#'\\s*\\+\\s*'> (add | number | parens))
-multiply = (number | parens | add) (<#'\\s*\\*\\s*'> expr)
+<parens> = <'('> expr <')'>
+add = (number | parens) (<'+'> (add | number | parens))
+multiply = (number | parens | add) (<'*'> expr)
 number = #'[\\d]+'
-"))
+" :auto-whitespace :standard))
 
 (comment
   ;; Verify parses are not ambigious and succeed
