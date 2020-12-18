@@ -11,8 +11,21 @@ whitespace = #'\\s*'
 number = #'[\\d]+'
 "))
 
-(defn read-eval [line]
-  (let [tree (left-parser line)
+(def adv-left-parser (insta/parser "P = expr
+<expr> = parens | multiply | add | number
+<parens> = <#'\\(\\s*\\s*'> expr <#'\\s*\\)\\s*'>
+add = (number | parens) (<#'\\s*\\+\\s*'> (add | number | parens))
+multiply = (number | parens | add) (<#'\\s*\\*\\s*'> expr)
+number = #'[\\d]+'
+"))
+
+(comment
+  (insta/parses adv-left-parser "1 + 2 * 3 + 4 * 5 + 6")
+  (insta/parse adv-left-parser "2 * 3 + (4 * 5)")
+  (insta/parses adv-left-parser "2 * 3 + (4 * 5)"))
+
+(defn read-eval [parser line]
+  (let [tree (parser line)
         transformations
         {:P identity
          :number read-string
@@ -20,22 +33,27 @@ number = #'[\\d]+'
          :multiply *}]
     (insta/transform transformations tree)))
 
-(defn first-star [filename]
+(defn evaluate-sum [parser filename]
   (->> filename
        slurp
        str/split-lines
-       (map read-eval)
+       (map (partial read-eval parser))
        (reduce +)))
 
+(def first-star (partial evaluate-sum left-parser))
+(def second-star (partial evaluate-sum adv-left-parser))
+
 (comment
-  (first-star "example")
-  (first-star "input")
+  (= (first-star "example") 26409)
+  (= (first-star "input") 29839238838303)
+
+  (= (second-star "example") 694125)
+  (= (second-star "input") 201376568795521)
 
   (insta/parses left-parser "1 + 2 * 3")
   (insta/parses left-parser "1 * 2 + 3")
   (insta/parses left-parser "1 + (2 * 3)")
   (insta/parses left-parser "(1 + 2) + 2")
   (insta/parses left-parser "2 * 3 + (4 * 5)")
-  (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
-  )
+  (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"))
 
