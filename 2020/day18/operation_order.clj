@@ -2,7 +2,7 @@
   (:require [instaparse.core :as insta]
             [clojure.string :as str]))
 
-(def parser (insta/parser "P = expr
+(def left-parser (insta/parser "P = expr
 <expr> = parens | add | multiply | number
 add = expr <whitespace> <'+'> <whitespace> (number | parens)
 multiply = expr <whitespace> <'*'> <whitespace> (number | parens)
@@ -12,7 +12,7 @@ number = #'[\\d]+'
 "))
 
 (defn read-eval [line]
-  (let [tree (parser line)
+  (let [tree (left-parser line)
         transformations
         {:P identity
          :number read-string
@@ -20,7 +20,7 @@ number = #'[\\d]+'
          :multiply *}]
     (insta/transform transformations tree)))
 
-(defn process-input [filename]
+(defn first-star [filename]
   (->> filename
        slurp
        str/split-lines
@@ -28,14 +28,14 @@ number = #'[\\d]+'
        (reduce +)))
 
 (comment
-  (process-input "example")
-  (process-input "input")
+  (first-star "example")
+  (first-star "input")
 
-  (insta/parses parser "1 + 2 * 3")
-  (insta/parses parser "1 * 2 + 3")
-  (insta/parses parser "1 + (2 * 3)")
-  (insta/parses parser "(1 + 2) + 2")
-  (insta/parses parser "2 * 3 + (4 * 5)")
-  (insta/parses parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
+  (insta/parses left-parser "1 + 2 * 3")
+  (insta/parses left-parser "1 * 2 + 3")
+  (insta/parses left-parser "1 + (2 * 3)")
+  (insta/parses left-parser "(1 + 2) + 2")
+  (insta/parses left-parser "2 * 3 + (4 * 5)")
+  (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
   )
 
