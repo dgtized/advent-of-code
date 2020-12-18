@@ -1,7 +1,11 @@
 (ns operation-order
   (:require [instaparse.core :as insta]
             [clojure.string :as str]))
+;; See https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/readme and
+;; https://samrat.me/posts/2014-03-15-arithmetic-with-instaparse/ for details on instaparse.
 
+;; Use an ABNF parser generator with left associative rules
+;; parens precedence is encoded in the grammar
 (def left-parser (insta/parser "P = expr
 <expr> = parens | add | multiply | number
 add = expr <whitespace> <'+'> <whitespace> (number | parens)
@@ -11,6 +15,7 @@ whitespace = #'\\s*'
 number = #'[\\d]+'
 "))
 
+;; Adjust original grammar to ensure addition is a higher precedence
 (def adv-left-parser (insta/parser "P = expr
 <expr> = parens | multiply | add | number
 <parens> = <#'\\(\\s*\\s*'> expr <#'\\s*\\)\\s*'>
@@ -34,11 +39,11 @@ number = #'[\\d]+'
 
 (defn read-eval [parser line]
   (let [tree (parser line)
-        transformations
-        {:P identity
-         :number read-string
-         :add +
-         :multiply *}]
+        transformations {:P identity ;; lift evaluation out of tree
+                         :number read-string ;; parse "6" => 6
+                         :add +
+                         :multiply *}]
+    ;; Applies functions to matching tokens from bottom up
     (insta/transform transformations tree)))
 
 (defn evaluate-sum [parser filename]
@@ -57,4 +62,3 @@ number = #'[\\d]+'
 
   (= (second-star "example") 694125)
   (= (second-star "input") 201376568795521))
-
