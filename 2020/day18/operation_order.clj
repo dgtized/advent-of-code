@@ -20,6 +20,14 @@ number = #'[\\d]+'
 "))
 
 (comment
+  ;; Verify parses are not ambigious and succeed
+  (insta/parses left-parser "1 + 2 * 3")
+  (insta/parses left-parser "1 * 2 + 3")
+  (insta/parses left-parser "1 + (2 * 3)")
+  (insta/parses left-parser "(1 + 2) + 2")
+  (insta/parses left-parser "2 * 3 + (4 * 5)")
+  (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
+
   (insta/parses adv-left-parser "1 + 2 * 3 + 4 * 5 + 6")
   (insta/parse adv-left-parser "2 * 3 + (4 * 5)")
   (insta/parses adv-left-parser "2 * 3 + (4 * 5)"))
@@ -48,12 +56,5 @@ number = #'[\\d]+'
   (= (first-star "input") 29839238838303)
 
   (= (second-star "example") 694125)
-  (= (second-star "input") 201376568795521)
-
-  (insta/parses left-parser "1 + 2 * 3")
-  (insta/parses left-parser "1 * 2 + 3")
-  (insta/parses left-parser "1 + (2 * 3)")
-  (insta/parses left-parser "(1 + 2) + 2")
-  (insta/parses left-parser "2 * 3 + (4 * 5)")
-  (insta/parses left-parser "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"))
+  (= (second-star "input") 201376568795521))
 
