@@ -2,6 +2,12 @@
   (:require [instaparse.core :as insta]
             [clojure.string :as str]))
 
+;; Had to find some help on this, original attempt in Ruby building regex didn't
+;; work, saw that folks were re-using instaparse so decided to try that, which
+;; worked for part1, then swapped rules for part2 with some complicated logic
+;; and it didn't work, so just went back to raw string replacement and somehow
+;; that was a success. A lot of black-box guessing on this one.
+
 (defn count-valid [file change-rules]
   (let [[rules messages] (map str/split-lines (str/split (slurp file) #"\n\n"))
         fixed-rules (replace change-rules rules)
