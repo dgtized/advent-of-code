@@ -10,12 +10,6 @@ class Rule
     choices.all? { |x| x.kind_of?(String) } && choices.size <= n
   end
 
-  def identity?
-    !terminal? &&
-      choices.size == 1 && choices.first.kind_of?(Array) &&
-      choices.first.size == 1 && choices.first.first.is_a?(Integer)
-  end
-
   def collapse
     if terminal?
       self
@@ -53,12 +47,6 @@ class Rule
 end
 
 def simplify(rules)
-  while identity = rules.find { |r| r.identity? }
-    rules.delete(identity)
-    rules = rules.map { |r| r.substitute(Rule.new(identity.id, identity.choices.first.first)) }
-    rules = rules.map(&:collapse)
-  end
-
   while terminal = rules.find { |r| r.terminal?(1) }
     break if rules.size == 1
     rules.delete(terminal)
