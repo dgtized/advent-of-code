@@ -50,8 +50,7 @@ def simplify(rules)
   while terminal = rules.find { |r| r.terminal?(1) }
     break if rules.size == 1
     rules.delete(terminal)
-    rules = rules.map { |r| r.substitute(terminal) }
-    rules = rules.map(&:collapse)
+    rules = rules.map { |r| r.substitute(terminal).collapse }
   end
 
   rules
@@ -80,7 +79,9 @@ def parse(file)
 
   messages = lines.drop(rules.size + 1).map(&:chomp)
 
+  puts "Initial rules: %d" % [rules.size]
   rules = simplify(rules.dup)
+  puts "Simplified rules: %d" % [rules.size]
 
   if(rules.size == 1)
     choices = rules.first.choices
