@@ -61,10 +61,12 @@ class Rule
 end
 
 def simplify(rules)
-  while terminal = rules.find { |r| r.terminal?(10_000000) }
-    break if rules.size == 1
-    rules.delete(terminal)
-    rules = rules.map { |r| r.substitute(terminal) }
+  1.times do |depth|
+    while terminal = rules.find { |r| r.terminal?(depth) }
+      break if rules.size == 1
+      rules.delete(terminal)
+      rules = rules.map { |r| r.substitute(terminal) }
+    end
   end
 
   rules
