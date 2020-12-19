@@ -25,16 +25,17 @@
         valid (remove (fn [msg] (insta/failure? (insta/parse parser msg))) messages)]
     (count valid)))
 
+(def fixes ["8: 42 | 42 8"
+            "11: 42 31 | 42 11 31"])
+
 (comment
   (= 2 (count-valid "example" []))
   (= 3 (count-valid "example2" []))
   (= 147 (count-valid "input" []))
 
-  (= (count-valid "example2" ["8: 42 | 42 8"
-                              "11: 42 31 | 42 11 31"])
+  (= (count-valid "example2" fixes)
      12)
 
-  (count-valid "input" ["8: 42 | 42 8"
-                        "11: 42 31 | 42 11 31"])
+  (count-valid "input" fixes)
   )
 
