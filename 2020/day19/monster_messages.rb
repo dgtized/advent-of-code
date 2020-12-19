@@ -6,12 +6,8 @@ class Rule
     @id, @choices = id, choices
   end
 
-  def terminal?
-    choices.kind_of?(String)
-  end
-
-  def terminal_choice?
-    choices.size < 3 && choices.all? { |x| x.kind_of?(String) }
+  def terminal?(n = 1)
+    choices.all? { |x| x.kind_of?(String) } && choices.size <= n
   end
 
   def identity?
@@ -37,20 +33,12 @@ class Rule
     end
   end
 
-  def lift
-    if choices.kind_of?(Array) && choices.size == 1 && choices.first.kind_of?(String)
-      Rule.new(id, choices.first)
-    else
-      self
-    end
-  end
-
-  def alternate(rule)
+  def substitute(rule)
     if choices.kind_of?(Array)
       alts = []
       choices.each do |path|
         if(path.kind_of?(Array) && path.include?(rule.id))
-          rule.choices.each do |rpath|
+          Array(rule.choices).each do |rpath|
             alts << path.map { |x| x == rule.id ? rpath : x }
           end
         else
@@ -62,49 +50,20 @@ class Rule
       self
     end
   end
-
-  def substitute(rule)
-    if choices.kind_of?(Array)
-      Rule.new(
-        id,
-        choices.map do |path|
-          if(path.kind_of?(Array))
-            path.map do |x|
-              if(x == rule.id)
-                rule.choices
-              else
-                x
-              end
-            end
-          else
-            path
-          end
-        end
-      )
-    else
-      self
-    end
-  end
 end
 
 def simplify(rules)
   while identity = rules.find { |r| r.identity? }
     rules.delete(identity)
     rules = rules.map { |r| r.substitute(Rule.new(identity.id, identity.choices.first.first)) }
-    rules = rules.map(&:collapse).map(&:lift)
+    rules = rules.map(&:collapse)
   end
 
-  while terminal = rules.find { |r| r.terminal? } do
-    rules.delete(terminal)
-    rules = rules.map { |r| r.substitute(terminal) }
-    rules = rules.map(&:collapse).map(&:lift)
-  end
-
-  while terminal = rules.find { |r| r.terminal_choice? }
+  while terminal = rules.find { |r| r.terminal?(1) }
     break if rules.size == 1
     rules.delete(terminal)
-    rules = rules.map { |r| r.alternate(terminal) }
-    rules = rules.map(&:collapse).map(&:lift)
+    rules = rules.map { |r| r.substitute(terminal) }
+    rules = rules.map(&:collapse)
   end
 
   rules
@@ -123,7 +82,7 @@ def parse(file)
   rules = lines.take_while { |line| line.match(/\d+:/) }.map do |line|
     m = line.match(/(\d+): (.*)$/)
     choices = if terminal = m[2].match(/"(.)"/)
-      terminal[1]
+      [terminal[1]]
     else
       m[2].split("|").map { |r| r.chomp.split(" ").map(&:to_i)}
     end
@@ -145,16 +104,12 @@ def parse(file)
   end
 
   count = 0
-  lengths = Hash.new { |h,k| h[k] = 0 }
   messages.each do |msg|
-    lengths[msg.length] += 1
     if matching?(rules, msg)
       puts msg
       count += 1
     end
   end
-
-  p lengths
 
   puts "First Star: #{count}"
 end
