@@ -46,7 +46,8 @@
 
 (defn find-corners [tiles]
   (let [matches (match-all-tiles tiles)]
-    (filter (fn [[k v]] (= 2 (count v))) (group-by first matches))))
+    (filter (fn [[k v]] (= 2 (count v)))
+            (group-by first matches))))
 
 (defn first-star [tiles]
   (let [corner-ids (map first (find-corners tiles))]
