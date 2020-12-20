@@ -25,12 +25,12 @@ problems.
 
 ```
 Perl (1), AWK (2,5), C (3), Ruby (4), C++ (5), Bash (6),
-Clojure (7,16,18), Elixir (8), Scala (9), Emacs Lisp (10),
+Clojure (7,16,18,19), Elixir (8), Scala (9), Emacs Lisp (10),
 Java (11), Go (12), Javascript (13.1), Common-Lisp (13.2, 15.1),
 Racket (14, 15.2), Clojurescript (17)
 ```
 
-Note that Clojure solutions for 7 and 18 use
+Note that Clojure solutions for 7 and 18,19 use
 [`core.logic`](https://github.com/clojure/core.logic), and
 [`instaparse`](https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/readme)
 respectively.
