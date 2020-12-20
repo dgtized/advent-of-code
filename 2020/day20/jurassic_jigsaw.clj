@@ -44,10 +44,18 @@
                 tile2 tiles]
             (match-any-edges tile1 tile2))))
 
-(defn find-corners [tiles]
+(defn tiles-with-n-links [tiles n]
   (let [matches (match-all-tiles tiles)]
-    (filter (fn [[k v]] (= 2 (count v)))
-            (group-by first matches))))
+    (->> matches
+         (group-by first)
+         (map (fn [[k v]] [k (mapv rest v)]))
+         (filter (fn [[k v]] (= n (count v)))))))
+
+(defn find-corners [tiles]
+  (tiles-with-n-links tiles 2))
+
+(defn find-edges [tiles]
+  (tiles-with-n-links tiles 3))
 
 (defn first-star [tiles]
   (let [corner-ids (map first (find-corners tiles))]
@@ -58,9 +66,13 @@
   (match-all-tiles (tiles "input"))
 
   (find-corners (tiles "example"))
+  (find-edges (tiles "example"))
 
   (= 20899048083289 (first-star (tiles "example")))
   (= 54755174472007 (first-star (tiles "input")))
+
+  (find-corners (tiles "input"))
+  (find-edges (tiles "input"))
 
   (map count-pixels
        (edges ["..##.#..#."
