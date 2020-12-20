@@ -48,18 +48,21 @@
   (let [matches (match-all-tiles tiles)]
     (->> matches
          (group-by first)
-         (map (fn [[k v]] [k (mapv rest v)]))
+         (map (fn [[k v]] [k (into {} (map #(vec (rest %)) v))]))
          (filter (fn [[k v]] (= n (count v)))))))
 
 (defn find-corners [tiles]
-  (tiles-with-n-links tiles 2))
+  (into {} (tiles-with-n-links tiles 2)))
 
 (defn find-edges [tiles]
-  (tiles-with-n-links tiles 3))
+  (into {} (tiles-with-n-links tiles 3)))
 
 (defn first-star [tiles]
-  (let [corner-ids (map first (find-corners tiles))]
+  (let [corner-ids (keys (find-corners tiles))]
     (apply * corner-ids)))
+
+;; (defn edge-chain [tiles]
+;;   (let [[corners ]]))
 
 (comment
   (match-all-tiles (tiles "example"))
