@@ -10,27 +10,9 @@
     [(str/split allergens #", ")
      (str/split ingredients #" ")]))
 
-(defn allergens-map [input]
-  (apply merge-with set/union
-         (for [[allergens ingredients] input
-               allergy allergens]
-           {allergy (set ingredients)})))
-
-(defn ingredients-freq [input]
-  (apply merge-with +
-         (for [[_ ingredients] input]
-           (frequencies ingredients))))
-
-(defn ingredients-map [input]
-  (apply merge-with set/union
-         (for [[allergens ingredients] input
-               ingredient ingredients]
-           {ingredient (set allergens)})))
-
 (defn probable-ingredients [input]
   (reduce (fn [known [allergens ingredients]]
             (reduce (fn [prove allergen]
-                      (println [prove allergen])
                       (update prove allergen
                               (fn [v] (if (nil? v) (set ingredients)
                                          (set/intersection (set ingredients) v)))))
@@ -47,17 +29,7 @@
                        (apply set/union))]
     (count (remove probables (mapcat second input)))))
 
-(defn combined [filename]
-  (let [input (parse filename)]
-    [(map (juxt first (comp sort second)) input)
-     (allergens-map input)
-     (ingredients-map input)]))
-
 (comment
-  (allergens-map (parse "example"))
-  (sort-by second (ingredients-freq (parse "example")))
-  (combined "example")
-
   (probable-ingredients (parse "example"))
   (probable-ingredients (parse "input"))
 
