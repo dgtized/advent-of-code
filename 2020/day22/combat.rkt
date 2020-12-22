@@ -67,11 +67,11 @@
 (module+ test
   (require rackunit)
   (check-equal? '(4 0) (hash-decks '((1 2) ())))
-  (check-equal? '(0 4) (hash-decks '(() (1 2)))))
+  (check-equal? '(0 4) (hash-decks '(() (1 2))))
+  (check-equal? 306 (score (run-game (parse-decks "example"))))
+  (check-equal? 32472 (score (run-game (parse-decks "input"))))
 
-;; (= 306 (score (run-game (parse-decks "example"))))
-;; (= 32472 (score (run-game (parse-decks "input"))))
+  (check-equal? 291 (score (recursive-game (parse-decks "example") (list->set '()))))
+  (check-equal? '((43 19) (2 29 14)) (recursive-game (parse-decks "infinite") (list->set '())))
+  (check-equal? 36463 (score (recursive-game (parse-decks "input") (list->set '())))))
 
-;; (= 291 (score (recursive-game (parse-decks "example") (list->set '()))))
-;; (= 273 (score (recursive-game (parse-decks "infinite") (list->set '()))))
-;; (score (recursive-game (parse-decks "input") (list->set '())))
