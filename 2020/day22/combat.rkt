@@ -21,14 +21,6 @@
       decks
       (run-game (normal-round decks))))
 
-(define (score-deck deck)
-  (for/sum ([i (range 1 (+ 1 (length deck)))]
-            [v (reverse deck)])
-    (* i v)))
-
-(define (deck-hash decks)
-  (score-deck (flatten decks)))
-
 (define (recursive-game decks seen)
   (define (recursive-round decks seen)
     (match-let* (((list p1 p2) decks)
@@ -57,12 +49,12 @@
 
 (define (score decks)
   (let ((winner (flatten decks)))
-    (score-deck winner)))
+    (for/sum ([i (range 1 (+ 1 (length winner)))]
+              [v (reverse winner)])
+      (* i v))))
 
 ;; (= 306 (score (run-game (parse-decks "example"))))
 ;; (= 32472 (score (run-game (parse-decks "input"))))
-
-;; (set-member? (list->set '(7254)) (deck-hash (parse-decks "example")))
 
 ;; (= 291 (score (recursive-game (parse-decks "example") (list->set '()))))
 ;; (= 273 (score (recursive-game (parse-decks "infinite") (list->set '()))))
