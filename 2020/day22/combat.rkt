@@ -55,11 +55,9 @@
 (define (recursive-game decks seen)
   (let ((deck-hash (hash-decks decks)))
     (cond ((or (ormap empty? decks))
-           ;; (println (list "win by empty" decks))
            decks)
           ((set-member? seen deck-hash)
-           ;; (println (list "player 1 wins by previous" decks))
-           decks)
+           (list (first decks) '()))
           (else
            (let ((new-deck (recursive-round decks seen)))
              (recursive-game new-deck (set-add seen deck-hash)))))))
@@ -72,6 +70,7 @@
   (check-equal? 32472 (score (run-game (parse-decks "input"))))
 
   (check-equal? 291 (score (recursive-game (parse-decks "example") (list->set '()))))
-  (check-equal? '((43 19) (2 29 14)) (recursive-game (parse-decks "infinite") (list->set '())))
+  (check-equal? '((43 19) ()) (recursive-game (parse-decks "infinite") (list->set '())))
+  (check-equal? 105 (score '((43 19) ())))
   (check-equal? 36463 (score (recursive-game (parse-decks "input") (list->set '())))))
 
