@@ -10,12 +10,9 @@ struct node {
 
 int ncups = 9;
 
-struct node* create(int size) {
+struct node* create(int size, int sequence[]) {
   struct node *t;
   struct node *head;
-
-  /* int sequence[] = {3,8,9,1,2,5,4,6,7}; */
-  int sequence[] = {4,6,7,5,2,8,1,9,3};
 
   head = (struct node*)malloc(sizeof(struct node));
   t = head;
@@ -90,8 +87,8 @@ struct node* crab_cups(struct node* current) {
   return current;
 }
 
-int main(void) {
-  struct node* initial = create(ncups);
+void first_star(int sequence[]) {
+  struct node* initial = create(ncups, sequence);
   struct node* current = initial;
   int iterations = 1;
   while(iterations <= 100) {
@@ -104,4 +101,9 @@ int main(void) {
 
   struct node* one = find(current, 1);
   print_from(one->next, 8);
+}
+
+int main(void) {
+  first_star((int[]){3,8,9,1,2,5,4,6,7});
+  first_star((int[]){4,6,7,5,2,8,1,9,3});
 }
