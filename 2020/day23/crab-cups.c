@@ -8,6 +8,8 @@ struct node {
   struct node *next;
 };
 
+int ncups = 9;
+
 struct node* create(int size) {
   struct node *t;
   struct node *head;
@@ -49,10 +51,18 @@ struct node* take(struct node* current) {
   return head;
 }
 
-struct node* select_destination(struct node* current, int value) {
+struct node* select_destination(struct node* current, int value, int m1, int m2, int m3) {
   struct node* p = current->next;
 
-  while(p->value != value) {
+  int check = value;
+
+  if(check < 1) check = ncups;
+  while(check == m1 || check == m2 || check == m3) {
+    check--;
+    if(check < 1) check = ncups;
+  }
+
+  while(p->value != check) {
     p = p->next;
   }
 
@@ -60,20 +70,30 @@ struct node* select_destination(struct node* current, int value) {
 }
 
 struct node* crab_cups(struct node* current) {
-  //int dest = current->value - 1;
+  struct node* move = take(current);
+
+  struct node* dest = select_destination(
+    current, current->value - 1,
+    move->value, move->next->value, move->next->next->value);
+
+  printf("dest: %d\npick up: ", dest->value);
+  print_from(move, 10);
+
+  struct node *after = dest->next;
+  dest->next = move;
+  move->next->next->next = after;
 
   return current;
 }
 
 int main(void) {
-  struct node* initial = create(9);
+  struct node* initial = create(ncups);
   struct node* current = initial;
-  print_from(current, 20);
-
-  struct node* move = take(current);
-  print_from(current, 20);
-  print_from(move, 10);
-
-  struct node* dest = select_destination(current, current->value - 1);
-  print_from(dest, 10);
+  int iterations = 1;
+  while(iterations <= 10) {
+    printf("%4d - cups: ", iterations);
+    print_from(initial, 9);
+    current = crab_cups(current)->next;
+    iterations++;
+  };
 }
