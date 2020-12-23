@@ -24,10 +24,10 @@ problems.
 ## 2020
 
 ```
-Perl (1), AWK (2,5), C (3), Ruby (4), C++ (5), Bash (6),
+Perl (1), AWK (2,5), C (3,23.2), Ruby (4), C++ (5), Bash (6),
 Clojure (7,16,18,19,20,21), Elixir (8), Scala (9), Emacs Lisp (10),
 Java (11), Go (12), Javascript (13.1), Common-Lisp (13.2, 15.1),
-Racket (14, 15.2, 22), Clojurescript (17)
+Racket (14, 15.2, 22,23.1), Clojurescript (17)
 ```
 
 Note that Clojure solutions for 7 and 18,19 use
