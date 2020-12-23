@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// usage: gcc crab-cups.c -o crab-cups && ./crab-cups
+/* usage: gcc crab-cups.c -o crab-cups && ./crab-cups */
 
 struct node {
   int value;
@@ -14,7 +14,8 @@ struct node* create(int size) {
   struct node *t;
   struct node *head;
 
-  int sequence[] = {3,8,9,1,2,5,4,6,7};
+  /* int sequence[] = {3,8,9,1,2,5,4,6,7}; */
+  int sequence[] = {4,6,7,5,2,8,1,9,3};
 
   head = (struct node*)malloc(sizeof(struct node));
   t = head;
@@ -51,9 +52,16 @@ struct node* take(struct node* current) {
   return head;
 }
 
-struct node* select_destination(struct node* current, int value, int m1, int m2, int m3) {
+struct node* find(struct node* current, int value) {
   struct node* p = current->next;
+  while(p->value != value) {
+    p = p->next;
+  }
 
+  return p;
+}
+
+struct node* select_destination(struct node* current, int value, int m1, int m2, int m3) {
   int check = value;
 
   if(check < 1) check = ncups;
@@ -62,11 +70,7 @@ struct node* select_destination(struct node* current, int value, int m1, int m2,
     if(check < 1) check = ncups;
   }
 
-  while(p->value != check) {
-    p = p->next;
-  }
-
-  return p;
+  return find(current, check);
 }
 
 struct node* crab_cups(struct node* current) {
@@ -76,8 +80,8 @@ struct node* crab_cups(struct node* current) {
     current, current->value - 1,
     move->value, move->next->value, move->next->next->value);
 
-  printf("dest: %d\npick up: ", dest->value);
-  print_from(move, 10);
+  /* printf("dest: %d\npick up: ", dest->value); */
+  /* print_from(move, 10); */
 
   struct node *after = dest->next;
   dest->next = move;
@@ -90,10 +94,14 @@ int main(void) {
   struct node* initial = create(ncups);
   struct node* current = initial;
   int iterations = 1;
-  while(iterations <= 10) {
-    printf("%4d - cups: ", iterations);
-    print_from(initial, 9);
+  while(iterations <= 100) {
+    /* printf("\n-- move %d --\ncups: ", iterations); */
+    /* print_from(current, 9); */
+    /* printf("current: %d\n", current->value); */
     current = crab_cups(current)->next;
     iterations++;
   };
+
+  struct node* one = find(current, 1);
+  print_from(one->next, 8);
 }
