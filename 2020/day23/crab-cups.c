@@ -54,8 +54,6 @@ struct node* find(struct node* current, int value) {
     p = p->next;
     i++;
   }
-  printf("Finding %d took %d cycles ", value, i);
-  print_from(p, 9);
 
   return p;
 }
@@ -81,7 +79,7 @@ struct node* crab_cups(struct node* current, int ncups) {
     move->value, move->next->value, move->next->next->value);
 
   /* printf("dest: %d\npick up: ", dest->value); */
-  print_from(move, 10);
+  /* print_from(move, 10); */
 
   struct node *after = dest->next;
   dest->next = move;
@@ -99,7 +97,7 @@ struct node* run_sim(struct node* current, int ncups, int count) {
     /* printf("\n-- move %d --\ncups: ", iterations); */
     /* print_from(current, 9); */
     /* printf("current: %d\n", current->value); */
-    print_from(current, 8);
+    /* print_from(current, 8); */
     current = crab_cups(current, ncups)->next;
     iterations++;
   };
