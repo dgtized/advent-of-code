@@ -59,6 +59,7 @@ struct node* find(struct node* current, int value) {
 }
 
 struct node* select_destination(struct node* current, int value, int ncups,
+                                struct node** index,
                                 int m1, int m2, int m3) {
   int check = value;
 
@@ -68,14 +69,14 @@ struct node* select_destination(struct node* current, int value, int ncups,
     if(check < 1) check = ncups;
   }
 
-  return find(current, check);
+  return index[check-1];
 }
 
-struct node* crab_cups(struct node* current, int ncups) {
+struct node* crab_cups(struct node* current, int ncups, struct node** index) {
   struct node* move = take(current);
 
   struct node* dest = select_destination(
-    current, current->value - 1, ncups,
+    current, current->value - 1, ncups, index,
     move->value, move->next->value, move->next->next->value);
 
   /* printf("dest: %d\npick up: ", dest->value); */
@@ -89,16 +90,21 @@ struct node* crab_cups(struct node* current, int ncups) {
 }
 
 struct node* run_sim(struct node* current, int ncups, int count) {
+  struct node** index = malloc(ncups * sizeof(struct node *));
+  index[current->value-1] = current;
+  struct node* p = current->next;
+  while(p != current) {
+    index[p->value-1] = p;
+    p = p->next;
+  }
+
   int iterations = 1;
   while(iterations <= count) {
-    if(iterations % 1000 == 0) {
-      fprintf(stderr, ".");
-    }
     /* printf("\n-- move %d --\ncups: ", iterations); */
     /* print_from(current, 9); */
     /* printf("current: %d\n", current->value); */
     /* print_from(current, 8); */
-    current = crab_cups(current, ncups)->next;
+    current = crab_cups(current, ncups, index)->next;
     iterations++;
   };
 
@@ -120,11 +126,15 @@ void first_star(int sequence[]) {
 void second_star(int sequence[]) {
   int ncups = 1000000;
   struct node* current = create(ncups,sequence);
+
   current = run_sim(current, ncups, 10000000);
 
   struct node* one = find(current, 1);
   printf("Second Star: ");
   print_from(one, 4);
+
+  unsigned long result = (unsigned long)one->next->value * one->next->next->value;
+  printf("Result: %ld\n", result);
 }
 
 int main(void) {
