@@ -115,6 +115,7 @@ void first_star(int sequence[]) {
   current = run_sim(initial, ncups, 100);
 
   struct node* one = find(current, 1);
+  printf("First Star: ");
   print_from(one->next, 8);
 }
 
@@ -124,6 +125,7 @@ void second_star(int sequence[]) {
   current = run_sim(current, ncups, 10000000);
 
   struct node* one = find(current, 1);
+  printf("Second Star: ");
   print_from(one, 4);
 }
 
