@@ -8,6 +8,9 @@ struct node {
   struct node *next;
 };
 
+/* creates a cyclic linked list
+seeds value from sequence if available, otherwise fills in up to size.
+*/
 struct node* create(int size, int sequence[]) {
   struct node *t;
   struct node *head;
@@ -17,6 +20,8 @@ struct node* create(int size, int sequence[]) {
 
   for(int i = 0; i < size; i++) {
     t->value = i < 9 ? sequence[i] : i + 1;
+
+    /* last element in the list points back at the start */
     if(i < size - 1) {
       t->next = (struct node*)malloc(sizeof(struct node));
     } else {
@@ -28,6 +33,7 @@ struct node* create(int size, int sequence[]) {
   return head;
 }
 
+/* print the next N, non-null elements in the cyclic linked list */
 void print_from(struct node *p, int count) {
   while(p && count > 0) {
     printf("%d ", p->value);
@@ -37,6 +43,7 @@ void print_from(struct node *p, int count) {
   printf("\n");
 }
 
+/* remove the next 3 elements from the loop */
 struct node* take(struct node* current) {
   struct node* head = current->next;
   struct node* lookahead = current->next->next->next;
@@ -47,6 +54,7 @@ struct node* take(struct node* current) {
   return head;
 }
 
+/* linear scan for next element in the cyclic list with matching value */
 struct node* find(struct node* current, int value) {
   int i = 0;
   struct node* p = current->next;
@@ -58,8 +66,8 @@ struct node* find(struct node* current, int value) {
   return p;
 }
 
-struct node* select_destination(struct node* current, int value, int ncups,
-                                struct node** index,
+/* lookup destination node from index, skipping m1-m3 and looping back */
+struct node* select_destination(int value, int ncups, struct node** index,
                                 int m1, int m2, int m3) {
   int check = value;
 
@@ -76,12 +84,13 @@ struct node* crab_cups(struct node* current, int ncups, struct node** index) {
   struct node* move = take(current);
 
   struct node* dest = select_destination(
-    current, current->value - 1, ncups, index,
+    current->value - 1, ncups, index,
     move->value, move->next->value, move->next->next->value);
 
   /* printf("dest: %d\npick up: ", dest->value); */
   /* print_from(move, 10); */
 
+  /* Put the 3 nodes in sequence back in after destination */
   struct node *after = dest->next;
   dest->next = move;
   move->next->next->next = after;
@@ -90,6 +99,7 @@ struct node* crab_cups(struct node* current, int ncups, struct node** index) {
 }
 
 struct node* run_sim(struct node* current, int ncups, int count) {
+  /* build an index from node->value-1 to node for fast find */
   struct node** index = malloc(ncups * sizeof(struct node *));
   index[current->value-1] = current;
   struct node* p = current->next;
