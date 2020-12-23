@@ -8,8 +8,6 @@ struct node {
   struct node *next;
 };
 
-int ncups = 9;
-
 struct node* create(int size, int sequence[]) {
   struct node *t;
   struct node *head;
@@ -50,15 +48,20 @@ struct node* take(struct node* current) {
 }
 
 struct node* find(struct node* current, int value) {
+  int i = 0;
   struct node* p = current->next;
   while(p->value != value) {
     p = p->next;
+    i++;
   }
+  printf("Finding %d took %d cycles ", value, i);
+  print_from(p, 9);
 
   return p;
 }
 
-struct node* select_destination(struct node* current, int value, int m1, int m2, int m3) {
+struct node* select_destination(struct node* current, int value, int ncups,
+                                int m1, int m2, int m3) {
   int check = value;
 
   if(check < 1) check = ncups;
@@ -70,15 +73,15 @@ struct node* select_destination(struct node* current, int value, int m1, int m2,
   return find(current, check);
 }
 
-struct node* crab_cups(struct node* current) {
+struct node* crab_cups(struct node* current, int ncups) {
   struct node* move = take(current);
 
   struct node* dest = select_destination(
-    current, current->value - 1,
+    current, current->value - 1, ncups,
     move->value, move->next->value, move->next->next->value);
 
   /* printf("dest: %d\npick up: ", dest->value); */
-  /* print_from(move, 10); */
+  print_from(move, 10);
 
   struct node *after = dest->next;
   dest->next = move;
@@ -87,23 +90,47 @@ struct node* crab_cups(struct node* current) {
   return current;
 }
 
-void first_star(int sequence[]) {
-  struct node* initial = create(ncups, sequence);
-  struct node* current = initial;
+struct node* run_sim(struct node* current, int ncups, int count) {
   int iterations = 1;
-  while(iterations <= 100) {
+  while(iterations <= count) {
+    if(iterations % 1000 == 0) {
+      fprintf(stderr, ".");
+    }
     /* printf("\n-- move %d --\ncups: ", iterations); */
     /* print_from(current, 9); */
     /* printf("current: %d\n", current->value); */
-    current = crab_cups(current)->next;
+    print_from(current, 8);
+    current = crab_cups(current, ncups)->next;
     iterations++;
   };
+
+  return current;
+}
+
+void first_star(int sequence[]) {
+  int ncups = 9;
+  struct node* initial = create(ncups, sequence);
+  struct node* current = initial;
+
+  current = run_sim(initial, ncups, 100);
 
   struct node* one = find(current, 1);
   print_from(one->next, 8);
 }
 
+void second_star(int sequence[]) {
+  int ncups = 1000000;
+  struct node* current = create(ncups,sequence);
+  current = run_sim(current, ncups, 10000000);
+
+  struct node* one = find(current, 1);
+  print_from(one, 4);
+}
+
 int main(void) {
   first_star((int[]){3,8,9,1,2,5,4,6,7});
   first_star((int[]){4,6,7,5,2,8,1,9,3});
+
+  second_star((int[]){3,8,9,1,2,5,4,6,7});
+  second_star((int[]){4,6,7,5,2,8,1,9,3});
 }
