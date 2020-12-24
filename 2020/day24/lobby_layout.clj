@@ -68,11 +68,9 @@
   "For every cell in the grid, add all of it's neighboring cells as white if they
   are not yet specified."
   [grid]
-  (->> (keys grid)
-       (mapcat neighboring-coordinates)
-       distinct
-       (reduce (fn [grid coord] (assoc-if-missing grid coord true))
-               grid)))
+  (reduce (fn [grid coord] (assoc-if-missing grid coord true))
+          grid
+          (distinct (mapcat neighboring-coordinates (keys grid)))))
 
 (defn count-neighbors
   "For a coordinate, count all the neighboring black tiles."
