@@ -20,10 +20,17 @@
 (defn vector-add [[x0 y0] [x1 y1]]
   [(+ x0 x1) (+ y0 y1)])
 
-(defn tile-coord [directions]
+(defn tile-coord
+  "Add up the axial coordinates from origin, following the directions."
+  [directions]
   (reduce vector-add [0 0] (map follow directions)))
 
-(defn update-grid [grid positions]
+(defn update-grid
+  "Toggle every position listed in the grid.
+
+  Grid is of form {[x y] true|false} where false is black/off, and true is
+  white/on. If tiles are missing they are presumed as true."
+  [grid positions]
   (loop [grid grid
          positions positions]
     (if (empty? positions)
@@ -31,38 +38,52 @@
       (recur (update grid (first positions) (fnil not true))
              (rest positions)))))
 
-(defn calculate-grid [filename]
+(defn calculate-grid
+  "Initialize a grid from tile-coordinate flips in a file."
+  [filename]
   (update-grid {} (map tile-coord (parse filename))))
 
-(defn first-star [grid]
+(defn first-star
+  "Count all black tiles in a given grid."
+  [grid]
   (-> grid
       vals
       frequencies
       (get false)))
 
-(defn neighboring-coordinates [position]
+(defn neighboring-coordinates
+  "List of coordinates of all neighboring tiles"
+  [position]
   (map (comp (partial vector-add position) follow)
        ["e" "se" "sw" "w" "nw" "ne"]))
 
-(defn assoc-if-missing [map key value]
+(defn assoc-if-missing
+  "Only assoc if the key is missing otherwise do nothing."
+  [map key value]
   (if (contains? map key)
     map
     (assoc map key value)))
 
-(defn add-missing-neighbors [grid]
+(defn add-missing-neighbors
+  "For every cell in the grid, add all of it's neighboring cells as white if they
+  are not yet specified."
+  [grid]
   (->> (keys grid)
        (mapcat neighboring-coordinates)
        distinct
        (reduce (fn [grid coord] (assoc-if-missing grid coord true))
                grid)))
 
-(defn count-neighbors [grid coord]
+(defn count-neighbors
+  "For a coordinate, count all the neighboring black tiles."
+  [grid coord]
   (get (frequencies (map (fn [p] (get grid p true))
                          (neighboring-coordinates coord)))
        false 0))
 
-(defn grid-step [grid]
-  ;; (println (first-star grid))
+(defn grid-step
+  "Update every grid cell by determining it's value for the next cycle."
+  [grid]
   (into {}
         (for [[coord value] (add-missing-neighbors grid)
               :let [black (count-neighbors grid coord)]]
@@ -73,7 +94,9 @@
                 :else
                 [coord value]))))
 
-(defn second-star [grid n]
+(defn second-star
+  "Apply grid-step to grid, N times and calculate the number of black tiles."
+  [grid n]
   (first-star (last (take (+ 1 n) (iterate grid-step grid)))))
 
 (comment
