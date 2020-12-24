@@ -17,11 +17,11 @@
     "nw" [0 -1]
     "ne" [1 -1]))
 
-(defn tile-coord [directions]
-  (reduce vector-add [0 0] (map follow directions)))
-
 (defn vector-add [[x0 y0] [x1 y1]]
   [(+ x0 x1) (+ y0 y1)])
+
+(defn tile-coord [directions]
+  (reduce vector-add [0 0] (map follow directions)))
 
 (defn update-grid [grid positions]
   (loop [grid grid
