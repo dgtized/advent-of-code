@@ -31,12 +31,15 @@
       (recur (update grid (first positions) (fnil not true))
              (rest positions)))))
 
-(defn first-star [positions]
-  (-> (update-grid {} positions)
+(defn calculate-grid [filename]
+  (update-grid {} (map tile-coord (parse filename))))
+
+(defn first-star [grid]
+  (-> grid
       vals
       frequencies
       (get false)))
 
 (comment
-  (first-star (map tile-coord (parse "example")))
-  (first-star (map tile-coord (parse "input"))))
+  (first-star (calculate-grid "example"))
+  (first-star (calculate-grid "input")))
