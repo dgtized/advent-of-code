@@ -271,7 +271,7 @@
                                   (for [[offset m] hits
                                         :let [size (count m)
                                               match (subs upper-row offset (+ offset size))]
-                                        :when (= \# (nth match (dec size)))]
+                                        :when (= \# (nth match (- size 2)))]
                                     [offset match]))]
            :when (and (seq lower-hits)
                       (seq upper-hits))]
@@ -320,13 +320,13 @@
   (find-monsters example)
   (find-monsters input)
 
-  (find-monsters (flip-x (rotate-left (show-image 12 (combine-image (tiles "input"))))))
+  (= \# (nth (first monster) 18))
 
   (= 273 (count-rough-water-in-habitat example))
 
-  ;; This is wrong, says it's too low, suggesting I should be matching more then
-  ;; 5 sea monsters?
-  (= 1842 (count-rough-water-in-habitat input))
+  ;; This is wrong, says it's too high, suggesting I should be matching more then
+  ;; 14 sea monsters?
+  (= 1707 (count-rough-water-in-habitat input))
 
   (map count-pixels
        (vals (edges ["..##.#..#."
