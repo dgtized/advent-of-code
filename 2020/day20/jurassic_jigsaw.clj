@@ -177,11 +177,6 @@
 
 (defn plan->operation [plan]
   (cond
-    (and (or (contains? plan [:north :south])
-             (contains? plan [:south :north]))
-         (or (contains? plan [:east :west])
-             (contains? plan [:west :east])))
-    (comp flip-y flip-x)
     (or (contains? plan [:north :south])
         (contains? plan [:south :north]))
     flip-y
