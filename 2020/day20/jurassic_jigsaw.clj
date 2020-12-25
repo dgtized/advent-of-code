@@ -133,6 +133,35 @@
               [4 5 6]
               [7 8 9]] 2))
 
+(defn rotate-left [grid]
+  (reverse (for [col (range (count grid))]
+             (column grid col))))
+
+(defn rotate-right [grid]
+  (for [col (range (count grid))]
+    (apply str (reverse (column grid col)))))
+
+(defn flip-x [grid]
+  (map (fn [row] (apply str (reverse row))) grid))
+
+(defn flip-y [grid]
+  (reverse grid))
+
+(defn trim-edges [grid]
+  (map (partial apply str)
+       (map (comp rest butlast)
+            (rest (butlast grid)))))
+
+(comment
+  (= ["cfi" "beh" "adg"] (rotate-left ["abc" "def" "ghi"]))
+  (= ["gda" "heb" "ifc"] (rotate-right ["abc" "def" "ghi"]))
+  (= ["cba" "fed" "ihg"] (flip-x ["abc" "def" "ghi"]))
+  (= ["ghi" "def" "abc"] (flip-y ["abc" "def" "ghi"]))
+  (= ["fg" "jk"] (trim-edges ["abcd"
+                              "efgh"
+                              "ijkl"
+                              "mnop"])))
+
 ;; TODO: use neighbors & links to rotate/flip-x/flip-y tile
 (defn orient [tile links neighbors]
   (println (str (:id tile) " " links " " neighbors))
@@ -178,6 +207,7 @@
   ;; * do a convolution match for the "sea monster" pattern
   ;; * count the unmatched coordinates in region
   (combine-image (tiles "example"))
+  (combine-image (tiles "input"))
 
   (map count-pixels
        (edges ["..##.#..#."
