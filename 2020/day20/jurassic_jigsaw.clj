@@ -341,8 +341,8 @@
   (find-monsters example)
   (find-monsters input)
 
-  (scan-monsters example)
-  (= 15 (scan-monsters input))
+  (= 2 (count (scan-monsters example)))
+  (= 15 (count (scan-monsters input)))
 
   (= 15 (count (rough-find-monsters input)))
 
