@@ -287,12 +287,35 @@
           :r1 match
           :r2 lower})))))
 
+(defn scan-check [monster-row region-row]
+  (every? (fn [idx]
+            (if (= \# (nth monster-row idx))
+              (= \# (nth region-row idx))
+              true))
+          (range (count region-row))))
+
+(comment (scan-check (first monster) (first monster))
+         (scan-check (first monster) (second monster))
+         (scan-check (first monster) (apply str (repeat 20 " "))))
+
+(defn scan-monsters [image]
+  (let [size (count image)
+        monster-width (count (first monster))]
+    (for [y (range (inc (- size 2)))
+          x (range (inc (- size monster-width)))
+          :when (every? (fn [offset]
+                          (scan-check (nth monster offset)
+                                      (subs (nth image (+ y offset))
+                                            x (+ x monster-width))))
+                        [0 1 2])]
+      [x y])))
+
 (defn count-rough-water [xs]
   (get (frequencies (apply str xs)) \#))
 
 (defn count-rough-water-in-habitat [image]
   (- (count-rough-water image)
-     (* (count (find-monsters image))
+     (* (count (scan-monsters image))
         (count-rough-water monster))))
 
 (comment
@@ -323,15 +346,15 @@
   (find-monsters example)
   (find-monsters input)
 
-  (count (rough-find-monsters input))
+  (scan-monsters example)
+  (= 15 (scan-monsters input))
+
+  (= 15 (count (rough-find-monsters input)))
 
   (= \# (nth (first monster) 18))
 
   (= 273 (count-rough-water-in-habitat example))
-
-  ;; This is wrong, says it's too high, suggesting I should be matching more then
-  ;; 14 sea monsters?
-  (= 1707 (count-rough-water-in-habitat input))
+  (= 1692 (count-rough-water-in-habitat input))
 
   (map count-pixels
        (vals (edges ["..##.#..#."
