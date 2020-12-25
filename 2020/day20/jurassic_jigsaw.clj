@@ -255,13 +255,16 @@
 (defn monster-matches [n row]
   (re-positions (nth monster-regex n) row))
 
+(defn rough-find-monsters [image]
+  (->> image
+       rest
+       butlast ;; can't use first and last row to match from middle
+       (keep-indexed (fn [idx row]
+                       (when-let [m (monster-matches 1 row)]
+                         [(inc idx) m])))))
+
 (defn find-monsters [image]
-  (let [middle-hits (->> image
-                         rest
-                         butlast ;; can't use first and last row to match from middle
-                         (map-indexed (fn [idx row]
-                                        [(inc idx) (monster-matches 1 row)]))
-                         (filter second))]
+  (let [middle-hits (rough-find-monsters image)]
     (flatten
      (for [[line-number hits] middle-hits
            :let [lower-row (nth image (inc line-number))
@@ -319,6 +322,8 @@
   (def input (flip-y (rotate-right (show-image 12 (combine-image (tiles "input"))))))
   (find-monsters example)
   (find-monsters input)
+
+  (count (rough-find-monsters input))
 
   (= \# (nth (first monster) 18))
 
