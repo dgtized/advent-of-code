@@ -338,6 +338,14 @@
   ;; * count the unmatched coordinates in region
   (def example (flip-y (rotate-right (show-image 3 (combine-image (tiles "example"))))))
   (def input (flip-y (rotate-right (show-image 12 (combine-image (tiles "input"))))))
+
+  ;; can also use some/juxt to look for first transformation that matches
+  (some (comp seq scan-monsters)
+        ((juxt flip-y flip-x rotate-right rotate-left
+               (comp flip-y rotate-right) (comp flip-x rotate-right)
+               (comp flip-x rotate-left) (comp flip-y rotate-left))
+         (show-image 3 (combine-image (tiles "example")))))
+
   (find-monsters example)
   (find-monsters input)
 
