@@ -1,5 +1,6 @@
 (ns jurassic-jigsaw
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.set :as set]))
 
 (defn column [grid col]
   (str/join (map #(nth % col) grid)))
@@ -165,10 +166,52 @@
                               "ijkl"
                               "mnop"])))
 
+(defn orient-plan
+  [{:keys [grid] :as tile} links neighbors]
+  (into #{}
+        (for [[expected-dir expected-edge]
+              (set/rename-keys links (set/map-invert neighbors))
+              [tile-dir tile-edge] (edges grid)
+              :when (and (edge-match tile-edge expected-edge) (not= tile-dir expected-dir))]
+          [tile-dir expected-dir])))
+
+(defn plan->operation [plan]
+  (cond
+    (and (or (contains? plan [:north :south])
+             (contains? plan [:south :north]))
+         (or (contains? plan [:east :west])
+             (contains? plan [:west :east])))
+    (comp flip-y flip-x)
+    (or (contains? plan [:north :south])
+        (contains? plan [:south :north]))
+    flip-y
+    (or (contains? plan [:east :west])
+        (contains? plan [:west :east]))
+    flip-x
+    (or (contains? plan [:south :east])
+        (contains? plan [:east :north])
+        (contains? plan [:north :west])
+        (contains? plan [:west :south]))
+    rotate-left
+    (or (contains? plan [:east :south])
+        (contains? plan [:north :east])
+        (contains? plan [:west :north])
+        (contains? plan [:south :west]))
+    rotate-right
+    :else identity))
+
 ;; TODO: use neighbors & links to rotate/flip-x/flip-y tile
 (defn orient [tile links neighbors]
-  (println (str (:id tile) " " links " " neighbors))
-  (:grid tile))
+  (let [plan (orient-plan tile links neighbors)]
+    (if (empty? plan)
+      (:grid tile)
+      (do
+        (println (str (:id tile) " " (:edges tile) "\n     "
+                      (set/rename-keys links (set/map-invert neighbors)) " "
+                      neighbors "\n     "
+                      plan))
+        (recur (assoc tile :grid ((plan->operation plan) (:grid tile)))
+               links neighbors)))))
 
 (defn combine-image [tiles]
   (let [grid (edge-chain tiles)
