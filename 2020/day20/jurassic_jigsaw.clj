@@ -118,19 +118,23 @@
   (let [position (find-position grid id)]
     (into {}
           (for [[direction neighbor]
-                {:north [-1 0] :east [0 1] :south [1 0] :west [0 -1]}
+                {:north [0 -1] :east [1 0]
+                 :south [0 1] :west [-1 0]}
                 :let [coord (map + neighbor position)
-                      value (get-in grid coord)]
+                      value (get-in grid (reverse coord))]
                 :when value]
             [direction value]))))
 
 (comment
   (find-position [[1 2 3]
                   [4 5 6]
-                  [7 8 9]] 9)
+                  [7 8 9]] 2)
   (neighbors [[1 2 3]
               [4 5 6]
-              [7 8 9]] 2))
+              [7 8 9]] 2)
+  (neighbors [[1 2 3]
+              [4 5 6]
+              [7 8 9]] 5))
 
 (defn rotate-left [grid]
   (reverse (for [col (range (count grid))]
