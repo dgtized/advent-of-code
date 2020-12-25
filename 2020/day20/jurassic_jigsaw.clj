@@ -204,7 +204,7 @@
 (defn orient [tile links neighbors]
   (let [plan (orient-plan tile links neighbors)]
     (if (empty? plan)
-      (:grid tile)
+      (trim-edges (:grid tile))
       (do
         (println (str (:id tile) " " (:edges tile) "\n     "
                       (set/rename-keys links (set/map-invert neighbors)) " "
@@ -229,6 +229,13 @@
         (map (fn [cell] (nth cell i)) combined))
       )))
 
+(defn show-image [size combined]
+  (->> combined
+       flatten
+       (partition size)
+       ;; (map (partial interpose " "))
+       (map (partial apply str))))
+
 (comment
   (match-all-tiles (tiles "example"))
   (match-all-tiles (tiles "input"))
@@ -252,8 +259,8 @@
   ;; * strip the edges of each element
   ;; * do a convolution match for the "sea monster" pattern
   ;; * count the unmatched coordinates in region
-  (combine-image (tiles "example"))
-  (combine-image (tiles "input"))
+  (show-image 3 (combine-image (tiles "example")))
+  (show-image 12 (combine-image (tiles "input")))
 
   (map count-pixels
        (vals (edges ["..##.#..#."
