@@ -5,11 +5,10 @@
   (str/join (map #(nth % col) grid)))
 
 (defn edges [grid]
-  [(nth grid 0) ;; north
-   (column grid 9) ;; east
-   (nth grid 9) ;; south
-   (column grid 0) ;; west
-   ])
+  {:north (nth grid 0)
+   :east (column grid 9)
+   :south (nth grid 9)
+   :west (column grid 0)})
 
 (defn tiles [file]
   (for [tile (str/split (slurp file) #"\n\n")]
@@ -30,8 +29,8 @@
   (if (= (:id tile1) (:id tile2))
     []
     (let [matches
-          (for [edge1 (:edges tile1)
-                edge2 (:edges tile2)
+          (for [edge1 (vals (:edges tile1))
+                edge2 (vals (:edges tile2))
                 :when (edge-match edge1 edge2)]
             edge1)]
       (if (seq matches)
@@ -210,14 +209,13 @@
   (combine-image (tiles "input"))
 
   (map count-pixels
-       (edges ["..##.#..#."
-               "##..#....."
-               "#...##..#."
-               "####.#...#"
-               "##.##.###."
-               "##...#.###"
-               ".#.#.#..##"
-               "..#....#.."
-               "###...#.#."
-               "..###..###"]))
-  )
+       (vals (edges ["..##.#..#."
+                     "##..#....."
+                     "#...##..#."
+                     "####.#...#"
+                     "##.##.###."
+                     "##...#.###"
+                     ".#.#.#..##"
+                     "..#....#.."
+                     "###...#.#."
+                     "..###..###"]))))
