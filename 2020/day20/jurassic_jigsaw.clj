@@ -284,6 +284,14 @@
           :r1 match
           :r2 lower})))))
 
+(defn count-rough-water [xs]
+  (get (frequencies (apply str xs)) \#))
+
+(defn count-rough-water-in-habitat [image]
+  (- (count-rough-water image)
+     (* (count (find-monsters image))
+        (count-rough-water monster))))
+
 (comment
   (match-all-tiles (tiles "example"))
   (match-all-tiles (tiles "input"))
@@ -311,6 +319,14 @@
   (def input (flip-y (rotate-right (show-image 12 (combine-image (tiles "input"))))))
   (find-monsters example)
   (find-monsters input)
+
+  (find-monsters (flip-x (rotate-left (show-image 12 (combine-image (tiles "input"))))))
+
+  (= 273 (count-rough-water-in-habitat example))
+
+  ;; This is wrong, says it's too low, suggesting I should be matching more then
+  ;; 5 sea monsters?
+  (= 1842 (count-rough-water-in-habitat input))
 
   (map count-pixels
        (vals (edges ["..##.#..#."
