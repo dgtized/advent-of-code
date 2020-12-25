@@ -234,7 +234,55 @@
        flatten
        (partition size)
        ;; (map (partial interpose " "))
-       (map (partial apply str))))
+       (map (partial apply str))
+       (map (fn [s] (str/replace s "." " ")))))
+
+(def monster ["                  # "
+              "#    ##    ##    ###"
+              " #  #  #  #  #  #   "])
+
+(def monster-regex (map (fn [s] (str/replace s " " ".")) monster))
+
+(defn re-positions [re s]
+  (let [m (re-matcher (re-pattern re) s)]
+    ((fn step []
+       (when (.find m)
+         (cons [(.start m) (re-groups m)]
+               (lazy-seq (step))))))))
+
+(comment (re-positions #".S" "  S S      s  S"))
+
+(defn monster-matches [n row]
+  (re-positions (nth monster-regex n) row))
+
+(defn find-monsters [image]
+  (let [middle-hits (->> image
+                         rest
+                         butlast ;; can't use first and last row to match from middle
+                         (map-indexed (fn [idx row]
+                                        [(inc idx) (monster-matches 1 row)]))
+                         (filter second))]
+    (flatten
+     (for [[line-number hits] middle-hits
+           :let [lower-row (nth image (inc line-number))
+                 upper-row (nth image (dec line-number))
+                 lower-hits (into {} (monster-matches 2 lower-row))
+                 upper-hits (into {}
+                                  (for [[offset m] hits
+                                        :let [size (count m)
+                                              match (subs upper-row offset (+ offset size))]
+                                        :when (= \# (nth match (dec size)))]
+                                    [offset match]))]
+           :when (and (seq lower-hits)
+                      (seq upper-hits))]
+       (for [[offset match] hits
+             :let [upper (get upper-hits offset)
+                   lower (get lower-hits offset)]
+             :when (and lower upper)]
+         {:upper-left [line-number offset]
+          :r0 upper
+          :r1 match
+          :r2 lower})))))
 
 (comment
   (match-all-tiles (tiles "example"))
@@ -259,8 +307,10 @@
   ;; * strip the edges of each element
   ;; * do a convolution match for the "sea monster" pattern
   ;; * count the unmatched coordinates in region
-  (show-image 3 (combine-image (tiles "example")))
-  (show-image 12 (combine-image (tiles "input")))
+  (def example (flip-y (rotate-right (show-image 3 (combine-image (tiles "example"))))))
+  (def input (flip-y (rotate-right (show-image 12 (combine-image (tiles "input"))))))
+  (find-monsters example)
+  (find-monsters input)
 
   (map count-pixels
        (vals (edges ["..##.#..#."
