@@ -4,18 +4,37 @@
 
 use strict;
 use warnings;
-use 5.010;
+use v5.10;
 
-chomp(my @readings = <>);
+my @readings = <>;
+chomp(@readings);
 
-my $last = shift @readings;
-my $count = 0;
+# my $count = 0;
 
-for my $v (@readings) {
-  if ($v > $last) {
-    $count++;
+# my $last = shift @readings;
+
+# for my $v (@readings) {
+#   if ($v > $last) {
+#     $count++;
+#   }
+#   $last = $v;
+# }
+
+# say $count;
+
+my $count2 = 0;
+for(my $i = 0; $i < scalar(@readings); $i++) {
+  if ($i > 2) {
+    my $d = $readings[$i - 3];
+    my $c = $readings[$i - 2];
+    my $b = $readings[$i - 1];
+    my $a = $readings[$i];
+    my $s1 = $d + $c + $b;
+    my $s2 = $c + $b + $a;
+    if ($s2 > $s1) {
+      $count2++;
+    }
   }
-  $last = $v;
 }
 
-say $count;
+say $count2;
