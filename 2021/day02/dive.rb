@@ -26,3 +26,24 @@ puts horizontal
 puts depth
 
 puts horizontal * depth
+puts
+
+aim = 0
+horizontal = 0
+depth = 0
+cmds.each do |cmd,amt|
+  case cmd
+  when /forward/
+    horizontal += amt
+    depth += aim * amt
+  when /down/
+    aim += amt
+  when /up/
+    aim -= amt
+  end
+end
+
+puts horizontal
+puts depth
+
+puts horizontal * depth
