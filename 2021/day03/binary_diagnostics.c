@@ -3,6 +3,19 @@
 
 // gcc binary_diagnostics.c -o binary_diagnostics && ./binary_diagnostics input
 
+int bitcheck(char lines[1000][60], int length, int pos) {
+     int on = 0;
+     int off = 0;
+     for(int i = 0; i < length; i++) {
+          if(lines[i][pos] == '0')
+               off++;
+          if(lines[i][pos] == '1')
+               on++;
+     }
+     printf("%d %d\n", on, off);
+     return (on > off);
+}
+
 int main(int argc, char **argv) {
   const char *filename = argv[1];
   char lines[1000][60];
@@ -19,18 +32,8 @@ int main(int argc, char **argv) {
   int gamma = 0;
   int epsilon = 0;
   for(int j = 0; j < width; j++) {
-       int on = 0;
-       int off = 0;
-       for(int i = 0; i < length; i++) {
-            char *line = lines[i];
-            if(line[j] == '0')
-                 off++;
-            if(line[j] == '1')
-                 on++;
-       }
        int bitvalue = 1 << (width-j-1);
-       //printf(" %d %d -> %d %d\n", on, off, j, bitvalue);
-       if(on > off) {
+       if(bitcheck(lines, length, j)) {
             gamma += bitvalue;
        } else {
             epsilon += bitvalue;
