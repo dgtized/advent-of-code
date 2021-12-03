@@ -1,6 +1,5 @@
 (ns binary_diagnostics_2
-  (:require [clojure.string :as str]
-            [clojure.set :as set]))
+  (:require [clojure.string :as str]))
 
 (def example (str/split-lines (slurp "example")))
 (def input (str/split-lines (slurp "input")))
@@ -22,7 +21,7 @@
               (reduced xs)
               (let [bit (common xs pos)]
                 (filter #(= (nth % pos) bit) xs))))
-          input (range (count (first example)))))
+          input (range (count (first input)))))
 
 (defn oxygen [input]
   (first (winnow most-common input)))
@@ -30,26 +29,16 @@
 (defn co2-scrubber [input]
   (first (winnow least-common input)))
 
-(comment
-  (oxygen example)
-  (co2-scrubber example))
-
-(defn binary [s]
-  (let [l (count s)]
-    (int (reduce (fn [acc p] (if (= \1 (nth s p))
-                              (+ acc (Math/pow 2 (- l p 1)))
-                              acc))
-                 0
-                 (range l)))))
-
 (defn second-star [input]
   (let [o (oxygen input)
         co2 (co2-scrubber input)
-        [a b] (mapv binary [o co2])]
+        [a b] (mapv #(Integer/parseInt % 2) [o co2])]
     [o a co2 b (* a b)]))
 
-(second-star example)
-(second-star input)
+(assert (= ["10111" 23 "01010" 10 230]
+           (second-star example)))
+(assert (= ["000111111101" 509 "101010000101" 2693 1370737]
+           (second-star input)))
 
 
 
