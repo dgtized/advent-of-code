@@ -14,3 +14,5 @@
 (count> input) ;; => 1832
 (count> (map #(reduce + %) (partition 3 1 input))) ;; => 1858
 
+;; bb -I -e '(count (filter (fn [[a b]] (> b a)) (partition 2 1 *input*)))' < input
+;; bb -I -e '(count (filter (fn [[a b]] (> b a)) (partition 2 1 (map #(reduce + %) (partition 3 1 *input*)))))' < input
