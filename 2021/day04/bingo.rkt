@@ -63,5 +63,10 @@
 
 (require rackunit)
 
-(check-equal? (score-board (first (winning-boards (load-input "input")))) 35670)
-(check-equal? (score-board (last (winning-boards (load-input "input")))) 22704)
+(let ((example (winning-boards (load-input "example"))))
+  (check-equal? (score-board (first example)) 4512)
+  (check-equal? (score-board (last example)) 1924))
+
+(let ((input (winning-boards (load-input "input"))))
+  (check-equal? (score-board (first input)) 35670)
+  (check-equal? (score-board (last input)) 22704))
