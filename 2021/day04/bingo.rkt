@@ -55,6 +55,14 @@
                  #:key (lambda (x) (length (cadr x)))
                  <))))
 
+(define (last-winning-board input)
+  (let ((sequence (first input))
+        (boards (cadr input)))
+    (last (sort (for/list ((board (in-list boards)))
+                  (list board (winning-sequence board sequence)))
+                 #:key (lambda (x) (length (cadr x)))
+                 <))))
+
 (define (score-board board-seq)
   (let ((board (car board-seq))
         (winning-seq (cadr board-seq)))
@@ -62,3 +70,4 @@
                    (last winning-seq)))))
 
 (= (score-board (winning-board (load-input "input"))) 35670)
+(= (score-board (last-winning-board (load-input "input"))) 22704)
