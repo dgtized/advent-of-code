@@ -33,12 +33,10 @@
 ;; (bingo? '(1 2 3 4 5) '(1 2 3 4 5 6))
 ;; (bingo? '(1 2 3 4 5) '(5))
 
-(define (all-in? sets sequence)
-  (ormap (lambda (s) (bingo? s sequence)) sets))
-
 (define (winning-board? board sequence)
-  (or (all-in? (board->rows board) sequence)
-      (all-in? (board->columns board) sequence)))
+  (ormap (lambda (s) (bingo? s sequence))
+         (append (board->rows board)
+                 (board->columns board))))
 
 (define (winning-sequence board sequence)
   (for/or ((upto (range (length sequence))))
