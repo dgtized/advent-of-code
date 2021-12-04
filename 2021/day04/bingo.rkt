@@ -47,21 +47,13 @@
           sequence-thus-far
           #f))))
 
-(define (winning-board input)
+(define (winning-boards input)
   (let ((sequence (first input))
         (boards (cadr input)))
-    (first (sort (for/list ((board (in-list boards)))
-                   (list board (winning-sequence board sequence)))
+    (sort (for/list ((board (in-list boards)))
+            (list board (winning-sequence board sequence)))
                  #:key (lambda (x) (length (cadr x)))
-                 <))))
-
-(define (last-winning-board input)
-  (let ((sequence (first input))
-        (boards (cadr input)))
-    (last (sort (for/list ((board (in-list boards)))
-                  (list board (winning-sequence board sequence)))
-                 #:key (lambda (x) (length (cadr x)))
-                 <))))
+                 <)))
 
 (define (score-board board-seq)
   (let ((board (car board-seq))
@@ -69,5 +61,5 @@
     (apply * (list (foldl + 0 (filter (lambda (x) (not (member x winning-seq))) board))
                    (last winning-seq)))))
 
-(= (score-board (winning-board (load-input "input"))) 35670)
-(= (score-board (last-winning-board (load-input "input"))) 22704)
+(= (score-board (first (winning-boards (load-input "input")))) 35670)
+(= (score-board (last (winning-boards (load-input "input")))) 22704)
