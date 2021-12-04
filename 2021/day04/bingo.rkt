@@ -27,4 +27,38 @@
     (list (map string->number (string-split (first lines) ","))
           (parse-bingo-boards (string-join (rest (rest lines)))))))
 
-(load-input "example")
+(define (bingo? lst sequence)
+  (andmap (lambda (x) (member x sequence)) lst))
+
+;; (bingo? '(1 2 3 4 5) '(1 2 3 4 5 6))
+;; (bingo? '(1 2 3 4 5) '(5))
+
+(define (all-in? sets sequence)
+  (ormap (lambda (s) (bingo? s sequence)) sets))
+
+(define (winning-board? board sequence)
+  (or (all-in? (board->rows board) sequence)
+      (all-in? (board->columns board) sequence)))
+
+(define (winning-sequence board sequence)
+  (for/or ((upto (range (length sequence))))
+    (let ((sequence-thus-far (take sequence upto)))
+      (if (winning-board? board sequence-thus-far)
+          sequence-thus-far
+          #f))))
+
+(define (winning-board input)
+  (let ((sequence (first input))
+        (boards (cadr input)))
+    (first (sort (for/list ((board (in-list boards)))
+                   (list board (winning-sequence board sequence)))
+                 #:key (lambda (x) (length (cadr x)))
+                 <))))
+
+(define (score-board board-seq)
+  (let ((board (car board-seq))
+        (winning-seq (cadr board-seq)))
+    (apply * (list (foldl + 0 (filter (lambda (x) (not (member x winning-seq))) board))
+                   (last winning-seq)))))
+
+(= (score-board (winning-board (load-input "input"))) 35670)
