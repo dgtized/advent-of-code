@@ -19,8 +19,7 @@
     (column board j)))
 
 (define (parse-bingo-boards input)
-  (for/list [(board (partition-into (map string->number (string-split input #:trim? #t)) 25))]
-    board))
+  (partition-into (map string->number (string-split input #:trim? #t)) 25))
 
 (define (load-input filename)
   (let [(lines (file->lines filename))]
