@@ -61,5 +61,7 @@
     (apply * (list (foldl + 0 (filter (lambda (x) (not (member x winning-seq))) board))
                    (last winning-seq)))))
 
-(= (score-board (first (winning-boards (load-input "input")))) 35670)
-(= (score-board (last (winning-boards (load-input "input")))) 22704)
+(require rackunit)
+
+(check-equal? (score-board (first (winning-boards (load-input "input")))) 35670)
+(check-equal? (score-board (last (winning-boards (load-input "input")))) 22704)
