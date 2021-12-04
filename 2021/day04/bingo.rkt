@@ -56,8 +56,8 @@
 (define (score-board board-seq)
   (let ((board (car board-seq))
         (winning-seq (cadr board-seq)))
-    (apply * (list (foldl + 0 (filter (lambda (x) (not (member x winning-seq))) board))
-                   (last winning-seq)))))
+    (* (apply + (filter (lambda (x) (not (member x winning-seq))) board))
+       (last winning-seq))))
 
 (require rackunit)
 
