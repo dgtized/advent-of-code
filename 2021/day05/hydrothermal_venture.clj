@@ -63,7 +63,7 @@
        count))
 
 (assert (= 12 (part2 "example")))
-(assert (= 0 (part2 "input")))
+(assert (= 21373 (part2 "input")))
 
 
 
