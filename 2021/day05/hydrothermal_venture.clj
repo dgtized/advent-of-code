@@ -42,14 +42,15 @@
                         y-range)
                   (= y0 y1)
                   (mapv vector
-                        (range (min x0 x1) (inc (max x0 x1)))
-                        x-range)
+                        x-range
+                        (repeatedly (constantly y0)))
                   :else
                   (mapv vector
                         (if (> x0 x1) (reverse x-range) x-range)
                         (if (> y0 y1) (reverse y-range) y-range))))))
 
-(comment (line2 {} [8 0 0 8])
+(comment (line2 {} [0 9 5 9])
+         (line2 {} [8 0 0 8])
          (line2 {} [1 1 3 3])
          (line2 {} [9 7 7 9]))
 
@@ -57,14 +58,12 @@
   (->> filename
        parse-lines
        (reduce line2 {})
-       ;; vals
-       ;; (remove #(= 1 %))
-       ;; count
+       vals
+       (remove #(= 1 %))
+       count))
 
-       ))
-
-;; (assert (= 12 (part2 "example")))
-;; (assert (= 0 (part2 "input")))
+(assert (= 12 (part2 "example")))
+(assert (= 0 (part2 "input")))
 
 
 
