@@ -6,7 +6,11 @@
   (->> filename
        slurp
        str/split-lines
-       (mapv (fn [line] (map edn/read-string (rest (re-matches #"(\d+),(\d+) -> (\d+),(\d+)" line)))))))
+       (mapv (fn [line]
+               (->> line
+                    (re-matches #"(\d+),(\d+) -> (\d+),(\d+)")
+                    rest
+                    (mapv edn/read-string))))))
 
 (defn line [screen [x0 y0 x1 y1]]
   (cond (= x0 x1)
