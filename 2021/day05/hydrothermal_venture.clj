@@ -31,7 +31,7 @@
 (assert (= 5 (part1 "example")))
 (assert (= 7380 (part1 "input")))
 
-(defn line2 [screen [x0 y0 x1 y1]]
+(defn diag-line [screen [x0 y0 x1 y1]]
   (let [x-range (range (min x0 x1) (inc (max x0 x1)))
         y-range (range (min y0 y1) (inc (max y0 y1)))]
     (reduce (fn [m p] (update m p (fnil inc 0)))
@@ -49,15 +49,15 @@
                         (if (> x0 x1) (reverse x-range) x-range)
                         (if (> y0 y1) (reverse y-range) y-range))))))
 
-(comment (line2 {} [0 9 5 9])
-         (line2 {} [8 0 0 8])
-         (line2 {} [1 1 3 3])
-         (line2 {} [9 7 7 9]))
+(comment (diag-line {} [0 9 5 9])
+         (diag-line {} [8 0 0 8])
+         (diag-line {} [1 1 3 3])
+         (diag-line {} [9 7 7 9]))
 
 (defn part2 [filename]
   (->> filename
        parse-lines
-       (reduce line2 {})
+       (reduce diag-line {})
        vals
        (remove #(= 1 %))
        count))
