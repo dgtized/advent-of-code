@@ -31,8 +31,8 @@
 (defn part1 [filename]
   (->> filename
        parse-lines
-       (mapv line)
-       (reduce ink-line {})
+       (mapcat line)
+       (ink-line {})
        vals
        (remove #(= 1 %))
        count))
@@ -64,8 +64,8 @@
 (defn part2 [filename]
   (->> filename
        parse-lines
-       (mapv diag-line)
-       (reduce ink-line {})
+       (mapcat diag-line)
+       (ink-line {})
        vals
        (remove #(= 1 %))
        count))
