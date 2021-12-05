@@ -28,7 +28,7 @@
               (repeatedly (constantly y0)))
         :else []))
 
-(defn part1 [filename]
+(defn intersections [line filename]
   (->> filename
        parse-lines
        (mapcat line)
@@ -36,6 +36,8 @@
        vals
        (remove #(= 1 %))
        count))
+
+(def part1 (partial intersections line))
 
 (assert (= 5 (part1 "example")))
 (assert (= 7380 (part1 "input")))
@@ -61,14 +63,7 @@
          (diag-line [1 1 3 3])
          (diag-line [9 7 7 9]))
 
-(defn part2 [filename]
-  (->> filename
-       parse-lines
-       (mapcat diag-line)
-       (ink-line {})
-       vals
-       (remove #(= 1 %))
-       count))
+(def part2 (partial intersections diag-line))
 
 (assert (= 12 (part2 "example")))
 (assert (= 21373 (part2 "input")))
