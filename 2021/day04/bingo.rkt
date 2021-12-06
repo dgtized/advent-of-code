@@ -47,6 +47,7 @@
 (define (winning-boards input)
   (let ((sequence (first input))
         (boards (cadr input)))
+    ;; see also argmin/argmax from racket/list
     (sort (for/list ((board (in-list boards)))
             (list board (winning-sequence board sequence)))
                  #:key (lambda (x) (length (cadr x)))
