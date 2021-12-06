@@ -50,16 +50,9 @@
 (check-equal? '#(0 1 1 2 1 0 0 0 0) (frequencies '(3 4 3 1 2)))
 
 (define (vec-tick base)
-  (let ((next (make-vector 9 0)))
-    (vector-set! next 0 (vector-ref base 1))
-    (vector-set! next 1 (vector-ref base 2))
-    (vector-set! next 2 (vector-ref base 3))
-    (vector-set! next 3 (vector-ref base 4))
-    (vector-set! next 4 (vector-ref base 5))
-    (vector-set! next 5 (vector-ref base 6))
+  (let ((next (build-vector 9 (lambda (i)
+                                (vector-ref base (modulo (+ i 1) 9))))))
     (vector-set! next 6 (+ (vector-ref base 7) (vector-ref base 0)))
-    (vector-set! next 7 (vector-ref base 8))
-    (vector-set! next 8 (vector-ref base 0))
     next))
 
 (check-equal? (vec-tick (frequencies '(3 4 3 1 2))) (frequencies '(2 3 2 0 1)))
