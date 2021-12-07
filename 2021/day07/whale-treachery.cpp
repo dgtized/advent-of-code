@@ -1,9 +1,7 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <cstdio>
-#include <string>
 #include <vector>
-#include <regex>
 
 // usage: g++ whale-treachery.cpp -o whale-treachery && ./whale-treachery input
 
