@@ -17,6 +17,7 @@ int cost(vector<int> &positions, int pos) {
   return cost;
 }
 
+// this works but overflows on input dataset, see racket solution for part2
 long cost2(vector<int> &positions, int pos) {
   long cost = 0;
   for(auto v : positions) {
@@ -32,7 +33,7 @@ long min_cost(vector<int> positions) {
   long best_cost = 10000000;
   long best_idx = -1;
   for(int i = positions.front(); i <= positions.back(); i++) {
-    int c = cost2(positions, i);
+    int c = cost(positions, i);
     if(c < best_cost) {
       best_cost = c;
       best_idx = i;
@@ -55,5 +56,5 @@ int main(int argc, char **argv) {
   cout << cost2(positions, 5) << endl;
 
   int min = min_cost(positions);
-  cout << "First Star: @" << min << " -> " << cost2(positions, min) << endl;
+  cout << "First Star: @" << min << " -> " << cost(positions, min) << endl;
 }
