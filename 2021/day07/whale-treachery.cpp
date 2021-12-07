@@ -17,16 +17,22 @@ int cost(vector<int> &positions, int pos) {
   return cost;
 }
 
-int min_cost(vector<int> positions) {
+long cost2(vector<int> &positions, int pos) {
+  long cost = 0;
+  for(auto v : positions) {
+    long dist = abs(pos-v);
+    cost += (dist * (dist + 1)/2);
+  }
+  return cost;
+}
+
+long min_cost(vector<int> positions) {
   sort(positions.begin(), positions.end());
 
-  int a = positions.front();
-  int b = positions.back();
-  cout << "min_cost: " << a << " " << b << endl;
-  int best_cost = 10000000;
-  int best_idx = -1;
-  for(int i = a; i <= b; i++) {
-    int c = cost(positions, i);
+  long best_cost = 10000000;
+  long best_idx = -1;
+  for(int i = positions.front(); i <= positions.back(); i++) {
+    int c = cost2(positions, i);
     if(c < best_cost) {
       best_cost = c;
       best_idx = i;
@@ -45,15 +51,9 @@ int main(int argc, char **argv) {
     positions.push_back(atoi(str.c_str()));
   }
 
-  float average = 0.0;
-  for(auto v : positions) {
-    average += v;
-  }
-  average = (average / positions.size());
-
-  cout << average << endl;
-  cout << cost(positions, 2) << endl;
+  cout << cost2(positions, 2) << endl;
+  cout << cost2(positions, 5) << endl;
 
   int min = min_cost(positions);
-  cout << "First Star: @" << min << " -> " << cost(positions, min) << endl;
+  cout << "First Star: @" << min << " -> " << cost2(positions, min) << endl;
 }
