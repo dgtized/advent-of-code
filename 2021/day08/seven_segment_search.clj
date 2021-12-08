@@ -59,41 +59,40 @@
 (defn cases-matching [base values]
   (filter (fn [[_ possible]] (set/superset? (set values) possible)) base))
 
+(defn missing-segments [digits]
+  (set/difference (set "abcdefg") (set digits)))
+
 (defn solve-0 [base]
-  (let [eight (set (ffirst (cases-matching base #{8})))
-        missing-235
+  (let [missing-235
         (->> (cases-matching base #{2 3 5})
-             (map (comp #(set/difference eight %) set first))
+             (map (comp missing-segments first))
              (apply set/union))]
     (some (fn [[in _]]
-            (when (empty? (set/intersection (set/difference eight (set in)) missing-235))
+            (when (empty? (set/intersection (missing-segments in) missing-235))
               in))
           (cases-matching base #{0 6 9}))))
 
 (defn solve-5 [base]
-  (let [eight (set (ffirst (cases-matching base #{8})))
-        missing-ec (apply set/union (map (comp #(set/difference eight %) set first)
+  (let [missing-ec (apply set/union (map (comp missing-segments first)
                                          (cases-matching base #{6 9})))]
     (some (fn [[in _]]
-            (when (= (set/difference eight (set in)) missing-ec)
+            (when (= (missing-segments in) missing-ec)
               in))
           (cases-matching base #{2 3 5}))))
 
 (defn solve-2 [base]
-  (let [eight (set (ffirst (cases-matching base #{8})))
-        five (set (ffirst (cases-matching base #{5})))]
+  (let [five (set (ffirst (cases-matching base #{5})))]
     (some (fn [[in _]]
-            (when (empty? (set/intersection (set/difference eight (set in))
-                                            (set/difference eight five)))
+            (when (empty? (set/intersection (missing-segments in)
+                                            (missing-segments five)))
               in))
           (cases-matching base #{2 3}))))
 
 (defn solve-6 [base]
-  (let [eight (set (ffirst (cases-matching base #{8})))
-        three (set (ffirst (cases-matching base #{3})))]
+  (let [three (set (ffirst (cases-matching base #{3})))]
     (some (fn [[in _]]
-            (when (empty? (set/intersection (set/difference eight (set in))
-                                            (set/difference eight three)))
+            (when (empty? (set/intersection (missing-segments in)
+                                            (missing-segments three)))
               in))
           (cases-matching base #{6 9}))))
 
