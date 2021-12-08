@@ -66,16 +66,16 @@
 (defn missing-segments [digits]
   (set/difference (set "abcdefg") (set digits)))
 
-(defn no-overlap-in-missing-segments? [a b]
-  (empty? (set/intersection (missing-segments a) (missing-segments b))))
+(defn disjoint-from-missing-segments [a]
+  (fn [in]
+    (when (empty? (set/intersection a (missing-segments in)))
+      in)))
 
 (defn solve-0 [base]
   (let [missing-235 (->> (cases-matching base #{2 3 5})
                          (map missing-segments)
                          (apply set/union))]
-    (some (fn [in]
-            (when (empty? (set/intersection (missing-segments in) missing-235))
-              in))
+    (some (disjoint-from-missing-segments missing-235)
           (cases-matching base #{0 6 9}))))
 
 (defn solve-5 [base]
@@ -88,15 +88,13 @@
           (cases-matching base #{2 3 5}))))
 
 (defn solve-2 [base]
-  (let [five (set (first (cases-matching base #{5})))]
-    (some (fn [in] (when (no-overlap-in-missing-segments? five in)
-                    in))
+  (let [missing-five (missing-segments (first (cases-matching base #{5})))]
+    (some (disjoint-from-missing-segments missing-five)
           (cases-matching base #{2 3}))))
 
 (defn solve-6 [base]
-  (let [three (set (first (cases-matching base #{3})))]
-    (some (fn [in] (when (no-overlap-in-missing-segments? three in)
-                    in))
+  (let [missing-three (missing-segments (first (cases-matching base #{3})))]
+    (some (disjoint-from-missing-segments missing-three)
           (cases-matching base #{6 9}))))
 
 (defn prove [base digit value]
