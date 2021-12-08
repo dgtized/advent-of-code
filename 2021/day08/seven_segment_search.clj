@@ -115,8 +115,10 @@
 (solution (first ex2))
 
 (defn solve-line [[digits output]]
-  (let [mapping (solution digits)]
-    (edn/read-string (apply str (map mapping output)))))
+  (let [mapping (solution digits)
+        s (apply str (map mapping output))]
+    ;; edn/read-string doesn't like leading zeros so strip them
+    (edn/read-string (str/replace-first s #"^[0]+" ""))))
 
 (assert (= '(8394 9781 1197 9361 4873 8418 4548 1625 8717 4315)
            (map solve-line (parse "example"))))
@@ -125,5 +127,5 @@
   (apply + (map solve-line input)))
 
 (assert (= 61229 (part2 (parse "example"))))
-;; (assert (= 61229 (part2 (parse ""))))
+(assert (= 936117 (part2 (parse "input"))))
 
