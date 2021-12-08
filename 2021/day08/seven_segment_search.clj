@@ -1,6 +1,5 @@
 (ns seven-segment-search
   (:require
-   [clojure.edn :as edn]
    [clojure.set :as set]
    [clojure.string :as str]))
 
@@ -115,10 +114,10 @@
 (comment (solution (first ex2)))
 
 (defn solve-line [[digits output]]
-  (let [mapping (solution digits)
-        s (apply str (map mapping output))]
-    ;; edn/read-string doesn't like leading zeros so strip them
-    (edn/read-string (str/replace-first s #"^[0]+" ""))))
+  (->> output
+       (map (solution digits))
+       (apply str)
+       Integer/parseInt))
 
 (assert (= '(8394 9781 1197 9361 4873 8418 4548 1625 8717 4315)
            (map solve-line (parse "example"))))
