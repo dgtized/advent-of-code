@@ -23,12 +23,12 @@
    7 8 ;; abcdefg
    })
 
-;; 9 [abcdfg] missing e
-;; 6 [abdefg] missing c
-;; 5 [abdfg]  missing c,e
-;; 3 [acdfg]  missing b,e
-;; 2 [acdeg]  missing b,f
-;; 0 [abcefg] missing d
+;; 9 [abcdfg] 6 missing e
+;; 6 [abdefg] 6 missing c
+;; 5 [abdfg]  5 missing c,e
+;; 3 [acdfg]  5 missing b,e
+;; 2 [acdeg]  5 missing b,f
+;; 0 [abcefg] 6 missing d
 
 (defn part1 [input]
   (let [freqs (->> input
@@ -44,8 +44,13 @@
 
 (defn solve-digits [digits]
   (let [base (zipmap digits
-                     (for [digit digits]
-                       (known-digits (count digit))))]
+                     (for [digit digits
+                           :let [c (count digit)]]
+                       (set (if-let [k (known-digits c)]
+                              [k]
+                              (if (= c 5)
+                                [2 3 5]
+                                [0 6 9])))))]
     base))
 
 (comment (solve-digits (first ex2)))
