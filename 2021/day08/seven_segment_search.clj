@@ -114,7 +114,7 @@
         mapping (prove base2 (solve-6 base2) 6)]
     (zipmap (keys mapping) (map first (vals mapping)))))
 
-(solution (first ex2))
+(comment (solution (first ex2)))
 
 (defn solve-line [[digits output]]
   (let [mapping (solution digits)
