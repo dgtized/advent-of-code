@@ -57,9 +57,9 @@
     base))
 
 (defn cases-matching [base values]
-  (filter (fn [[_ possible]]
-            (set/superset? (set values) possible))
-          base))
+  (keep (fn [[in possible]]
+          (when (set/superset? (set values) possible) in))
+        base))
 
 (assert (= 1 (count (cases-matching (solve-digits (first ex2)) #{7}))))
 
@@ -67,34 +67,34 @@
   (set/difference (set "abcdefg") (set digits)))
 
 (defn solve-0 [base]
-  (let [missing-235
-        (->> (cases-matching base #{2 3 5})
-             (map (comp missing-segments first))
-             (apply set/union))]
-    (some (fn [[in _]]
+  (let [missing-235 (->> (cases-matching base #{2 3 5})
+                         (map missing-segments)
+                         (apply set/union))]
+    (some (fn [in]
             (when (empty? (set/intersection (missing-segments in) missing-235))
               in))
           (cases-matching base #{0 6 9}))))
 
 (defn solve-5 [base]
-  (let [missing-ec (apply set/union (map (comp missing-segments first)
-                                         (cases-matching base #{6 9})))]
-    (some (fn [[in _]]
+  (let [missing-ec (->> (cases-matching base #{6 9})
+                        (map missing-segments)
+                        (apply set/union))]
+    (some (fn [in]
             (when (= (missing-segments in) missing-ec)
               in))
           (cases-matching base #{2 3 5}))))
 
 (defn solve-2 [base]
-  (let [five (set (ffirst (cases-matching base #{5})))]
-    (some (fn [[in _]]
+  (let [five (set (first (cases-matching base #{5})))]
+    (some (fn [in]
             (when (empty? (set/intersection (missing-segments in)
                                             (missing-segments five)))
               in))
           (cases-matching base #{2 3}))))
 
 (defn solve-6 [base]
-  (let [three (set (ffirst (cases-matching base #{3})))]
-    (some (fn [[in _]]
+  (let [three (set (first (cases-matching base #{3})))]
+    (some (fn [in]
             (when (empty? (set/intersection (missing-segments in)
                                             (missing-segments three)))
               in))
