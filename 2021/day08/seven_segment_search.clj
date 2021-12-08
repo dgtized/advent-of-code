@@ -57,7 +57,11 @@
     base))
 
 (defn cases-matching [base values]
-  (filter (fn [[_ possible]] (set/superset? (set values) possible)) base))
+  (filter (fn [[_ possible]]
+            (set/superset? (set values) possible))
+          base))
+
+(assert (= 1 (count (cases-matching (solve-digits (first ex2)) #{7}))))
 
 (defn missing-segments [digits]
   (set/difference (set "abcdefg") (set digits)))
