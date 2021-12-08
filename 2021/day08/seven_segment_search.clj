@@ -1,5 +1,7 @@
 (ns seven-segment-search
-  (:require [clojure.string :as str]))
+  (:require
+   [clojure.set :as set]
+   [clojure.string :as str]))
 
 (defn parse-line [line]
   (map (fn [s] (map sort (str/split s #"\s+"))) (str/split line #"\|\s+")))
@@ -53,4 +55,23 @@
                                 [0 6 9])))))]
     base))
 
-(comment (solve-digits (first ex2)))
+(defn solve-0 [base]
+  (let [eight (set (ffirst (filter (fn [[_ possible]] (= #{8} possible)) base)))
+        missing-235
+        (->> base
+             (filter (fn [[in possible]] (set/superset? #{3 2 5} possible)))
+             (map (comp #(set/difference eight %) set first))
+             (apply set/union))]
+    (some (fn [[in possible]]
+            (when (and (set/superset? #{0 6 9} possible)
+                       (empty? (set/intersection (set/difference eight (set in)) missing-235)))
+              in))
+          base)))
+
+(defn prove [base digit value]
+  (assoc (zipmap (keys base) (map #(disj % value) (vals base)))
+         digit (set [value])))
+
+(let [base (solve-digits (first ex2))
+      zero (solve-0 base)]
+  (prove base zero 0))
