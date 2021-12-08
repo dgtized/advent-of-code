@@ -1,5 +1,6 @@
 (ns seven-segment-search
   (:require
+   [clojure.edn :as edn]
    [clojure.set :as set]
    [clojure.string :as str]))
 
@@ -107,9 +108,22 @@
         five (solve-5 base0)
         base5 (prove base0 five 5)
         two (solve-2 base5)
-        base2 (prove base5 two 2)]
-    (prove base2 (solve-6 base2) 6)))
+        base2 (prove base5 two 2)
+        mapping (prove base2 (solve-6 base2) 6)]
+    (zipmap (keys mapping) (map first (vals mapping)))))
 
 (solution (first ex2))
 
+(defn solve-line [[digits output]]
+  (let [mapping (solution digits)]
+    (edn/read-string (apply str (map mapping output)))))
+
+(assert (= '(8394 9781 1197 9361 4873 8418 4548 1625 8717 4315)
+           (map solve-line (parse "example"))))
+
+(defn part2 [input]
+  (apply + (map solve-line input)))
+
+(assert (= 61229 (part2 (parse "example"))))
+;; (assert (= 61229 (part2 (parse ""))))
 
