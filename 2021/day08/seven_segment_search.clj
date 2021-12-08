@@ -69,10 +69,47 @@
               in))
           (cases-matching base #{0 6 9}))))
 
+(defn solve-5 [base]
+  (let [eight (set (ffirst (cases-matching base #{8})))
+        missing-ec (apply set/union (map (comp #(set/difference eight %) set first)
+                                         (cases-matching base #{6 9})))]
+    (some (fn [[in _]]
+            (when (= (set/difference eight (set in)) missing-ec)
+              in))
+          (cases-matching base #{2 3 5}))))
+
+(defn solve-2 [base]
+  (let [eight (set (ffirst (cases-matching base #{8})))
+        five (set (ffirst (cases-matching base #{5})))]
+    (some (fn [[in _]]
+            (when (empty? (set/intersection (set/difference eight (set in))
+                                            (set/difference eight five)))
+              in))
+          (cases-matching base #{2 3}))))
+
+(defn solve-6 [base]
+  (let [eight (set (ffirst (cases-matching base #{8})))
+        three (set (ffirst (cases-matching base #{3})))]
+    (some (fn [[in _]]
+            (when (empty? (set/intersection (set/difference eight (set in))
+                                            (set/difference eight three)))
+              in))
+          (cases-matching base #{6 9}))))
+
 (defn prove [base digit value]
   (assoc (zipmap (keys base) (map #(disj % value) (vals base)))
          digit (set [value])))
 
-(let [base (solve-digits (first ex2))
-      zero (solve-0 base)]
-  (prove base zero 0))
+(defn solution [digits]
+  (let [base (solve-digits digits)
+        zero (solve-0 base)
+        base0 (prove base zero 0)
+        five (solve-5 base0)
+        base5 (prove base0 five 5)
+        two (solve-2 base5)
+        base2 (prove base5 two 2)]
+    (prove base2 (solve-6 base2) 6)))
+
+(solution (first ex2))
+
+
