@@ -55,18 +55,19 @@
                                 [0 6 9])))))]
     base))
 
+(defn cases-matching [base values]
+  (filter (fn [[_ possible]] (set/superset? (set values) possible)) base))
+
 (defn solve-0 [base]
-  (let [eight (set (ffirst (filter (fn [[_ possible]] (= #{8} possible)) base)))
+  (let [eight (set (ffirst (cases-matching base #{8})))
         missing-235
-        (->> base
-             (filter (fn [[in possible]] (set/superset? #{3 2 5} possible)))
+        (->> (cases-matching base #{2 3 5})
              (map (comp #(set/difference eight %) set first))
              (apply set/union))]
-    (some (fn [[in possible]]
-            (when (and (set/superset? #{0 6 9} possible)
-                       (empty? (set/intersection (set/difference eight (set in)) missing-235)))
+    (some (fn [[in _]]
+            (when (empty? (set/intersection (set/difference eight (set in)) missing-235))
               in))
-          base)))
+          (cases-matching base #{0 6 9}))))
 
 (defn prove [base digit value]
   (assoc (zipmap (keys base) (map #(disj % value) (vals base)))
