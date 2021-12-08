@@ -129,3 +129,4 @@
 (assert (= 61229 (part2 (parse "example"))))
 (assert (= 936117 (part2 (parse "input"))))
 
+;; TODO: consider implementing again in Prolog?
