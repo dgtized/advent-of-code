@@ -37,7 +37,7 @@
       (let [(value (lookup input (cons x y)))]
         (if (not (for/first ((v (map (lambda (c) (lookup input c))
                                      (filter (lambda (coord) (valid? width height coord))
-                                      (neighbors (cons x y)))))
+                                             (neighbors (cons x y)))))
                              #:when (<= v value))
                    v))
             (+ 1 value)
@@ -47,3 +47,44 @@
 
 (check-equal? 570 (first-star (load-input "input")))
 (check-equal? 15 (first-star (load-input "example")))
+
+(define (basins input)
+  (let [(height (vector-length input))
+        (width (vector-length (vector-ref input 0)))]
+    (for*/fold ((acc '()))
+               ((y (range height))
+                (x (range width)))
+      (let [(value (lookup input (cons x y)))]
+        (cond ((= value 9)
+               (values acc))
+              ((for/first ((v (map (lambda (c) (lookup input c))
+                                   (filter (lambda (coord) (valid? width height coord))
+                                           (neighbors (cons x y)))))
+                           #:when (<= v value))
+                 v)
+               (values acc))
+              (else
+               (values (cons (cons x y) acc))))))))
+
+(define (grow input basin)
+  (let* [(height (vector-length input))
+         (width (vector-length (vector-ref input 0)))
+         (basin2 (set-union basin
+                            (apply set-union (for/list ((coord (in-set basin)))
+                                               (list->set (filter (lambda (c) (and (valid? width height c)
+                                                                     (< (lookup input c) 9)))
+                                                                        (neighbors coord)))))))]
+    (if (proper-subset? basin basin2)
+        (grow input basin2)
+        basin)))
+
+(define (part2 input)
+  (take (sort (for/list ((basin (basins input)))
+                (set-count (grow input (set basin))))
+              >)
+        3))
+
+(check-equal? 1134 (apply * (part2 (load-input "example"))))
+(check-equal? 899392 (apply * (part2 (load-input "input"))))
+
+
