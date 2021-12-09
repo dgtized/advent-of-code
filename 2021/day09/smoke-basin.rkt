@@ -69,11 +69,11 @@
 (define (grow input basin)
   (let* [(height (vector-length input))
          (width (vector-length (vector-ref input 0)))
-         (basin2 (set-union basin
-                            (apply set-union (for/list ((coord (in-set basin)))
-                                               (list->set (filter (lambda (c) (and (valid? width height c)
-                                                                     (< (lookup input c) 9)))
-                                                                        (neighbors coord)))))))]
+         (expansions (for/list ((coord (in-set basin)))
+                       (list->set (filter (lambda (c) (and (valid? width height c)
+                                                           (< (lookup input c) 9)))
+                                          (neighbors coord)))))
+         (basin2 (apply set-union (cons basin expansions)))]
     (if (proper-subset? basin basin2)
         (grow input basin2)
         basin)))
