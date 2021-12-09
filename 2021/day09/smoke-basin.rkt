@@ -29,11 +29,11 @@
         (y (cdr coords))]
     (vector-ref (vector-ref input y) x)))
 
-(define (low-points input)
+(define (first-star input)
   (let [(height (vector-length input))
         (width (vector-length (vector-ref input 0)))]
-    (for*/list ((y (range height))
-                (x (range width)))
+    (for*/sum ((y (range height))
+               (x (range width)))
       (let [(value (lookup input (cons x y)))]
         (if (not (for/first ((v (map (lambda (c) (lookup input c))
                                      (filter (lambda (coord) (valid? width height coord))
@@ -43,10 +43,7 @@
             (+ 1 value)
             0)))))
 
-(define (first-star input)
-  (filter positive-integer? input))
-
 (require rackunit)
 
-(check-equal? 570 (apply + (first-star (low-points (load-input "input")))))
-(check-equal? 15 (apply + (first-star (low-points (load-input "example")))))
+(check-equal? 570 (first-star (load-input "input")))
+(check-equal? 15 (first-star (load-input "example")))
