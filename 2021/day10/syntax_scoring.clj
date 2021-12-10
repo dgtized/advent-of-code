@@ -47,8 +47,7 @@
 (assert (= [288957 5566 1480781 995444 294] (part2 (parse "example"))))
 
 (defn middle [xs]
-  (let [n (count xs)]
-    (nth (sort xs) (/ n 2))))
+  (nth (sort xs) (/ (count xs) 2)))
 
 (assert (= 288957 (middle (part2 (parse "example")))))
 (assert (= 4038824534 (middle (part2 (parse "input")))))
