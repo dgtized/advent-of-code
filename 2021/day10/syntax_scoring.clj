@@ -37,6 +37,23 @@
 (assert (= 26397 (part1 (parse "example"))))
 (assert (= 268845 (part1 (parse "input"))))
 
+(defn part2 [input]
+  (let [points {")" 1 "]" 2 "}" 3 ">" 4}]
+    (->> input
+         (mapv walk)
+         (remove string?)
+         (mapv (comp (partial map pairs) reverse))
+         (mapv (partial reduce (fn [acc sym] (+ (* acc 5) (get points sym))) 0)))))
+
+(assert (= [288957 5566 1480781 995444 294] (part2 (parse "example"))))
+
+(defn middle [xs]
+  (let [n (count xs)]
+    (nth (sort xs) (/ n 2))))
+
+(assert (= 288957 (middle (part2 (parse "example")))))
+(assert (= 4038824534 (middle (part2 (parse "input")))))
+
 
 
 
