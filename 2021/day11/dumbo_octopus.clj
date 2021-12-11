@@ -68,6 +68,13 @@
 (defn part1 [grid]
   (apply + (mapv count-flashes (take 101 (iterate step grid)))))
 
+(defn part2 [grid]
+  (->> grid
+       (iterate step)
+       (map count-flashes)
+       (take-while (fn [n] (< n 100)))
+       count))
+
 (assert (= [[0 3 9 7 6 6 6 8 6 6]
             [0 7 4 9 7 6 6 9 1 8]
             [0 0 5 3 9 7 6 9 3 3]
@@ -83,8 +90,5 @@
 (assert (= 1656 (part1 (parse "example"))))
 (assert (= 1585 (part1 (parse "input"))))
 
-;; (take 2 (reductions step (parse "example")))
-
-
-
-;; (apply-flashes (apply-flashes (update-vals (grid->map (step (parse "example"))) inc)))
+(assert (= 195 (part2 (parse "example"))))
+(assert (= 382 (part2 (parse "input"))))
