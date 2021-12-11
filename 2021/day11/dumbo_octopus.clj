@@ -34,10 +34,14 @@
 
 (defn flash [grid coord]
   (let [v (get grid coord)]
+    (if (> v 9)
+      (assoc grid coord 0)
+      grid)))
+
+(defn propagate [grid coord]
+  (let [v (get grid coord)]
     (cond (= v 0)
           grid
-          (> v 9)
-          (assoc grid coord 0)
           :else
           (update grid coord inc))))
 
@@ -45,9 +49,9 @@
   (let [flashes (to-flash grid)]
     (if (empty? flashes)
       grid
-      (recur (->> (mapcat neighbors flashes)
-                  (into flashes)
-                  (reduce flash grid))))))
+      (recur (reduce propagate
+                     (reduce flash grid flashes)
+                     (mapcat neighbors flashes))))))
 
 (defn iterate-cycles
   [n f x]
@@ -63,7 +67,7 @@
 (comment (map->grid (grid->map (parse "example")))
          (step (step (step (parse "example")))))
 
-(iterate-cycles 2 step (parse "example"))
+(iterate-cycles 100 step (parse "example"))
 
 
 
