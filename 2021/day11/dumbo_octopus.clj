@@ -57,11 +57,11 @@
   (last (take (inc n) (iterate f x))))
 
 (defn step [grid]
-  (as-> grid g
-    (grid->map g)
-    (update-vals g inc)
-    (apply-flashes g)
-    (map->grid g)))
+  (-> grid
+      grid->map
+      (update-vals inc)
+      apply-flashes
+      map->grid))
 
 (comment (map->grid (grid->map (parse "example")))
          (step (step (step (parse "example")))))
