@@ -67,8 +67,7 @@
 
 (defn count-flashes [grid]
   (->> grid
-       grid->map
-       vals
+       flatten
        (filter zero?)
        count))
 
