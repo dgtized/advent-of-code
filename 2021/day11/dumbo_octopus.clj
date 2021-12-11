@@ -5,13 +5,17 @@
   (mapv (fn [line] (mapv (comp parse-long str) (seq line)))
         (str/split-lines (slurp filename))))
 
-(defn grid->map [grid]
+(defn grid->map
+  "Change grid into a map of coords -> value."
+  [grid]
   (into {}
         (for [j (range 10)
               i (range 10)]
           {[i j] (nth (nth grid j) i)})))
 
-(defn map->grid [map]
+(defn map->grid
+  "Convert map from back into a grid for easier debug output."
+  [map]
   (->> (for [j (range 10)
              i (range 10)]
          (get map [i j]))
@@ -52,10 +56,6 @@
                  (zero flashes)
                  (propagate flashes))))))
 
-(defn iterate-cycles
-  [n f x]
-  (last (take (inc n) (iterate f x))))
-
 (defn step [grid]
   (-> grid
       grid->map
@@ -63,23 +63,31 @@
       apply-flashes
       map->grid))
 
-(comment (map->grid (grid->map (parse "example")))
-         (step (step (step (parse "example")))))
+(assert (= (parse "step100") (last (take 101 (iterate step (parse "example"))))))
+(assert (= (parse "example") (map->grid (grid->map (parse "example")))))
+(comment (step (step (step (parse "example")))))
 
 (defn count-flashes [grid]
-  (count (filter zero? (vals (grid->map grid)))))
+  (->> grid
+       grid->map
+       vals
+       (filter zero?)
+       count))
 
 (defn part1 [grid]
-  (apply + (mapv count-flashes (take 101 (iterate step grid)))))
+  (->> grid
+       (iterate step)
+       (take 101)
+       (mapv count-flashes)
+       (apply +)))
 
+;; Lazily count flashes at each step until they all flash
 (defn part2 [grid]
   (->> grid
        (iterate step)
        (map count-flashes)
        (take-while (fn [n] (< n 100)))
        count))
-
-(assert (= (parse "step100") (iterate-cycles 100 step (parse "example"))))
 
 (assert (= 1656 (part1 (parse "example"))))
 (assert (= 1585 (part1 (parse "input"))))
