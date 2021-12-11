@@ -33,17 +33,12 @@
         grid))
 
 (defn flash [grid coord]
-  (let [v (get grid coord)]
-    (if (> v 9)
-      (assoc grid coord 0)
-      grid)))
+  (assoc grid coord 0))
 
 (defn propagate [grid coord]
-  (let [v (get grid coord)]
-    (cond (= v 0)
-          grid
-          :else
-          (update grid coord inc))))
+  (if (= (get grid coord) 0)
+    grid
+    (update grid coord inc)))
 
 (defn apply-flashes [grid]
   (let [flashes (to-flash grid)]
@@ -67,7 +62,19 @@
 (comment (map->grid (grid->map (parse "example")))
          (step (step (step (parse "example")))))
 
-(iterate-cycles 100 step (parse "example"))
+(assert (= [[0 3 9 7 6 6 6 8 6 6]
+            [0 7 4 9 7 6 6 9 1 8]
+            [0 0 5 3 9 7 6 9 3 3]
+            [0 0 0 4 2 9 7 8 2 2]
+            [0 0 0 4 2 2 9 8 9 2]
+            [0 0 5 3 2 2 2 8 7 7]
+            [0 5 3 2 2 2 2 9 6 6]
+            [9 3 2 2 2 2 8 9 6 6]
+            [7 9 2 2 2 8 6 8 6 6]
+            [6 7 8 9 9 9 8 7 6 6]]
+           (iterate-cycles 100 step (parse "example"))))
+
+;; (take 2 (reductions step (parse "example")))
 
 
 
