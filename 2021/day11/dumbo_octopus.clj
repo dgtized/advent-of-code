@@ -66,22 +66,17 @@
 (comment (step (step (step (parse "example")))))
 
 (defn count-flashes [grid]
-  (->> grid
-       flatten
-       (filter zero?)
-       count))
+  (count (filter zero? (flatten grid))))
 
 (defn part1 [grid]
-  (->> grid
-       (iterate step)
+  (->> (iterate step grid)
        (take 101)
        (mapv count-flashes)
        (apply +)))
 
 ;; Lazily count flashes at each step until they all flash
 (defn part2 [grid]
-  (->> grid
-       (iterate step)
+  (->> (iterate step grid)
        (map count-flashes)
        (take-while (fn [n] (< n 100)))
        count))
