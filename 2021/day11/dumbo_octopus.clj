@@ -7,20 +7,22 @@
 
 (defn grid->map [grid]
   (into {}
-        (for [i (range 10)
-              j (range 10)]
+        (for [j (range 10)
+              i (range 10)]
           {[i j] (nth (nth grid j) i)})))
 
 (defn map->grid [map]
-  (->> (for [i (range 10)
-             j (range 10)]
+  (->> (for [j (range 10)
+             i (range 10)]
          (get map [i j]))
        (partition 10)
        (mapv vec)))
 
-;; (defn step [grid]
-;;   (let [m (grid->map grid)]))
+(defn step [grid]
+  (let [m (grid->map grid)]
+    (map->grid (update-vals m inc))))
 
 (comment (map->grid (grid->map (parse "example"))))
 
+(step (parse "example"))
 
