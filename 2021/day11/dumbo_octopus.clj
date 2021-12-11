@@ -18,11 +18,53 @@
        (partition 10)
        (mapv vec)))
 
+(defn neighbors [[x y]]
+  (filter (fn [[x y]] (and (<= 0 x 9) (<= 0 y 9)))
+          (for [j [-1 0 1]
+                i [-1 0 1]
+                :when (not= i j 0)]
+            [(+ x i) (+ y j)])))
+
+(assert (= [[0 0] [2 0] [0 1] [1 1] [2 1]] (neighbors [1 0])))
+
+(defn to-flash [grid]
+  (keep (fn [[coord value]]
+          (when (> value 9) coord))
+        grid))
+
+(defn flash [grid coord]
+  (let [v (get grid coord)]
+    (cond (= v 0)
+          grid
+          (> v 9)
+          (assoc grid coord 0)
+          :else
+          (update grid coord inc))))
+
+(defn apply-flashes [grid]
+  (let [flashes (to-flash grid)]
+    (if (empty? flashes)
+      grid
+      (recur (->> (mapcat neighbors flashes)
+                  (into flashes)
+                  (reduce flash grid))))))
+
+(defn iterate-cycles
+  [n f x]
+  (last (take (inc n) (iterate f x))))
+
 (defn step [grid]
-  (let [m (grid->map grid)]
-    (map->grid (update-vals m inc))))
+  (as-> grid g
+    (grid->map g)
+    (update-vals g inc)
+    (apply-flashes g)
+    (map->grid g)))
 
-(comment (map->grid (grid->map (parse "example"))))
+(comment (map->grid (grid->map (parse "example")))
+         (step (step (step (parse "example")))))
 
-(step (parse "example"))
+(iterate-cycles 2 step (parse "example"))
 
+
+
+;; (apply-flashes (apply-flashes (update-vals (grid->map (step (parse "example"))) inc)))
