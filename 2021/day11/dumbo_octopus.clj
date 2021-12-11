@@ -32,21 +32,25 @@
           (when (> value 9) coord))
         grid))
 
-(defn flash [grid coord]
-  (assoc grid coord 0))
+(defn zero [grid flashes]
+  (reduce (fn [g c] (assoc g c 0))
+          grid flashes))
 
-(defn propagate [grid coord]
-  (if (= (get grid coord) 0)
-    grid
-    (update grid coord inc)))
+(defn propagate [grid flashes]
+  (reduce (fn [g c]
+            (if (zero? (get g c))
+              g
+              (update g c inc)))
+          grid
+          (mapcat neighbors flashes)))
 
 (defn apply-flashes [grid]
   (let [flashes (to-flash grid)]
     (if (empty? flashes)
       grid
-      (recur (reduce propagate
-                     (reduce flash grid flashes)
-                     (mapcat neighbors flashes))))))
+      (recur (-> grid
+                 (zero flashes)
+                 (propagate flashes))))))
 
 (defn iterate-cycles
   [n f x]
