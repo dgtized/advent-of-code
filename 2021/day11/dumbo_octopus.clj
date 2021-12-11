@@ -45,16 +45,14 @@
             (if (zero? (get g c))
               g
               (update g c inc)))
-          grid
-          (mapcat neighbors flashes)))
+          grid flashes))
 
 (defn apply-flashes [grid]
   (let [flashes (to-flash grid)]
     (if (empty? flashes)
       grid
-      (recur (-> grid
-                 (zero flashes)
-                 (propagate flashes))))))
+      (recur (-> (zero grid flashes)
+                 (propagate (mapcat neighbors flashes)))))))
 
 (defn step [grid]
   (-> grid
