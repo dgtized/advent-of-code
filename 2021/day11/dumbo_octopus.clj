@@ -62,6 +62,12 @@
 (comment (map->grid (grid->map (parse "example")))
          (step (step (step (parse "example")))))
 
+(defn count-flashes [grid]
+  (count (filter zero? (vals (grid->map grid)))))
+
+(defn part1 [grid]
+  (apply + (mapv count-flashes (take 101 (iterate step grid)))))
+
 (assert (= [[0 3 9 7 6 6 6 8 6 6]
             [0 7 4 9 7 6 6 9 1 8]
             [0 0 5 3 9 7 6 9 3 3]
@@ -73,6 +79,9 @@
             [7 9 2 2 2 8 6 8 6 6]
             [6 7 8 9 9 9 8 7 6 6]]
            (iterate-cycles 100 step (parse "example"))))
+
+(assert (= 1656 (part1 (parse "example"))))
+(assert (= 1585 (part1 (parse "input"))))
 
 ;; (take 2 (reductions step (parse "example")))
 
