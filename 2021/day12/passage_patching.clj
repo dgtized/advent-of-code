@@ -24,13 +24,22 @@
        (= (last path) "end")
        (not (some #{"start" "end"} (rest (butlast path))))))
 
-(defn small-caves-once? [path]
-  (let [f (frequencies path)]
-    (not (some (fn [[n c]] (and (small? n) (> c 1))) f))))
+(defn paths [successors path]
+  (let [seen (set path)
+        this-node (peek path)]
+    (if (= this-node "end")
+      [path]
+      (->> (successors this-node)
+           (remove (fn [n] (and (small? n) (seen n))))
+           (mapcat #(paths successors (conj path %)))
+           (cons path)))))
 
 (defn legal-paths [g]
-  (filter (fn [path] (and (start-to-end? path) (small-caves-once? path)))
-          (lag/paths (lg/successors g) ["start"])))
+  (->> (paths (lg/successors g) ["start"])
+       (filter start-to-end?)))
 
 (assert (= 10 (count (legal-paths (->graph (parse "example1"))))))
-;; (assert (= 19 (count (legal-paths (->graph (parse "example2"))))))
+(assert (= 19 (count (legal-paths (->graph (parse "example2"))))))
+(assert (= 226 (count (legal-paths (->graph (parse "example3"))))))
+(assert (= 5178 (count (legal-paths (->graph (parse "input"))))))
+
