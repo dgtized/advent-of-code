@@ -12,9 +12,6 @@
   (map #(str/split % #"-")
        (str/split-lines (slurp filename))))
 
-;; (defn ->graph [edges]
-;;   (apply lg/graph edges))
-
 (defn ->graph
   "Map node to set of successor nodes it is linked to."
   [edges]
@@ -24,40 +21,38 @@
                 (update b (fnil conj #{}) a)))
           {} edges))
 
-(defn paths [successors path]
-  (let [seen (set path)
-        this-node (peek path)]
-    (if (= this-node "end")
-      [path]
-      (->> (successors this-node)
-           (remove (fn [n] (and (small? n) (seen n))))
-           (mapcat #(paths successors (conj path %)))))))
+(defn part1
+  ([successors] (part1 successors ["start"]))
+  ([successors path]
+   (let [seen (set path)
+         this-node (peek path)]
+     (if (= this-node "end")
+       [path]
+       (->> (successors this-node)
+            (remove (fn [n] (and (small? n) (seen n))))
+            (mapcat #(part1 successors (conj path %))))))))
 
-(defn legal-paths [g]
-  (paths g ["start"]))
+(assert (= 10 (count (part1 (->graph (parse "example1"))))))
+(assert (= 19 (count (part1 (->graph (parse "example2"))))))
+(assert (= 226 (count (part1 (->graph (parse "example3"))))))
+(assert (= 5178 (count (part1 (->graph (parse "input"))))))
 
-(assert (= 10 (count (legal-paths (->graph (parse "example1"))))))
-(assert (= 19 (count (legal-paths (->graph (parse "example2"))))))
-(assert (= 226 (count (legal-paths (->graph (parse "example3"))))))
-(assert (= 5178 (count (legal-paths (->graph (parse "input"))))))
-
-(defn paths2 [successors path]
-  (let [pf (frequencies path)
-        seen (set path)
-        seen-twice (some (fn [[n c]] (when (and (small? n) (> c 1)) n)) pf)
-        this-node (peek path)]
-    (if (= this-node "end")
-      [path]
-      (->> (successors this-node)
-           (remove
-            (fn [n]
-              (when (seen n)
-                (or (= n "start")
-                    (and (small? n) (or (> (get pf n 0) 1) seen-twice))))))
-           (mapcat #(paths2 successors (conj path %)))))))
-
-(defn part2 [g]
-  (paths2 g ["start"]))
+(defn part2
+  ([successors] (part2 successors ["start"]))
+  ([successors path]
+   (let [pf (frequencies path)
+         seen (set path)
+         seen-twice (some (fn [[n c]] (when (and (small? n) (> c 1)) n)) pf)
+         this-node (peek path)]
+     (if (= this-node "end")
+       [path]
+       (->> (successors this-node)
+            (remove
+             (fn [n]
+               (when (seen n)
+                 (or (= n "start")
+                     (and (small? n) (or (> (get pf n 0) 1) seen-twice))))))
+            (mapcat #(part2 successors (conj path %))))))))
 
 (assert (= 36 (count (part2 (->graph (parse "example1"))))))
 (assert (= 103 (count (part2 (->graph (parse "example2"))))))
