@@ -2,9 +2,6 @@
   (:require
    [clojure.string :as str]))
 
-(defn big? [room]
-  (= room (str/upper-case room)))
-
 (defn small? [room]
   (= room (str/lower-case room)))
 
