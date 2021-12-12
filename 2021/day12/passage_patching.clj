@@ -1,9 +1,6 @@
 (ns passage-pathing
   (:require
    [clojure.string :as str]
-   [loom.alg :as la]
-   [loom.alg-generic :as lag]
-   [loom.derived :as ld]
    [loom.graph :as lg]))
 
 (defn big? [room]
