@@ -19,11 +19,6 @@
 (defn ->graph [edges]
   (apply lg/graph edges))
 
-(defn start-to-end? [path]
-  (and (= (first path) "start")
-       (= (last path) "end")
-       (not (some #{"start" "end"} (rest (butlast path))))))
-
 (defn paths [successors path]
   (let [seen (set path)
         this-node (peek path)]
@@ -31,12 +26,10 @@
       [path]
       (->> (successors this-node)
            (remove (fn [n] (and (small? n) (seen n))))
-           (mapcat #(paths successors (conj path %)))
-           (cons path)))))
+           (mapcat #(paths successors (conj path %)))))))
 
 (defn legal-paths [g]
-  (->> (paths (lg/successors g) ["start"])
-       (filter start-to-end?)))
+  (paths (lg/successors g) ["start"]))
 
 (assert (= 10 (count (legal-paths (->graph (parse "example1"))))))
 (assert (= 19 (count (legal-paths (->graph (parse "example2"))))))
