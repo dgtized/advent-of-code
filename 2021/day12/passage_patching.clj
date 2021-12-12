@@ -1,7 +1,6 @@
 (ns passage-pathing
   (:require
-   [clojure.string :as str]
-   [loom.graph :as lg]))
+   [clojure.string :as str]))
 
 (defn big? [room]
   (= room (str/upper-case room)))
@@ -13,8 +12,17 @@
   (map #(str/split % #"-")
        (str/split-lines (slurp filename))))
 
-(defn ->graph [edges]
-  (apply lg/graph edges))
+;; (defn ->graph [edges]
+;;   (apply lg/graph edges))
+
+(defn ->graph
+  "Map node to set of successor nodes it is linked to."
+  [edges]
+  (reduce (fn [acc [a b]]
+            (-> acc
+                (update a (fnil conj #{}) b)
+                (update b (fnil conj #{}) a)))
+          {} edges))
 
 (defn paths [successors path]
   (let [seen (set path)
@@ -26,7 +34,7 @@
            (mapcat #(paths successors (conj path %)))))))
 
 (defn legal-paths [g]
-  (paths (lg/successors g) ["start"]))
+  (paths g ["start"]))
 
 (assert (= 10 (count (legal-paths (->graph (parse "example1"))))))
 (assert (= 19 (count (legal-paths (->graph (parse "example2"))))))
@@ -49,7 +57,7 @@
            (mapcat #(paths2 successors (conj path %)))))))
 
 (defn part2 [g]
-  (paths2 (lg/successors g) ["start"]))
+  (paths2 g ["start"]))
 
 (assert (= 36 (count (part2 (->graph (parse "example1"))))))
 (assert (= 103 (count (part2 (->graph (parse "example2"))))))
