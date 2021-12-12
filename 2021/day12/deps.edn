@@ -1,0 +1,2 @@
+{:deps {org.clojure/clojure {:mvn/version "1.11.0-alpha3"}
+        aysylu/loom {:mvn/version "1.0.2"}}}
