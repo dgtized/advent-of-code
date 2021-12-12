@@ -36,3 +36,25 @@
 (assert (= 226 (count (legal-paths (->graph (parse "example3"))))))
 (assert (= 5178 (count (legal-paths (->graph (parse "input"))))))
 
+(defn paths2 [successors path]
+  (let [pf (frequencies path)
+        seen (set path)
+        seen-twice (some (fn [[n c]] (when (and (small? n) (> c 1)) n)) pf)
+        this-node (peek path)]
+    (if (= this-node "end")
+      [path]
+      (->> (successors this-node)
+           (remove
+            (fn [n]
+              (when (seen n)
+                (or (= n "start")
+                    (and (small? n) (or (> (get pf n 0) 1) seen-twice))))))
+           (mapcat #(paths2 successors (conj path %)))))))
+
+(defn part2 [g]
+  (paths2 (lg/successors g) ["start"]))
+
+(assert (= 36 (count (part2 (->graph (parse "example1"))))))
+(assert (= 103 (count (part2 (->graph (parse "example2"))))))
+(assert (= 3509 (count (part2 (->graph (parse "example3"))))))
+(assert (= 130094 (count (part2 (->graph (parse "input"))))))
