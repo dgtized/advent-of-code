@@ -45,3 +45,25 @@
 
 (assert (= 17 (part1 (parse "example"))))
 (assert (= 693 (part1 (parse "input"))))
+
+(defn ->grid [coords]
+  (let [mx (inc (first (apply max-key first coords)))
+        my (inc (second (apply max-key second coords)))
+        grid (zipmap coords (repeat "#"))]
+    (->> (for [y (range my)
+               x (range mx)]
+           (get grid [x y] "."))
+         (partition mx)
+         (mapv (partial apply str)))))
+
+(defn part2 [[coords folds]]
+  (->grid (reduce fold coords folds)))
+
+(assert (= ["#####" "#...#" "#...#" "#...#" "#####"]
+           (part2 (parse "example"))))
+
+(do (println)
+    (doseq [line (part2 (parse "input"))]
+      (println (reverse line))))
+
+;; UCLZRAZU
