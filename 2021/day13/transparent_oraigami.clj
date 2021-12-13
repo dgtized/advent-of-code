@@ -35,19 +35,13 @@
 (assert (= #{[0 0] [1 0] [2 0] [3 0] [4 0]}
            (fold-x 5 [[0 0] [2 0] [3 0] [6 0] [9 0]])))
 
-(defn fold [[axis offset] coords]
+(defn fold [coords [axis offset]]
   (if (= "x" axis)
     (fold-x (parse-long offset) coords)
     (fold-y (parse-long offset) coords)))
 
-(let [[coords folds] (parse "example")]
-  {:coords coords
-   :x (apply max-key first coords)
-   :y (apply max-key second coords)
-   :fold (fold-y 7 coords)})
-
 (defn part1 [[coords folds]]
-  (count (fold (first folds) coords)))
+  (count (fold coords (first folds))))
 
 (assert (= 17 (part1 (parse "example"))))
 (assert (= 693 (part1 (parse "input"))))
