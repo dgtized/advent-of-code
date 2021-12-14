@@ -30,10 +30,40 @@
 
 (assert (= 2703 (second (part1 10 (parse "input")))))
 
+(defn expansions [rules]
+  (into {}
+        (for [[k v] rules]
+          (let [[a b] k]
+            [k [(str a v) (str v b)]]))))
+
+(defn count-expansions [exp-rules freqs]
+  (->> freqs
+       (mapcat (fn [[rule n]]
+                 (for [exp (exp-rules rule)]
+                   {exp n})))
+       (apply merge-with +)))
+
+(defn part2 [step {:keys [rules template]}]
+  (let [template-freqs (->> template
+                            (partition 2 1)
+                            (map (partial apply str))
+                            frequencies)
+        counts (nth (iterate (partial count-expansions (expansions rules)) template-freqs) step)
+        freqs (apply merge-with +
+                     (into (for [[e n] counts]
+                             {(first e) n})
+                           [{(last template) 1}]))
+        values (sort (vals freqs))]
+    [freqs (- (last values) (first values))]))
+
+(assert (= 1588 (second (part2 10 (parse "example")))))
+(assert (= 2188189693529 (second (part2 40 (parse "example")))))
+(assert (= 2984946368465 (second (part2 40 (parse "input")))))
+
 ;; (for [i (range 1 20)]
 ;;   (time (second (part1 i (parse "example")))))
 
-(count (into #{} (map (partial apply str) (partition 2 1 (:template (parse "input"))))))
+(frequencies (map (partial apply str) (partition 2 1 (:template (parse "input")))))
 
 (defn pair-expansion [step pair rules]
   (take (inc step) (iterate (partial apply-rules rules) pair)))
@@ -59,7 +89,7 @@
 ;; (assert (= 2188189693529 (second (part1 40 (parse "example")))))
 
 (defn best-worst [step {:keys [rules template]}]
-  (let [result (last (take (inc step) (iterate (partial apply-rules rules) template)))
+  (let [result (nth (iterate (partial apply-rules rules) template) step)
         freqs (sort-by second (frequencies result))]
     [(last freqs) (first freqs)]))
 
