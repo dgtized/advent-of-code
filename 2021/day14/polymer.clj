@@ -64,38 +64,31 @@
 (assert (= 2188189693529 (second (part2 40 (parse "example")))))
 (assert (= 2984946368465 (second (part2 40 (parse "input")))))
 
-;; (for [i (range 1 20)]
-;;   (time (second (part1 i (parse "example")))))
-
-(frequencies (map (partial apply str) (partition 2 1 (:template (parse "input")))))
-
-(defn pair-expansion [step pair rules]
-  (take (inc step) (iterate (partial apply-rules rules) pair)))
-
-(let [{:keys [rules]} (parse "example")]
-  (for [form ["NN" "NC" "CB"]]
-    (time (frequencies (last (pair-expansion 10 form rules))))))
-
-(let [{:keys [rules]} (parse "example")]
-  (for [form ["NN" "NC" "CB"]]
-    (map (comp (partial sort-by first) frequencies) (pair-expansion 6 form rules))))
-
-(defn step-rules [{:keys [rules]}]
-  (for [match (keys rules)
-        :let [freqs (frequencies (last (take 11 (iterate (partial apply-rules rules) match))))]]
-    [match freqs (- (get freqs \B 0) (get freqs \H 0))]))
-
+;; various failed attempts to expand the rules instead of the template or solve the expansion
 (comment
+  (defn pair-expansion [step pair rules]
+    (take (inc step) (iterate (partial apply-rules rules) pair)))
+
+  (let [{:keys [rules]} (parse "example")]
+    (for [form ["NN" "NC" "CB"]]
+      (time (frequencies (last (pair-expansion 10 form rules))))))
+
+  (let [{:keys [rules]} (parse "example")]
+    (for [form ["NN" "NC" "CB"]]
+      (map (comp (partial sort-by first) frequencies) (pair-expansion 6 form rules))))
+
+  (defn step-rules [{:keys [rules]}]
+    (for [match (keys rules)
+          :let [freqs (frequencies (last (take 11 (iterate (partial apply-rules rules) match))))]]
+      [match freqs (- (get freqs \B 0) (get freqs \H 0))]))
+
   (step-rules (parse "example"))
-  (step-rules (parse "input")))
+  (step-rules (parse "input"))
 
-;; (time (second (part1 32 (parse "example"))))
-;; (assert (= 2188189693529 (second (part1 40 (parse "example")))))
+  (defn best-worst [step {:keys [rules template]}]
+    (let [result (nth (iterate (partial apply-rules rules) template) step)
+          freqs (sort-by second (frequencies result))]
+      [(last freqs) (first freqs)]))
+  (best-worst 10 (parse "example"))
+  (best-worst 10 (parse "input")))
 
-(defn best-worst [step {:keys [rules template]}]
-  (let [result (nth (iterate (partial apply-rules rules) template) step)
-        freqs (sort-by second (frequencies result))]
-    [(last freqs) (first freqs)]))
-
-(best-worst 10 (parse "example"))
-(best-worst 10 (parse "input"))
