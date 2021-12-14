@@ -36,12 +36,15 @@
           (let [[a b] k]
             [k [(str a v) (str v b)]]))))
 
+(defn sum-of-maps [maps]
+  (apply merge-with + maps))
+
 (defn count-expansions [exp-rules freqs]
   (->> freqs
        (mapcat (fn [[rule n]]
                  (for [exp (exp-rules rule)]
                    {exp n})))
-       (apply merge-with +)))
+       sum-of-maps))
 
 (defn part2 [step {:keys [rules template]}]
   (let [template-freqs (->> template
@@ -49,10 +52,11 @@
                             (map (partial apply str))
                             frequencies)
         counts (nth (iterate (partial count-expansions (expansions rules)) template-freqs) step)
-        freqs (apply merge-with +
-                     (into (for [[e n] counts]
-                             {(first e) n})
-                           [{(last template) 1}]))
+        freqs (-> (for [[e n] counts]
+                    {(first e) n})
+                  (into
+                   [{(last template) 1}])
+                  sum-of-maps)
         values (sort (vals freqs))]
     [freqs (- (last values) (first values))]))
 
