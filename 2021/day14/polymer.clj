@@ -33,24 +33,23 @@
 ;; (for [i (range 1 20)]
 ;;   (time (second (part1 i (parse "example")))))
 
+(count (into #{} (map (partial apply str) (partition 2 1 (:template (parse "input"))))))
+
 (defn pair-expansion [step pair rules]
   (take (inc step) (iterate (partial apply-rules rules) pair)))
 
 (let [{:keys [rules]} (parse "example")]
   (for [form ["NN" "NC" "CB"]]
-    (pair-expansion 6 form rules)))
+    (time (frequencies (last (pair-expansion 10 form rules))))))
 
 (let [{:keys [rules]} (parse "example")]
   (for [form ["NN" "NC" "CB"]]
     (map (comp (partial sort-by first) frequencies) (pair-expansion 6 form rules))))
 
 (defn step-rules [{:keys [rules]}]
-  (for [[match expansion] rules
-        :let [result1 (apply str (interpose expansion match))
-              result2 (apply-rules rules result1)
-              result3 (apply-rules rules result2)
-              result4 (apply-rules rules result3)]]
-    [match result1 result2 result3 result4 (frequencies result3) (frequencies result4)]))
+  (for [match (keys rules)
+        :let [freqs (frequencies (last (take 11 (iterate (partial apply-rules rules) match))))]]
+    [match freqs (- (get freqs \B 0) (get freqs \H 0))]))
 
 (comment
   (step-rules (parse "example"))
@@ -58,11 +57,6 @@
 
 ;; (time (second (part1 32 (parse "example"))))
 ;; (assert (= 2188189693529 (second (part1 40 (parse "example")))))
-
-
-(let [{:keys [template rules]} (parse "input")]
-  (for [form (take 2 (partition 2 1 template))]
-    (map (comp (partial sort-by second) frequencies) (pair-expansion 10 form rules))))
 
 (defn best-worst [step {:keys [rules template]}]
   (let [result (last (take (inc step) (iterate (partial apply-rules rules) template)))
