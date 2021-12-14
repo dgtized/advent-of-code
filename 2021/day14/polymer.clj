@@ -30,4 +30,5 @@
 (assert (= 1588 (second (part1 10 (parse "example")))))
 
 (assert (= 2703 (second (part1 10 (parse "input")))))
+;; (assert (= 2188189693529 (second (part1 40 (parse "example")))))
 
