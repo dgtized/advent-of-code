@@ -73,3 +73,7 @@
 ;; (time (second (part1 32 (parse "example"))))
 ;; (assert (= 2188189693529 (second (part1 40 (parse "example")))))
 
+
+(let [{:keys [template rules]} (parse "input")]
+  (for [form (take 2 (partition 2 1 template))]
+    (map (comp (partial sort-by second) frequencies) (pair-expansion 10 form rules))))
