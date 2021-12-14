@@ -18,10 +18,13 @@
                             (rules (str a b))))
                      [(last template)])))
 
+(defn most-least-diff [freqs]
+  (let [values (vals freqs)]
+    (- (apply max values) (apply min values))))
+
 (defn part1 [step {:keys [rules template]}]
-  (let [result (last (take (inc step) (iterate (partial apply-rules rules) template)))
-        freqs (vals (frequencies result))]
-    [result (- (apply max freqs) (apply min freqs))]))
+  (let [result (last (take (inc step) (iterate (partial apply-rules rules) template)))]
+    [result (most-least-diff (frequencies result))]))
 
 (assert (= "NCNBCHB" (first (part1 1 (parse "example")))))
 (assert (= "NBCCNBBBCBHCB" (first (part1 2 (parse "example")))))
@@ -56,9 +59,8 @@
                     {(first e) n})
                   (into
                    [{(last template) 1}])
-                  sum-of-maps)
-        values (sort (vals freqs))]
-    [freqs (- (last values) (first values))]))
+                  sum-of-maps)]
+    [freqs (most-least-diff freqs)]))
 
 (assert (= 1588 (second (part2 10 (parse "example")))))
 (assert (= 2188189693529 (second (part2 40 (parse "example")))))
