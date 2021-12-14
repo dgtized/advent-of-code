@@ -50,15 +50,19 @@
        sum-of-maps))
 
 (defn part2 [step {:keys [rules template]}]
-  (let [template-freqs (->> template
-                            (partition 2 1)
-                            (map (partial apply str))
-                            frequencies)
-        counts (nth (iterate (partial count-expansions (expansions rules)) template-freqs) step)
-        freqs (-> (for [[e n] counts]
-                    {(first e) n})
-                  (into
-                   [{(last template) 1}])
+  (let [initial-freqs
+        (->> template
+             (partition 2 1)
+             (map (partial apply str))
+             frequencies)
+
+        counts-at-step
+        (nth (iterate (partial count-expansions (expansions rules))
+                      initial-freqs)
+             step)
+
+        freqs (-> (for [[e n] counts-at-step] {(first e) n})
+                  (conj {(last template) 1})
                   sum-of-maps)]
     [freqs (most-least-diff freqs)]))
 
@@ -93,4 +97,3 @@
       [(last freqs) (first freqs)]))
   (best-worst 10 (parse "example"))
   (best-worst 10 (parse "input")))
-
