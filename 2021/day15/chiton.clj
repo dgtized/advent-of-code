@@ -1,6 +1,5 @@
 (ns chiton
   (:require [clojure.string :as str]
-            [loom.alg :as la]
             [clojure.data.priority-map :as dpm]))
 
 (defn parse [filename]
