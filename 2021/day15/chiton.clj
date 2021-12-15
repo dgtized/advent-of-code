@@ -53,3 +53,31 @@
 (assert (= 40 (apply + (part1 (parse "example") [9 9]))))
 (assert (= 415 (apply + (part1 (parse "input") [99 99]))))
 (assert (= 315 (apply + (part1 (parse "expanded") [49 49]))))
+
+(defn incr-grid [grid [x y] increase]
+  (into {}
+        (for [[[i j] v] grid
+              :let [nv (+ v increase)]]
+          [[(+ x i) (+ y j)] (if (> nv 9) (- nv 9) nv)])))
+
+(defn expand [grid]
+  (let [size (dims grid)]
+    (apply merge
+           (for [i (range 5)
+                 j (range 5)]
+             (incr-grid grid [(* size i) (* size j)] (+ i j))))))
+
+(defn map->grid
+  [grid]
+  (let [size (dims grid)]
+    (->> (for [j (range size)
+               i (range size)]
+           (get grid [i j]))
+         (partition size)
+         (mapv vec))))
+
+(assert (= (mapv (partial apply str) (map->grid (expand (parse "example"))))
+           (mapv (partial apply str) (map->grid (parse "expanded")))))
+(assert (= 315 (apply + (part1 (expand (parse "example")) [49 49]))))
+(assert (= 2864 (apply + (part1 (expand (parse "input")) [499 499]))))
+
