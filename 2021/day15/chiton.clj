@@ -52,3 +52,4 @@
 
 (assert (= 40 (apply + (part1 (parse "example") [9 9]))))
 (assert (= 415 (apply + (part1 (parse "input") [99 99]))))
+(assert (= 315 (apply + (part1 (parse "expanded") [49 49]))))
