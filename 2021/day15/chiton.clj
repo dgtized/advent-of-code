@@ -46,12 +46,16 @@
                          (pop queue)
                          (neighbors grid current))))))))
 
-(defn part1 [grid target]
-  (rest (map (partial cost grid) (search grid [0 0] target))))
+(defn path [grid]
+  (let [n (dec (dims grid))]
+    (search grid [0 0] [n n])))
 
-(assert (= 40 (apply + (part1 (parse "example") [9 9]))))
-(assert (= 415 (apply + (part1 (parse "input") [99 99]))))
-(assert (= 315 (apply + (part1 (parse "expanded") [49 49]))))
+(defn part1 [grid]
+  (apply + (rest (map (partial cost grid) (path grid)))))
+
+(assert (= 40 (part1 (parse "example"))))
+(assert (= 415 (part1 (parse "input"))))
+(assert (= 315 (part1 (parse "expanded"))))
 
 (defn incr-grid [grid [x y] increase]
   (into {}
@@ -77,6 +81,5 @@
 
 (assert (= (mapv (partial apply str) (map->grid (expand (parse "example"))))
            (mapv (partial apply str) (map->grid (parse "expanded")))))
-(assert (= 315 (apply + (part1 (expand (parse "example")) [49 49]))))
-(assert (= 2864 (apply + (part1 (expand (parse "input")) [499 499]))))
-
+(assert (= 315 (part1 (expand (parse "example")))))
+(assert (= 2864 (part1 (expand (parse "input")))))
