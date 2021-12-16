@@ -31,38 +31,73 @@
                   [(subs group 1)]
                   (cons (subs group 1) (decode-literal (subs in 5))))))))
 
-(defn decode-packet [in offset]
-  (println)
-  (println in)
-  (loop [base offset packets []]
-    (if (< (- (count in) base) 12)
+(defn decode-packet [in]
+  (loop [base 0 packets []]
+    (if (<= (- (count in) base) 10)
       packets
       (let [version (bits->int (subs in base (+ base 3)))
             type-id (bits->int (subs in (+ base 3) (+ base 6)))
-            control-id (bits->int (subs in (+ base 6) (+ base 7)))]
-        (println [base version type-id (subs in base)])
-        (cond (= type-id 4)
-              (let [groups (decode-literal (subs in 6))
-                    size (+ 6 (* (count groups) 5))]
-                (recur
-                 (+ base size)
-                 (conj packets [[:literal size] version type-id (bits->int (apply str groups))])))
-              (= control-id 0)
-              (let [sub-packet-length (bits->int (subs in (+ base 7) (+ base 22)))
-                    children (decode-packet (subs in (+ base 22) (+ base 22 sub-packet-length)) 0)
-                    size (apply + (map #(get-in % [0 1]) children))]
-                (recur (+ base 22 sub-packet-length)
-                       (conj packets [[:sub-bit size] version type-id children])))
-              (= control-id 1)
-              (let [n-sub-packets (bits->int (subs in (+ base 7) (+ base 18)))
-                    children (take n-sub-packets (decode-packet (subs in (+ base 18)) 0))
-                    size (apply + (map #(get-in % [0 1]) children))]
-                (recur (+ base 18 size)
-                       (conj packets [[:sub-n size] version type-id children]))))))))
+            control-id (bits->int (subs in (+ base 6) (+ base 7)))
+            packet
+            (cond (= type-id 4)
+                  (let [groups (decode-literal (subs in 6))
+                        size (+ 6 (* (count groups) 5))]
+                    {:type :literal :size size
+                     :version version :type-id type-id
+                     :value (bits->int (apply str groups))})
+                  (= control-id 0)
+                  (let [sub-packet-length (bits->int (subs in (+ base 7) (+ base 22)))
+                        children (decode-packet (subs in (+ base 22) (+ base 22 sub-packet-length)))
+                        size (+ 22 sub-packet-length)]
+                    {:type :sub-bit :size size
+                     :version version :type-id type-id
+                     :length sub-packet-length
+                     :children (vec children)})
+                  (= control-id 1)
+                  (let [n-sub-packets (bits->int (subs in (+ base 7) (+ base 18)))
+                        children (take n-sub-packets (decode-packet (subs in (+ base 18))))
+                        size (+ 18 (apply + (map :size children)))]
+                    {:type :sub-n :size size
+                     :version version :type-id type-id
+                     :n n-sub-packets
+                     :children (vec children)}))]
+        (recur (+ base (:size packet)) (conj packets packet))))))
 
-(assert (= [[[:literal 21] 6 4 2021]] (decode-packet (bit-string "D2FE28") 0)))
-(assert (= [[[:sub-bit 22] 1 6 [[[:literal 11] 6 4 10] [[:literal 11] 2 4 10]]]]
-           (decode-packet (bit-string "38006F45291200") 0)))
-(assert (= [[[:sub-n 33] 7 3
-             [[[:literal 11] 2 4 1] [[:literal 11] 4 4 1] [[:literal 11] 1 4 1]]]]
-           (decode-packet (bit-string "EE00D40C823060") 0)))
+(assert (= [{:type :literal, :size 21, :version 6, :type-id 4, :value 2021}]
+           (decode-packet (bit-string "D2FE28"))))
+(assert (= [{:type :sub-bit,
+             :size 49,
+             :version 1,
+             :type-id 6,
+             :length 27,
+             :children
+             [{:type :literal, :size 11, :version 6, :type-id 4, :value 10}
+              {:type :literal, :size 11, :version 2, :type-id 4, :value 10}]}]
+           (decode-packet (bit-string "38006F45291200"))))
+(assert (= [{:type :sub-n,
+             :size 51,
+             :version 7,
+             :type-id 3,
+             :n 3,
+             :children
+             [{:type :literal, :size 11, :version 2, :type-id 4, :value 1}
+              {:type :literal, :size 11, :version 4, :type-id 4, :value 1}
+              {:type :literal, :size 11, :version 1, :type-id 4, :value 1}]}]
+           (decode-packet (bit-string "EE00D40C823060"))))
+
+(assert (= [{:type :sub-n, :size 69,
+             :version 4,
+             :type-id 2,
+             :n 1,
+             :children
+             [{:type :sub-n, :size 51,
+               :version 1,
+               :type-id 2,
+               :n 1,
+               :children
+               [{:type :sub-bit, :size 33,
+                 :version 5,
+                 :type-id 2,
+                 :length 11,
+                 :children [{:type :literal, :size 11, :version 6, :type-id 4, :value 15}]}]}]}]
+           (decode-packet (bit-string "8A004A801A8002F478"))))
