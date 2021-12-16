@@ -69,54 +69,55 @@
        (let [packet (decode-packet in base)]
          (recur (+ base (:size packet)) (conj packets packet)))))))
 
-(assert (= [{:type :literal, :size 21, :version 6, :type-id 4, :value 2021}]
-           (decode-packets (bit-string "D2FE28"))))
-(assert (= [{:type :sub-bit,
-             :size 49,
-             :version 1,
-             :type-id 6,
-             :length 27,
-             :children
-             [{:type :literal, :size 11, :version 6, :type-id 4, :value 10}
-              {:type :literal, :size 11, :version 2, :type-id 4, :value 10}]}]
-           (decode-packets (bit-string "38006F45291200"))))
-(assert (= [{:type :sub-n,
-             :size 51,
-             :version 7,
-             :type-id 3,
-             :n 3,
-             :children
-             [{:type :literal, :size 11, :version 2, :type-id 4, :value 1}
-              {:type :literal, :size 11, :version 4, :type-id 4, :value 1}
-              {:type :literal, :size 11, :version 1, :type-id 4, :value 1}]}]
-           (decode-packets (bit-string "EE00D40C823060"))))
+(defn decode [in]
+  (first (decode-packets in 1)))
 
-(assert (= [{:type :sub-n, :size 69,
-             :version 4,
-             :type-id 2,
-             :n 1,
-             :children
-             [{:type :sub-n, :size 51,
-               :version 1,
-               :type-id 2,
-               :n 1,
-               :children
-               [{:type :sub-bit, :size 33,
-                 :version 5,
-                 :type-id 2,
-                 :length 11,
-                 :children [{:type :literal, :size 11, :version 6, :type-id 4, :value 15}]}]}]}]
-           (decode-packets (bit-string "8A004A801A8002F478"))))
+(assert (= {:type :literal, :size 21, :version 6, :type-id 4, :value 2021}
+           (decode (bit-string "D2FE28"))))
+(assert (= {:type :sub-bit,
+            :size 49,
+            :version 1,
+            :type-id 6,
+            :length 27,
+            :children
+            [{:type :literal, :size 11, :version 6, :type-id 4, :value 10}
+             {:type :literal, :size 11, :version 2, :type-id 4, :value 10}]}
+           (decode (bit-string "38006F45291200"))))
+(assert (= {:type :sub-n,
+            :size 51,
+            :version 7,
+            :type-id 3,
+            :n 3,
+            :children
+            [{:type :literal, :size 11, :version 2, :type-id 4, :value 1}
+             {:type :literal, :size 11, :version 4, :type-id 4, :value 1}
+             {:type :literal, :size 11, :version 1, :type-id 4, :value 1}]}
+           (decode (bit-string "EE00D40C823060"))))
+
+(assert (= {:type :sub-n, :size 69,
+            :version 4,
+            :type-id 2,
+            :n 1,
+            :children
+            [{:type :sub-n, :size 51,
+              :version 1,
+              :type-id 2,
+              :n 1,
+              :children
+              [{:type :sub-bit, :size 33,
+                :version 5,
+                :type-id 2,
+                :length 11,
+                :children [{:type :literal, :size 11, :version 6, :type-id 4, :value 15}]}]}]}
+           (decode (bit-string "8A004A801A8002F478"))))
 
 (defn part1 [in]
-  (if (map? in)
-    (apply + (map :version (tree-seq :children :children in)))
-    (apply + (map part1 in))))
+  (apply + (map :version (tree-seq :children :children in))))
 
-(assert (= 16 (part1 (decode-packets (bit-string "8A004A801A8002F478")))))
-(assert (= 12 (part1 (decode-packets (bit-string "620080001611562C8802118E34")))))
-(assert (= 23 (part1 (decode-packets (bit-string "C0015000016115A2E0802F182340")))))
-(assert (= 31 (part1 (decode-packets (bit-string "A0016C880162017C3686B18A3D4780")))))
+(assert (= 16 (part1 (decode (bit-string "8A004A801A8002F478")))))
+(assert (= 12 (part1 (decode (bit-string "620080001611562C8802118E34")))))
+(assert (= 23 (part1 (decode (bit-string "C0015000016115A2E0802F182340")))))
+(assert (= 31 (part1 (decode (bit-string "A0016C880162017C3686B18A3D4780")))))
 
-(decode-packet (bit-string (parse "input")))
+(decode (bit-string (parse "input")))
 ;; (assert (= 31 (part1 (decode-packet (bit-string (parse "input"))))))
