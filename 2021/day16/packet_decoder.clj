@@ -35,29 +35,33 @@
 (defn decode-packet [in base]
   (let [version (bits->int (subs in base (+ base 3)))
         type-id (bits->int (subs in (+ base 3) (+ base 6)))
-        control-id (bits->int (subs in (+ base 6) (+ base 7)))]
+        control-id (bits->int (subs in (+ base 6) (+ base 7)))
+        packet {:version version :type-id type-id}]
     (cond (= type-id 4)
           (let [groups (decode-literal (subs in 6))
                 size (+ 6 (* (count groups) 5))]
-            {:type :literal :size size
-             :version version :type-id type-id
-             :value (bits->int (apply str groups))})
+            (assoc packet
+                   :type :literal
+                   :size size
+                   :value (bits->int (apply str groups))))
           (= control-id 0)
           (let [sub-packet-length (bits->int (subs in (+ base 7) (+ base 22)))
                 children (decode-packets (subs in (+ base 22) (+ base 22 sub-packet-length)))
                 size (+ 22 sub-packet-length)]
-            {:type :sub-bit :size size
-             :version version :type-id type-id
-             :length sub-packet-length
-             :children (vec children)})
+            (assoc packet
+                   :type :operator
+                   :size size
+                   :length sub-packet-length
+                   :children (vec children)))
           (= control-id 1)
           (let [n-sub-packets (bits->int (subs in (+ base 7) (+ base 18)))
                 children (decode-packets (subs in (+ base 18)) n-sub-packets)
                 size (+ 18 (apply + (map :size children)))]
-            {:type :sub-n :size size
-             :version version :type-id type-id
-             :n n-sub-packets
-             :children (vec children)}))))
+            (assoc packet
+                   :type :operator
+                   :size size
+                   :n n-sub-packets
+                   :children (vec children))))))
 
 (defn decode-packets
   ([in] (decode-packets in -1))
@@ -74,7 +78,7 @@
 
 (assert (= {:type :literal, :size 21, :version 6, :type-id 4, :value 2021}
            (decode (bit-string "D2FE28"))))
-(assert (= {:type :sub-bit,
+(assert (= {:type :operator,
             :size 49,
             :version 1,
             :type-id 6,
@@ -83,7 +87,7 @@
             [{:type :literal, :size 11, :version 6, :type-id 4, :value 10}
              {:type :literal, :size 11, :version 2, :type-id 4, :value 10}]}
            (decode (bit-string "38006F45291200"))))
-(assert (= {:type :sub-n,
+(assert (= {:type :operator,
             :size 51,
             :version 7,
             :type-id 3,
@@ -94,17 +98,17 @@
              {:type :literal, :size 11, :version 1, :type-id 4, :value 1}]}
            (decode (bit-string "EE00D40C823060"))))
 
-(assert (= {:type :sub-n, :size 69,
+(assert (= {:type :operator, :size 69,
             :version 4,
             :type-id 2,
             :n 1,
             :children
-            [{:type :sub-n, :size 51,
+            [{:type :operator, :size 51,
               :version 1,
               :type-id 2,
               :n 1,
               :children
-              [{:type :sub-bit, :size 33,
+              [{:type :operator, :size 33,
                 :version 5,
                 :type-id 2,
                 :length 11,
