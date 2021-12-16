@@ -38,7 +38,7 @@
         control-id (bits->int (subs in (+ base 6) (+ base 7)))
         packet {:version version :type-id type-id}]
     (cond (= type-id 4)
-          (let [groups (decode-literal (subs in 6))
+          (let [groups (decode-literal (subs in (+ base 6)))
                 size (+ 6 (* (count groups) 5))]
             (assoc packet
                    :type :literal
@@ -47,7 +47,7 @@
           (= control-id 0)
           (let [sub-packet-length (bits->int (subs in (+ base 7) (+ base 22)))
                 children (decode-packets (subs in (+ base 22) (+ base 22 sub-packet-length)))
-                size (+ 22 sub-packet-length)]
+                size (+ 22 (apply + (map :size children)))]
             (assoc packet
                    :type :operator
                    :size size
@@ -85,7 +85,7 @@
             :length 27,
             :children
             [{:type :literal, :size 11, :version 6, :type-id 4, :value 10}
-             {:type :literal, :size 11, :version 2, :type-id 4, :value 10}]}
+             {:type :literal, :size 16, :version 2, :type-id 4, :value 20}]}
            (decode (bit-string "38006F45291200"))))
 (assert (= {:type :operator,
             :size 51,
@@ -94,8 +94,8 @@
             :n 3,
             :children
             [{:type :literal, :size 11, :version 2, :type-id 4, :value 1}
-             {:type :literal, :size 11, :version 4, :type-id 4, :value 1}
-             {:type :literal, :size 11, :version 1, :type-id 4, :value 1}]}
+             {:type :literal, :size 11, :version 4, :type-id 4, :value 2}
+             {:type :literal, :size 11, :version 1, :type-id 4, :value 3}]}
            (decode (bit-string "EE00D40C823060"))))
 
 (assert (= {:type :operator, :size 69,
