@@ -129,3 +129,28 @@
 
 (assert (= 877 (part1 (decode (bit-string (parse "input"))))))
 ;; (assert (= 31 (part1 (decode-packet (bit-string (parse "input"))))))
+
+(defn evaluate [{:keys [type-id children] :as packet}]
+  (case type-id
+    0 (apply + (map evaluate children))
+    1 (apply * (map evaluate children))
+    2 (apply min (map evaluate children))
+    3 (apply max (map evaluate children))
+    4 (:value packet)
+    5 (let [[b a] (map evaluate children)]
+        (if (< a b) 1 0))
+    6 (let [[b a] (map evaluate children)]
+        (if (> a b) 1 0))
+    7 (let [[a b] (map evaluate children)]
+        (if (= a b) 1 0))))
+
+(assert (= 3 (evaluate (decode (bit-string "C200B40A82")))))
+(assert (= 54 (evaluate (decode (bit-string "04005AC33890")))))
+(assert (= 7 (evaluate (decode (bit-string "880086C3E88112")))))
+(assert (= 9 (evaluate (decode (bit-string "CE00C43D881120")))))
+(assert (= 1 (evaluate (decode (bit-string "D8005AC2A8F0")))))
+(assert (= 0 (evaluate (decode (bit-string "F600BC2D8F")))))
+(assert (= 0 (evaluate (decode (bit-string "9C005AC2F8F0")))))
+(assert (= 1 (evaluate (decode (bit-string "9C0141080250320F1802104A08")))))
+
+(assert (= 194435634456 (evaluate (decode (bit-string (parse "input"))))))
