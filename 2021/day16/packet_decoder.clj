@@ -74,7 +74,7 @@
          (recur (+ base (:size packet)) (conj packets packet)))))))
 
 (defn decode [in]
-  (first (decode-packets in 1)))
+  (decode-packet in 0))
 
 (assert (= {:type :literal, :size 21, :version 6, :type-id 4, :value 2021}
            (decode (bit-string "D2FE28"))))
