@@ -20,13 +20,13 @@
 (assert (= "00111000000000000110111101000101001010010001001000000000" (bit-string "38006F45291200")))
 
 (defn bits->int [input]
-  (if (< (count input) 32)
-    (Integer/parseInt input 2)
-    input))
+  (Long/parseLong input 2))
 
+(assert (= 1 (bits->int "001")))
 (assert (= 2 (bits->int "010")))
-(let [bits-36 "101101011011100101111111101001101011"]
-  (assert (= bits-36 (bits->int bits-36))))
+(assert (= 3 (bits->int "011")))
+(assert (= 7 (bits->int "111")))
+(assert (= 48781326955 (bits->int "101101011011100101111111101001101011")))
 
 (defn decode-literal [in]
   (lazy-seq (when (>= (count in) 5)
