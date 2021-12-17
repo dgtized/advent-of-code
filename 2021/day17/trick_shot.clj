@@ -32,19 +32,19 @@
   (take-while (partial in-bounds? target)
               (iterate probe-step probe)))
 
-(defn summarize [{:keys [dx dy] :as probe} target]
+(defn firing-solution [{:keys [dx dy] :as probe} target]
   (let [path (trajectory probe target)]
     (when (hit? target (last path))
       [[dx dy] (apply max (map :y path))])))
 
-(assert (summarize (make-probe 7 2) (parse example)))
-(assert (summarize (make-probe 6 3) (parse example)))
-(assert (summarize (make-probe 6 9) (parse example)))
-(assert (summarize (make-probe 9 0) (parse example)))
-(assert (not (summarize (make-probe 17 -4) (parse example))))
+(assert (firing-solution (make-probe 7 2) (parse example)))
+(assert (firing-solution (make-probe 6 3) (parse example)))
+(assert (firing-solution (make-probe 6 9) (parse example)))
+(assert (firing-solution (make-probe 9 0) (parse example)))
+(assert (not (firing-solution (make-probe 17 -4) (parse example))))
 
 (defn search-max [target]
-  (keep (fn [probe] (summarize probe target))
+  (keep (fn [probe] (firing-solution probe target))
         (for [dx (range 0 250)
               dy (range 0 300)]
           (make-probe dx dy))))
@@ -53,7 +53,7 @@
 (assert (= [[17 101] 5151] (apply max-key second (search-max (parse input)))))
 
 (defn search-all [target]
-  (keep (fn [probe] (summarize probe target))
+  (keep (fn [probe] (firing-solution probe target))
         (for [dx (range 0 175)
               dy (range -125 125)]
           (make-probe dx dy))))
