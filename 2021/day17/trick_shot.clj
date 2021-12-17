@@ -43,14 +43,14 @@
 (assert (summarize 9 0 (parse example)))
 (assert (not (summarize 17 -4 (parse example))))
 
-(defn search [target]
+(defn search-max [target]
   (keep (fn [[dx dy]] (summarize dx dy target))
         (for [dx (range 0 250)
               dy (range 0 300)]
           [dx dy])))
 
-(assert (= [[7 9] 45] (apply max-key second (search (parse example)))))
-(assert (= [[17 101] 5151] (apply max-key second (search (parse input)))))
+(assert (= [[7 9] 45] (apply max-key second (search-max (parse example)))))
+(assert (= [[17 101] 5151] (apply max-key second (search-max (parse input)))))
 
 (defn search-all [target]
   (keep (fn [[dx dy]] (summarize dx dy target))
