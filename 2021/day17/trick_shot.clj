@@ -53,4 +53,11 @@
 (assert (= [[7 9] 45] (apply max-key second (search (parse example)))))
 (assert (= [[17 101] 5151]) (apply max-key second (search (parse input))))
 
+(defn search-all [target]
+  (keep (fn [[dx dy]] (summarize dx dy target))
+        (for [dx (range 0 500)
+              dy (range -300 300)]
+          [dx dy])))
 
+(assert (= 112 (count (search-all (parse example)))))
+(assert (= 968 (count (search-all (parse input)))))
