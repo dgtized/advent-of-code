@@ -48,14 +48,14 @@
         dy (range -125 125)]
     (make-probe dx dy)))
 
-(defn search-max [target]
-  (keep (fn [probe] (firing-solution probe target)) (solutions)))
-
-(assert (= [[7 9] 45] (apply max-key second (search-max (parse example)))))
-(assert (= [[17 101] 5151] (apply max-key second (search-max (parse input)))))
-
 (defn search-all [target]
   (keep (fn [probe] (firing-solution probe target)) (solutions)))
+
+(defn search-max [target]
+  (apply max-key second (search-all target)))
+
+(assert (= [[7 9] 45] (search-max (parse example))))
+(assert (= [[17 101] 5151] (search-max (parse input))))
 
 (assert (= 112 (count (search-all (parse example)))))
 (assert (= 968 (count (search-all (parse input)))))
