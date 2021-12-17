@@ -54,8 +54,8 @@
 
 (defn search-all [target]
   (keep (fn [[dx dy]] (summarize dx dy target))
-        (for [dx (range 0 500)
-              dy (range -300 300)]
+        (for [dx (range 0 175)
+              dy (range -125 125)]
           [dx dy])))
 
 (assert (= 112 (count (search-all (parse example)))))
