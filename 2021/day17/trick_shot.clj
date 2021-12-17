@@ -22,20 +22,19 @@
                    :else 0)
          :dy (dec dy)))
 
-(defn possible? [{:keys [x y]} [[x0 x1] [y0 y1]]]
+(defn in-bounds? [[[_ x1] [y0 _]] {:keys [x y]}]
   (and (<= x x1) (>= y y0)))
 
-(defn hit? [{:keys [x y]} [[x0 x1] [y0 y1]]]
-  (and (<= x0 x x1)
-       (<= y0 y y1)))
+(defn hit? [[[x0 x1] [y0 y1]] {:keys [x y]}]
+  (and (<= x0 x x1) (<= y0 y y1)))
 
 (defn trajectory [dx dy target]
-  (take-while (fn [p] (possible? p target))
+  (take-while (partial in-bounds? target)
               (iterate probe-step (probe dx dy))))
 
 (defn summarize [dx dy target]
   (let [path (trajectory dx dy target)]
-    (when (hit? (last path) target)
+    (when (hit? target (last path))
       [[dx dy] (apply max (map :y path))])))
 
 (assert (summarize 7 2 (parse example)))
