@@ -43,20 +43,19 @@
 (assert (firing-solution (make-probe 9 0) (parse example)))
 (assert (not (firing-solution (make-probe 17 -4) (parse example))))
 
+(defn solutions []
+  (for [dx (range 0 175)
+        dy (range -125 125)]
+    (make-probe dx dy)))
+
 (defn search-max [target]
-  (keep (fn [probe] (firing-solution probe target))
-        (for [dx (range 0 250)
-              dy (range 0 300)]
-          (make-probe dx dy))))
+  (keep (fn [probe] (firing-solution probe target)) (solutions)))
 
 (assert (= [[7 9] 45] (apply max-key second (search-max (parse example)))))
 (assert (= [[17 101] 5151] (apply max-key second (search-max (parse input)))))
 
 (defn search-all [target]
-  (keep (fn [probe] (firing-solution probe target))
-        (for [dx (range 0 175)
-              dy (range -125 125)]
-          (make-probe dx dy))))
+  (keep (fn [probe] (firing-solution probe target)) (solutions)))
 
 (assert (= 112 (count (search-all (parse example)))))
 (assert (= 968 (count (search-all (parse input)))))
