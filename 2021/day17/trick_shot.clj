@@ -38,11 +38,11 @@
     (when (hit? (last path) target)
       [[dx dy] (apply max (map :y path))])))
 
-(summarize 7 2 (parse example))
-(summarize 6 3 (parse example))
-(summarize 6 9 (parse example))
-(summarize 9 0 (parse example))
-(summarize 17 -4 (parse example))
+(assert (summarize 7 2 (parse example)))
+(assert (summarize 6 3 (parse example)))
+(assert (summarize 6 9 (parse example)))
+(assert (summarize 9 0 (parse example)))
+(assert (not (summarize 17 -4 (parse example))))
 
 (defn search [target]
   (keep (fn [[dx dy]] (summarize dx dy target))
