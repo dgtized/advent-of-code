@@ -13,30 +13,6 @@
 
 (addition [1 2] [[3 4] 5])
 
-(defn tree-depth [snail]
-  (letfn [(walk [depth node]
-            (lazy-seq (cons [node depth]
-                            (when (vector? node)
-                              (mapcat (partial walk (inc depth)) node)))))]
-    (filter (comp int? first) (walk 0 snail))))
-
-(tree-depth [[[[[9,8],1],2],3],4])
-(tree-depth [7,[6,[5,[4,[3,2]]]]])
-(tree-depth [[6,[5,[4,[3,2]]]],1])
-
-(comment
-  (-> (z/vector-zip [1 2 [3 4] 5])
-      z/next
-      z/up
-      z/up)
-
-  (-> (z/vector-zip [1 [2 [3 [4 [5 0]]]]])
-      z/next
-      z/next
-      left-of
-      (z/replace 0)
-      z/root))
-
 (defn left-of [z]
   (loop [loc z]
     (cond (and (not= z loc) (int? (z/node loc)))
