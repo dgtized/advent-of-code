@@ -48,10 +48,8 @@
                         (z/replace right (+ (z/node right) b))
                         explode')))
             (recur (z/down loc)))
-          (int? (z/node loc))
-          (if (z/right loc)
-            (recur (z/right loc))
-            (recur (z/next loc))))))
+          :else
+          (recur (z/next loc)))))
 
 (assert (not (explode-pair [[[[0,9],2],3],4])))
 (assert (= [[[[0,9],2],3],4] (explode-pair [[[[[9,8],1],2],3],4])))
