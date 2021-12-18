@@ -13,7 +13,7 @@
         loc
         (recur (z/prev loc))))))
 
-(defn right-to-zero
+(defn return-to-explode
   [loc]
   (->> (iterate z/next loc)
        (drop-while #(not= 0 (z/node %)))
@@ -42,7 +42,7 @@
                 explode' (if-let [left (left-of explode)]
                            (-> left
                                (z/replace (+ (z/node left) a))
-                               right-to-zero)
+                               return-to-explode)
                            explode)]
             (z/root (if-let [right (right-of explode')]
                       (z/replace right (+ (z/node right) b))
