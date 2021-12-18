@@ -90,3 +90,10 @@
 (assert (= [[1 2] [[3 4] 5]] (addition [1 2] [[3 4] 5])))
 (assert (= [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
            (addition [[[[4,3],4],4],[7,[[8,4],9]]] [1 1])))
+
+(defn homework [input]
+  (reduce addition input))
+
+(homework (parse "example"))
+
+(assert (= [[[[1,1],[2,2]],[3,3]],[4,4]] (homework [[1,1] [2,2] [3,3] [4,4]])))
