@@ -29,12 +29,15 @@
             :else
             (recur (z/next loc))))))
 
+(defn depth [loc]
+  (dec (count (take-while some? (iterate z/up loc)))))
+
 (defn explode-pair [snail]
-  (loop [loc (z/vector-zip snail) depth 0]
+  (loop [loc (z/vector-zip snail)]
     (cond (z/end? loc)
           nil
           (vector? (z/node loc))
-          (if (and (> depth 3) (every? int? (z/node loc)))
+          (if (and (= (depth loc) 4) (every? int? (z/node loc)))
             (let [[a b] (z/node loc)
                   explode (z/replace loc 0)
                   explode' (if-let [left (left-of explode)]
@@ -44,11 +47,11 @@
               (z/root (if-let [right (right-of explode')]
                         (z/replace right (+ (z/node right) b))
                         explode')))
-            (recur (z/down loc) (inc depth)))
+            (recur (z/down loc)))
           (int? (z/node loc))
           (if (z/right loc)
-            (recur (z/right loc) depth)
-            (recur (z/next loc) (dec depth))))))
+            (recur (z/right loc))
+            (recur (z/next loc))))))
 
 (assert (not (explode-pair [[[[0,9],2],3],4])))
 (assert (= [[[[0,9],2],3],4] (explode-pair [[[[[9,8],1],2],3],4])))
@@ -102,13 +105,13 @@
 
 ;; not working yet
 
-(assert (not= [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
-              (addition [[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
-                        [7,[[[3,7],[4,3]],[[6,3],[8,8]]]])))
+(assert (= [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
+           (addition [[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
+                     [7,[[[3,7],[4,3]],[[6,3],[8,8]]]])))
 
-(assert (not= [[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
-              (addition [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
-                        [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]])))
+(assert (= [[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
+           (addition [[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
+                     [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]])))
 
 
 (homework (parse "example2"))
