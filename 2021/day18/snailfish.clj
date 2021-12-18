@@ -122,3 +122,12 @@
 
 (assert (= 4140 (magnitude (homework (parse "example2")))))
 (assert (= 3051 (magnitude (homework (parse "input")))))
+
+(defn part2 [input]
+  (apply max (for [a input
+                   b input
+                   :when (not= a b)]
+               (magnitude (addition a b)))))
+
+(assert (= 3993 (part2 (parse "example2"))))
+(assert (= 4812 (part2 (parse "input"))))
