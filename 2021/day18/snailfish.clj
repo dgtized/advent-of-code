@@ -78,10 +78,16 @@
 (assert (= [[6 6]] (split-pair [12])))
 
 (defn addition [lhs rhs]
+  (println [:+ lhs rhs :=> (vector lhs rhs)])
   (loop [result (vector lhs rhs)]
-    (if-let [step ((some-fn explode-pair split-pair) result)]
-      (recur step)
-      result)))
+    (if-let [exploded (explode-pair result)]
+      (do (println [:exploded exploded])
+          (recur exploded))
+      (if-let [split (split-pair result)]
+        (do (println [:split split])
+            (recur split))
+        (do [:= result]
+            result)))))
 
 (assert (= [[1 2] [[3 4] 5]] (addition [1 2] [[3 4] 5])))
 (assert (= [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
