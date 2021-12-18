@@ -11,7 +11,7 @@
 (defn addition [lhs rhs]
   (vector lhs rhs))
 
-(addition [1 2] [[3 4] 5])
+(assert (= [[1 2] [[3 4] 5]] (addition [1 2] [[3 4] 5])))
 
 (defn left-of [z]
   (loop [loc z]
