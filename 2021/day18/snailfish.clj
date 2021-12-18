@@ -36,18 +36,16 @@
   (loop [loc (z/vector-zip snail)]
     (cond (z/end? loc)
           nil
-          (vector? (z/node loc))
-          (if (and (= (depth loc) 4) (every? int? (z/node loc)))
-            (let [[a b] (z/node loc)
-                  explode (z/replace loc 0)
-                  explode' (if-let [left (left-of explode)]
-                             (-> (z/replace left (+ (z/node left) a))
-                                 right-to-zero)
-                             explode)]
-              (z/root (if-let [right (right-of explode')]
-                        (z/replace right (+ (z/node right) b))
-                        explode')))
-            (recur (z/down loc)))
+          (and (= (depth loc) 4) (vector? (z/node loc)))
+          (let [[a b] (z/node loc)
+                explode (z/replace loc 0)
+                explode' (if-let [left (left-of explode)]
+                           (-> (z/replace left (+ (z/node left) a))
+                               right-to-zero)
+                           explode)]
+            (z/root (if-let [right (right-of explode')]
+                      (z/replace right (+ (z/node right) b))
+                      explode')))
           :else
           (recur (z/next loc)))))
 
