@@ -13,11 +13,11 @@
         loc
         (recur (z/prev loc))))))
 
-(defn right-to-zero [z]
-  (loop [loc z]
-    (if (= 0 (z/node loc))
-      loc
-      (recur (z/next loc)))))
+(defn right-to-zero
+  [loc]
+  (->> (iterate z/next loc)
+       (drop-while #(not= 0 (z/node %)))
+       first))
 
 (defn right-of [z]
   (loop [loc z]
@@ -40,7 +40,8 @@
           (let [[a b] (z/node loc)
                 explode (z/replace loc 0)
                 explode' (if-let [left (left-of explode)]
-                           (-> (z/replace left (+ (z/node left) a))
+                           (-> left
+                               (z/replace (+ (z/node left) a))
                                right-to-zero)
                            explode)]
             (z/root (if-let [right (right-of explode')]
