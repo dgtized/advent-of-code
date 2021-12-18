@@ -15,12 +15,13 @@
 
 (defn left-of [z]
   (loop [loc z]
-    (cond (and (not= z loc) (int? (z/node loc)))
-          loc
-          (z/left loc)
-          (recur (z/left loc))
-          :else
-          (recur (z/up loc)))))
+    (when loc
+      (cond (and (not= z loc) (int? (z/node loc)))
+            loc
+            (z/left loc)
+            (recur (z/left loc))
+            :else
+            (recur (z/up loc))))))
 
 (defn right-to-zero [z]
   (loop [loc z]
@@ -30,37 +31,42 @@
 
 (defn right-of [z]
   (loop [loc z]
-    (cond (and (not= z loc) (int? (z/node loc)))
-          loc
-          (z/end? loc)
-          nil
-          :else
-          (recur (z/next loc)))))
+    (when loc
+      (cond (and (not= z loc) (int? (z/node loc)))
+            loc
+            (z/end? loc)
+            nil
+            :else
+            (recur (z/next loc))))))
 
 (defn explode-pair [snail]
   (loop [loc (z/vector-zip snail) depth 0]
     (cond (z/end? loc)
-          (z/node loc)
-          (and (> depth 3) (vector? (z/node loc)))
-          (let [[a b] (z/node loc)
-                explode (z/replace loc 0)
-                explode' (if-let [left (left-of explode)]
-                           (do (println left)
-                               (-> (z/replace left (+ (z/node left) a))
-                                   right-to-zero))
-                           explode)]
-            (z/root (if-let [right (right-of explode')]
-                      (z/replace right (+ (z/node right) b))
-                      explode')))
-
+          snail
           (vector? (z/node loc))
-          (recur (z/down loc) (inc depth))
+          (if (and (> depth 3) (every? int? (z/node loc)))
+            (let [[a b] (z/node loc)
+                  explode (z/replace loc 0)
+                  explode' (if-let [left (left-of explode)]
+                             (-> (z/replace left (+ (z/node left) a))
+                                 right-to-zero)
+                             explode)]
+              (z/root (if-let [right (right-of explode')]
+                        (z/replace right (+ (z/node right) b))
+                        explode')))
+            (recur (z/down loc) (inc depth)))
           (int? (z/node loc))
-          (recur (z/next loc) depth))))
+          (if (z/right loc)
+            (recur (z/right loc) depth)
+            (recur (z/next loc) (dec depth))))))
 
 (assert (= [[[[0,9],2],3],4] (explode-pair [[[[[9,8],1],2],3],4])))
 (assert (= [7,[6,[5,[7,0]]]] (explode-pair [7,[6,[5,[4,[3,2]]]]])))
 (assert (= [[6,[5,[7,0]]],3] (explode-pair [[6,[5,[4,[3,2]]]],1])))
+(assert (= [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]
+           (explode-pair [[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]])))
+(assert (= [[3,[2,[8,0]]],[9,[5,[7,0]]]]
+           (explode-pair [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]])))
 
 (defn split-pair [snail]
   snail)
