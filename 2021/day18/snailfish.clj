@@ -9,12 +9,9 @@
 (defn left-of [z]
   (loop [loc z]
     (when loc
-      (cond (and (not= z loc) (int? (z/node loc)))
-            loc
-            (z/left loc)
-            (recur (z/left loc))
-            :else
-            (recur (z/up loc))))))
+      (if (and (not= z loc) (int? (z/node loc)))
+        loc
+        (recur (z/prev loc))))))
 
 (defn right-to-zero [z]
   (loop [loc z]
