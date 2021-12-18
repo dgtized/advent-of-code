@@ -6,13 +6,6 @@
 (defn parse [file]
   (mapv edn/read-string (str/split-lines (slurp file))))
 
-(parse "example")
-
-(defn addition [lhs rhs]
-  (vector lhs rhs))
-
-(assert (= [[1 2] [[3 4] 5]] (addition [1 2] [[3 4] 5])))
-
 (defn left-of [z]
   (loop [loc z]
     (when loc
@@ -86,3 +79,14 @@
 (assert (= [[5 5]] (split-pair [10])))
 (assert (= [[5 6]] (split-pair [11])))
 (assert (= [[6 6]] (split-pair [12])))
+
+
+(defn addition [lhs rhs]
+  (loop [result (vector lhs rhs)]
+    (if-let [step ((some-fn explode-pair split-pair) result)]
+      (recur step)
+      result)))
+
+(assert (= [[1 2] [[3 4] 5]] (addition [1 2] [[3 4] 5])))
+(assert (= [[[[0,7],4],[[7,8],[6,0]]],[8,1]]
+           (addition [[[[4,3],4],4],[7,[[8,4],9]]] [1 1])))
