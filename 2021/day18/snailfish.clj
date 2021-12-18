@@ -42,7 +42,7 @@
 (defn explode-pair [snail]
   (loop [loc (z/vector-zip snail) depth 0]
     (cond (z/end? loc)
-          snail
+          nil
           (vector? (z/node loc))
           (if (and (> depth 3) (every? int? (z/node loc)))
             (let [[a b] (z/node loc)
@@ -60,6 +60,7 @@
             (recur (z/right loc) depth)
             (recur (z/next loc) (dec depth))))))
 
+(assert (not (explode-pair [[[[0,9],2],3],4])))
 (assert (= [[[[0,9],2],3],4] (explode-pair [[[[[9,8],1],2],3],4])))
 (assert (= [7,[6,[5,[7,0]]]] (explode-pair [7,[6,[5,[4,[3,2]]]]])))
 (assert (= [[6,[5,[7,0]]],3] (explode-pair [[6,[5,[4,[3,2]]]],1])))
@@ -72,7 +73,7 @@
   (loop [loc (z/vector-zip snail)]
     (let [value (z/node loc)]
       (cond (z/end? loc)
-            snail
+            nil
             (and (int? value) (>= value 10))
             (-> loc
                 (z/replace [(int (Math/floor (/ value 2.0)))
@@ -81,6 +82,7 @@
             :else
             (recur (z/next loc))))))
 
+(assert (not (split-pair [9])))
 (assert (= [[5 5]] (split-pair [10])))
 (assert (= [[5 6]] (split-pair [11])))
 (assert (= [[6 6]] (split-pair [12])))
