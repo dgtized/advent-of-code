@@ -108,4 +108,17 @@
 (assert (= [[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]
            (homework (parse "long-example"))))
 
-;; (defn magnitude [])
+(defn magnitude [snail]
+  (cond (int? snail)
+        snail
+        (vector? snail)
+        (+ (* 3 (magnitude (first snail)))
+           (* 2 (magnitude (second snail))))))
+
+(assert (= 29 (magnitude [9 1])))
+(assert (= 21 (magnitude [1 9])))
+(assert (= 143 (magnitude [[1,2],[[3,4],5]])))
+(assert (= 3488 (magnitude [[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
+
+(assert (= 4140 (magnitude (homework (parse "example2")))))
+(assert (= 3051 (magnitude (homework (parse "input")))))
