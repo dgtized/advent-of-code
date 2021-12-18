@@ -69,4 +69,18 @@
            (explode-pair [[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]])))
 
 (defn split-pair [snail]
-  snail)
+  (loop [loc (z/vector-zip snail)]
+    (let [value (z/node loc)]
+      (cond (z/end? loc)
+            snail
+            (and (int? value) (>= value 10))
+            (-> loc
+                (z/replace [(int (Math/floor (/ value 2.0)))
+                            (int (Math/ceil (/ value 2.0)))])
+                z/root)
+            :else
+            (recur (z/next loc))))))
+
+(assert (= [[5 5]] (split-pair [10])))
+(assert (= [[5 6]] (split-pair [11])))
+(assert (= [[6 6]] (split-pair [12])))
