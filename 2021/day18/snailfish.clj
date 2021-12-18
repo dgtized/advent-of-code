@@ -41,11 +41,11 @@
                 explode (z/replace loc 0)
                 explode' (if-let [left (left-of explode)]
                            (-> left
-                               (z/replace (+ (z/node left) a))
+                               (z/edit + a)
                                return-to-explode)
                            explode)]
             (z/root (if-let [right (right-of explode')]
-                      (z/replace right (+ (z/node right) b))
+                      (z/edit right + b)
                       explode')))
           :else
           (recur (z/next loc)))))
