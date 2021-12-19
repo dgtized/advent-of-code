@@ -10,6 +10,10 @@
                    (mapv (comp (partial mapv parse-long)
                                #(re-seq #"\-?\d+" %))))])))
 
+(defn all-pairs [coll]
+  (when-let [s (next coll)]
+    (lazy-cat (for [y s] [(first coll) y])
+              (all-pairs s))))
 
 (defn vec3 [x y z]
   [x y z])
@@ -19,6 +23,9 @@
 
 (defn v- [a b]
   (mapv - a b))
+
+(defn v* [v n]
+  (mapv (partial * n) v))
 
 ;; rotation: n,s,e,w
 ;; facing direction: +x,-x, +y,-y, +z, -z
