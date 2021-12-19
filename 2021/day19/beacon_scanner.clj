@@ -69,4 +69,27 @@
 
 (assert (mapv oriented (range 24) (repeat [8 0 7])))
 
+;; scanner1 - scanner0 = (beacon0 - scanner0) + (beacon1 - scanner1)
+(defn scanner-coord [beacons0 beacons1]
+  (for [basis0 (range 24)
+        basis1 (range 24)]
+    (let [pairs (for [b0 beacons0
+                      b1 beacons1]
+                  (v+ (oriented basis0 b0) (oriented basis1 b1)))
+          overlap (filter #(>= (second %) 12) (frequencies pairs))]
+      [[basis0 basis1] overlap])))
 
+(defn basis-overlap [beacons0 beacons1]
+  (filter (fn [[basis overlap]] (when (seq overlap) [basis overlap]))
+          (scanner-coord beacons0 beacons1)))
+
+(defn scanner-pairs [input]
+  (let [size (count input)]
+    (for [[a b] (all-pairs (range size))]
+      [a b (basis-overlap (get input a) (get input b))])))
+
+(scanner-pairs (parse "example"))
+
+
+(comment (for [basis (range 24)]
+           [basis (v+ [-618 -824 -621] (oriented basis [686 422 578]))]))
