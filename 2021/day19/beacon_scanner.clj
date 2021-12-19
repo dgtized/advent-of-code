@@ -76,8 +76,8 @@
     (let [pairs (for [b0 beacons0
                       b1 beacons1]
                   (v+ (oriented basis0 b0) (oriented basis1 b1)))
-          overlap (filter #(>= (second %) 12) (frequencies pairs))]
-      [[basis0 basis1] overlap])))
+          overlap (filter #(>= (second %) 4) (frequencies pairs))]
+      [(mapv describe-orientation [basis0 basis1]) overlap])))
 
 (defn basis-overlap [beacons0 beacons1]
   (filter (fn [[basis overlap]] (when (seq overlap) [basis overlap]))
