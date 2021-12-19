@@ -49,9 +49,17 @@
    (+ (* x d) (* y e) (* z f))
    (+ (* x g) (* y h) (* z i))])
 
-(assert (->> (for [rotation [x-rotation y-rotation z-rotation]
-                   t (range 0 (* 2 Math/PI) (* 0.5 Math/PI))
-                   facing [-1 1]]
-               (mat* (rotation facing t) [8 0 7]))
-             count
-             (= 24)))
+(let [orientations
+      (into [] (for [rotation [x-rotation y-rotation z-rotation]
+                     theta (range 0 (* 2 Math/PI) (* 0.5 Math/PI))
+                     facing [1 -1]]
+                 (partial mat* (rotation facing theta))))]
+  (defn orientation [basis]
+    (nth orientations (mod basis 24))))
+
+(defn oriented [basis coord]
+  ((orientation basis) coord))
+
+(assert (mapv oriented (range 24) (repeat [8 0 7])))
+
+
