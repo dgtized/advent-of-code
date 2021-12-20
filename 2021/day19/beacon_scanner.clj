@@ -73,29 +73,64 @@
 (defn oriented [basis coord]
   (mat* (orientation basis) coord))
 
+(mapv (comp determinant orientation) (range 24))
+
 (assert (mapv oriented (range 24) (repeat [8 0 7])))
 
 ;; scanner1 - scanner0 = (beacon0 - scanner0) + (beacon1 - scanner1)
 (defn scanner-coord [beacons0 beacons1]
-  (for [basis0 (range 24)
-        basis1 (range 24)]
-    (let [pairs (for [b0 beacons0
-                      b1 beacons1]
-                  (v+ (oriented basis0 b0) (oriented basis1 b1)))
-          overlap (filter #(>= (second %) 4) (frequencies pairs))]
-      [(mapv describe-orientation [basis0 basis1]) overlap])))
-
-(defn basis-overlap [beacons0 beacons1]
-  (filter (fn [[basis overlap]] (when (seq overlap) [basis overlap]))
-          (scanner-coord beacons0 beacons1)))
+  (mapcat (fn [basis]
+            (let [pairs (for [b0 beacons0
+                              b1 beacons1]
+                          (v+ b0 (oriented basis b1)))
+                  overlap (filter #(>= (second %) 6) (frequencies pairs))]
+              (when (seq overlap)
+                (for [[coord n] overlap]
+                  {:basis basis :n n :coord coord}))))
+          (range 24)))
 
 (defn scanner-pairs [input]
-  (let [size (count input)]
-    (for [[a b] (all-pairs (range size))]
-      [a b (basis-overlap (get input a) (get input b))])))
+  (for [[a b] (all-pairs (keys input))
+        :let [coords (scanner-coord (get input a) (get input b))]
+        :when (seq coords)]
+    [a b coords]))
+
+(def example (parse "example"))
+(def puzzle (parse "input"))
 
 (scanner-pairs (parse "example"))
 
-
 (comment (for [basis (range 24)]
            [basis (v+ [-618 -824 -621] (oriented basis [686 422 578]))]))
+
+(frequencies (for [basis (range 24)]
+               (oriented basis [68 -1246 -43])))
+
+(assert (= [{:basis 3, :n 12, :coord [68 -1246 -43]}]
+           (scanner-coord (get example 0) (get example 1))))
+
+(defn translate [beacons basis coord]
+  (mapv #(v- coord (oriented basis %)) beacons))
+
+(assert (some #{[-618 -824 -621]} (translate (get example 1) 3 [68 -1246 -43])))
+
+(defn scanner-overlap [beacons scanners]
+  (for [scan-id (keys scanners)
+        :let [coords (scanner-coord beacons (get scanners scan-id))]
+        :when (seq coords)]
+    (for [[basis n coord] coords]
+      {:scan-id scan-id :basis basis :n n :coord coord})))
+
+(scanner-overlap (set (get example 0)) (dissoc example 0))
+
+(defn solve [input]
+  (loop [beacons (set (get input 0))
+         scanners (dissoc input 0)]
+    (if (empty? scanners)
+      beacons
+      (let [{:keys [scan-id basis _ coord]}
+            (apply max-key :n (scanner-overlap beacons scanners))]
+        (recur (into beacons (translate (get scanners scan-id) basis coord))
+               (dissoc scanners scan-id))))))
+
+(solve example)
