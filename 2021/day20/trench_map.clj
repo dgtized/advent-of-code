@@ -34,9 +34,11 @@
 (defn convolve [enhance image]
   (let [[[x0 x1] [y0 y1]] (bounds image)]
     (into {}
-          (for [j (range (- y0 1) (+ y1 1))
-                i (range (- x0 1) (+ x1 1))]
-            [[i j] (char->int (nth enhance (pixel-offset image [i j])))]))))
+          (for [i (range (- x0 1) (+ x1 1))
+                j (range (- y0 1) (+ y1 1))
+                :let [value (char->int (nth enhance (pixel-offset image [i j])))]
+                :when (= value 1)]
+            [[i j] value]))))
 
 (defn part1 [{:keys [enhance] :as input} steps]
   (-> (iterate (partial convolve enhance) (image->grid input))
