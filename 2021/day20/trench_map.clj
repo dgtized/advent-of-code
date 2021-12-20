@@ -56,10 +56,11 @@
          (print-grid (part1 (parse "input") 0))
          (print-grid (part1 (parse "input") 1))
          (print-grid (part1 (parse "input") 2))
-         (print-grid (part1 (parse "input") 3))
+         (print-grid (part1 (parse "input") 50))
          )
 (assert (= 35 ((frequencies (vals (part1 (parse "example") 2))) 1)))
 (assert (= 3351 ((frequencies (vals (part1 (parse "example") 50))) 1)))
 
 (assert (= 5884 ((frequencies (vals (part1 (parse "input") 2))) 1)))
+(assert (= 19043 ((frequencies (vals (part1 (parse "input") 50))) 1)))
 
