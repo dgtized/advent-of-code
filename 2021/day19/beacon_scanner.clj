@@ -124,7 +124,7 @@
              4 [15 [-20 -1133 1061]],
              3 [4 [-92 -2380 -20]],
              2 [6 [1105 -1205 1229]]}})
-        (solve (parse "example")))
+        (time (solve (parse "example"))))
 
 (assert (= {:beacons 496,
             :found
@@ -167,7 +167,7 @@
              18 [14 [1321 2335 49]],
              37 [22 [2557 -1262 2305]],
              8 [19 [2468 -2482 55]]}}
-           (solve (parse "input"))))
+           (time (solve (parse "input")))))
 
 (defn manhattan [v1 v2]
   (apply + (mapv (fn [v] (Math/abs v)) (v- v1 v2))))
