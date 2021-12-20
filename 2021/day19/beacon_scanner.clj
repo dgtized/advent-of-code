@@ -51,29 +51,28 @@
    (int (Math/sin t)) 0 (int (Math/cos t))
    0 0 facing])
 
+(defn rotation-matrices []
+  (let [rows (mapcat (juxt identity #(v* % -1)) [[1 0 0] [0 1 0] [0 0 1]])]
+    (for [r1 rows
+          r2 rows
+          r3 rows
+          :let [m (vec (concat r1 r2 r3))]
+          :when (= 1 (determinant m))]
+      m)))
+
 (defn mat* [[a b c d e f g h i] [x y z]]
   [(+ (* x a) (* y b) (* z c))
    (+ (* x d) (* y e) (* z f))
    (+ (* x g) (* y h) (* z i))])
 
-(let [orientations
-      (into [] (for [theta [0 90 180 270]
-                     rotation [:x :y :z]
-                     facing [1 -1]]
-                 [rotation facing theta]))]
-  (defn describe-orientation [basis]
-    (nth orientations (mod basis 24)))
-
+(let [orientations (vec (rotation-matrices))]
   (defn orientation [basis]
-    (let [[rotation facing theta] (nth orientations (mod basis 24))]
-      ((get {:x x-rotation :y y-rotation :z z-rotation} rotation)
-       facing
-       (/ (* theta Math/PI) 180)))))
+    (nth orientations (mod basis 24))))
 
 (defn oriented [basis coord]
   (mat* (orientation basis) coord))
 
-(mapv (comp determinant orientation) (range 24))
+(map-indexed vector (mapv (comp (juxt determinant identity) orientation) (range 24)))
 
 (assert (mapv oriented (range 24) (repeat [8 0 7])))
 
@@ -82,7 +81,7 @@
   (mapcat (fn [basis]
             (let [pairs (for [b0 beacons0
                               b1 beacons1]
-                          (v+ b0 (oriented basis b1)))
+                          (v- b0 (oriented basis b1)))
                   overlap (filter #(>= (second %) 6) (frequencies pairs))]
               (when (seq overlap)
                 (for [[coord n] overlap]
@@ -106,13 +105,13 @@
 (frequencies (for [basis (range 24)]
                (oriented basis [68 -1246 -43])))
 
-(assert (= [{:basis 3, :n 12, :coord [68 -1246 -43]}]
+(assert (= [{:basis 4 :n 12 :coord [68 -1246 -43]}]
            (scanner-coord (get example 0) (get example 1))))
 
 (defn translate [beacons basis coord]
-  (mapv #(v- coord (oriented basis %)) beacons))
+  (mapv #(v+ (oriented basis %) coord) beacons))
 
-(assert (some #{[-618 -824 -621]} (translate (get example 1) 3 [68 -1246 -43])))
+(assert (some #{[-618 -824 -621]} (translate (get example 1) 4 [68 -1246 -43])))
 
 (defn scanner-overlap [beacons scanners]
   (flatten
@@ -122,7 +121,8 @@
      (for [c coords]
        (assoc c :scan-id scan-id)))))
 
-(assert (= [{:basis 3, :n 12, :coord [68 -1246 -43], :scan-id 1}]
+(assert (= [{:basis 4, :n 12, :coord [68 -1246 -43], :scan-id 1}
+            {:basis 15, :n 6, :coord [-20 -1133 1061], :scan-id 4}]
            (scanner-overlap (set (get example 0)) (dissoc example 0))))
 
 (defn solve [input]
@@ -130,7 +130,7 @@
          found {}
          scanners (dissoc input 0)]
     (if (empty? scanners)
-      {:beacons beacons :found found}
+      {:beacons (count beacons) :found found}
       (if-let [scanning (seq (scanner-overlap beacons scanners))]
         (let [{:keys [scan-id basis coord]} (apply max-key :n scanning)]
           (recur (into beacons (translate (get scanners scan-id) basis coord))
@@ -138,4 +138,58 @@
                  (dissoc scanners scan-id)))
         {:beacons beacons :found found :scanners-remaining (keys scanners)}))))
 
-(solve example)
+(assert (= {:beacons 79,
+            :found
+            {1 [4 [68 -1246 -43]],
+             4 [15 [-20 -1133 1061]],
+             3 [4 [-92 -2380 -20]],
+             2 [6 [1105 -1205 1229]]}})
+        (solve (parse "example")))
+
+(assert (= {:beacons 496,
+            :found
+            {7 [5 [3785 48 1211]],
+             20 [16 [2566 -1130 -2367]],
+             27 [8 [1382 -30 -20]],
+             1 [17 [1212 -1236 3556]],
+             24 [22 [124 -1141 2453]],
+             39 [19 [1253 14 2421]],
+             4 [2 [8571 -45 -1296]],
+             15 [22 [3624 61 -1278]],
+             21 [12 [2477 -47 2]],
+             31 [6 [1258 -1243 1158]],
+             32 [0 [150 60 -2414]],
+             33 [16 [2450 92 1130]],
+             13 [7 [2490 -5 -1182]],
+             22 [23 [1254 -1265 2471]],
+             36 [16 [172 2 -1300]],
+             29 [0 [7324 -63 -1168]],
+             6 [15 [4832 80 -84]],
+             28 [11 [1267 42 1112]],
+             25 [16 [1280 -2409 2479]],
+             34 [5 [1367 -2453 -57]],
+             17 [6 [2565 1122 -1218]],
+             3 [20 [1252 -1184 4724]],
+             12 [21 [3752 1215 -1257]],
+             2 [9 [3607 -2449 -97]],
+             23 [18 [1276 54 3592]],
+             35 [7 [1273 1108 78]],
+             19 [13 [1280 -1226 -40]],
+             11 [1 [1205 1142 -1150]],
+             9 [4 [2530 2402 -1217]],
+             5 [10 [2480 -3 -2458]],
+             14 [11 [3687 -1240 -1176]],
+             26 [15 [6132 -1177 -1173]],
+             16 [8 [6041 14 -1191]],
+             38 [8 [1370 -2400 -1165]],
+             30 [2 [4847 -15 -1282]],
+             10 [3 [2537 1246 -2376]],
+             18 [14 [1321 2335 49]],
+             37 [22 [2557 -1262 2305]],
+             8 [19 [2468 -2482 55]]}}
+           (solve (parse "input"))))
+
+(defn manhattan [v1 v2]
+  (apply + (mapv (fn [v] (Math/abs v)) (v- v1 v2))))
+
+(assert (manhattan [1105 -1205 1229] [-92 -2380 -20]))
