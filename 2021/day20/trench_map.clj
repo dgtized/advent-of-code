@@ -53,7 +53,14 @@
                        (int->char (get image [i j] 0)))))))
 
 (comment (print-grid (part1 (parse "example") 2))
-         (print-grid (part1 (parse "input") 2)))
+         (print-grid (part1 (parse "input") 0))
+         (print-grid (part1 (parse "input") 1))
+         (print-grid (part1 (parse "input") 2))
+         (print-grid (part1 (parse "input") 3))
+         )
 (assert (= 35 ((frequencies (vals (part1 (parse "example") 2))) 1)))
+((frequencies (vals (image->grid (parse "input")))) 1)
+((frequencies (vals (part1 (parse "input") 0))) 1)
+((frequencies (vals (part1 (parse "input") 1))) 1)
 ((frequencies (vals (part1 (parse "input") 2))) 1)
 
