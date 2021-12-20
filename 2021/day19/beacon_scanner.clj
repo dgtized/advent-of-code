@@ -59,20 +59,20 @@
 
 ;; scanner1 - scanner0 = (beacon0 - scanner0) + (beacon1 - scanner1)
 (defn scanner-coord [beacons0 beacons1]
-  (mapcat (fn [basis]
-            (let [pairs (for [b0 beacons0
-                              b1 beacons1]
-                          (v- b0 (oriented basis b1)))
-                  overlap (filter #(>= (second %) 6) (frequencies pairs))]
-              (when (seq overlap)
-                (for [[coord n] overlap]
-                  {:basis basis :n n :coord coord}))))
-          (range 24)))
+  (some (fn [basis]
+          (let [pairs (for [b0 beacons0
+                            b1 beacons1]
+                        (v- b0 (oriented basis b1)))
+                overlap (filter #(>= (second %) 12) (frequencies pairs))]
+            (when (seq overlap)
+              (for [[coord n] overlap]
+                {:basis basis :n n :coord coord}))))
+        (range 24)))
 
 (defn scanner-pairs [input]
   (for [[a b] (all-pairs (keys input))
         :let [coords (scanner-coord (get input a) (get input b))]
-        :when (seq coords)]
+        :when coords]
     [a b coords]))
 
 (def example (parse "example"))
@@ -98,12 +98,11 @@
   (flatten
    (for [scan-id (keys scanners)
          :let [coords (scanner-coord beacons (get scanners scan-id))]
-         :when (seq coords)]
+         :when coords]
      (for [c coords]
        (assoc c :scan-id scan-id)))))
 
-(assert (= [{:basis 4, :n 12, :coord [68 -1246 -43], :scan-id 1}
-            {:basis 15, :n 6, :coord [-20 -1133 1061], :scan-id 4}]
+(assert (= [{:basis 4, :n 12, :coord [68 -1246 -43], :scan-id 1}]
            (scanner-overlap (set (get example 0)) (dissoc example 0))))
 
 (defn solve [input]
