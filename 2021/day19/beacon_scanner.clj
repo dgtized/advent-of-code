@@ -115,22 +115,27 @@
 (assert (some #{[-618 -824 -621]} (translate (get example 1) 3 [68 -1246 -43])))
 
 (defn scanner-overlap [beacons scanners]
-  (for [scan-id (keys scanners)
-        :let [coords (scanner-coord beacons (get scanners scan-id))]
-        :when (seq coords)]
-    (for [[basis n coord] coords]
-      {:scan-id scan-id :basis basis :n n :coord coord})))
+  (flatten
+   (for [scan-id (keys scanners)
+         :let [coords (scanner-coord beacons (get scanners scan-id))]
+         :when (seq coords)]
+     (for [c coords]
+       (assoc c :scan-id scan-id)))))
 
-(scanner-overlap (set (get example 0)) (dissoc example 0))
+(assert (= [{:basis 3, :n 12, :coord [68 -1246 -43], :scan-id 1}]
+           (scanner-overlap (set (get example 0)) (dissoc example 0))))
 
 (defn solve [input]
   (loop [beacons (set (get input 0))
+         found {}
          scanners (dissoc input 0)]
     (if (empty? scanners)
-      beacons
-      (let [{:keys [scan-id basis _ coord]}
-            (apply max-key :n (scanner-overlap beacons scanners))]
-        (recur (into beacons (translate (get scanners scan-id) basis coord))
-               (dissoc scanners scan-id))))))
+      {:beacons beacons :found found}
+      (if-let [scanning (seq (scanner-overlap beacons scanners))]
+        (let [{:keys [scan-id basis coord]} (apply max-key :n scanning)]
+          (recur (into beacons (translate (get scanners scan-id) basis coord))
+                 (assoc found scan-id [basis coord])
+                 (dissoc scanners scan-id)))
+        {:beacons beacons :found found :scanners-remaining (keys scanners)}))))
 
 (solve example)
