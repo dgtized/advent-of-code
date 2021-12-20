@@ -15,9 +15,6 @@
     (lazy-cat (for [y s] [(first coll) y])
               (all-pairs s))))
 
-(defn vec3 [x y z]
-  [x y z])
-
 (defn v+ [a b]
   (mapv + a b))
 
@@ -36,23 +33,9 @@
      (* (- b) (- (* d i) (* f g)))
      (* c (- (* d h) (* e g)))))
 
-(defn x-rotation [facing t]
-  [facing 0 0
-   0 (int (Math/cos t)) (int (- (Math/sin t)))
-   0 (int (Math/sin t)) (int (Math/cos t))])
-
-(defn y-rotation [facing t]
-  [(int (Math/cos t)) 0 (int (Math/sin t))
-   0 facing 0
-   (int (- (Math/sin t))) 0 (int (Math/cos t))])
-
-(defn z-rotation [facing t]
-  [(int (Math/cos t)) (int (- (Math/sin t))) 0
-   (int (Math/sin t)) 0 (int (Math/cos t))
-   0 0 facing])
-
 (defn rotation-matrices []
-  (let [rows (mapcat (juxt identity #(v* % -1)) [[1 0 0] [0 1 0] [0 0 1]])]
+  (let [rows (->> [[1 0 0] [0 1 0] [0 0 1]]
+                  (mapcat (juxt identity #(v* % -1))))]
     (for [r1 rows
           r2 rows
           r3 rows
@@ -71,8 +54,6 @@
 
 (defn oriented [basis coord]
   (mat* (orientation basis) coord))
-
-(map-indexed vector (mapv (comp (juxt determinant identity) orientation) (range 24)))
 
 (assert (mapv oriented (range 24) (repeat [8 0 7])))
 
