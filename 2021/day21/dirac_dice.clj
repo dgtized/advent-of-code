@@ -59,3 +59,35 @@
 
 (assert (= 739785 (part1 "example")))
 (assert (= 929625 (part1 "input")))
+
+(def choices
+  (frequencies (for [a [1 2 3]
+                     b [1 2 3]
+                     c [1 2 3]]
+                 (+ a b c))))
+
+(defn v+ [a b]
+  (mapv + a b))
+
+(defn v* [n v]
+  (mapv (partial * n) v))
+
+(defn part2 [turn scores positions]
+  (let [player (mod turn 2)
+        pos (nth positions player)
+        score (nth scores player)]
+    (reduce v+
+            (mapv (fn [[advance universes]]
+                    (let [p (add-track pos advance)
+                          s (+ score p)]
+                      (v* universes
+                          (if (>= s 21)
+                            (if (= player 0) [1M 0] [0 1M])
+                            (part2 (inc turn)
+                                   (assoc scores player s)
+                                   (assoc positions player p))))))
+                  choices))))
+
+;; (assert (= [444356092776315M 341960390180808M] (part2 0 [0 0] [4 8])))
+;; (assert (= [153087536629019M 175731756652760M] (part2 0 [0 0] [6 1])))
+(max 153087536629019M 175731756652760M)
