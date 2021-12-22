@@ -63,17 +63,32 @@
         q' (mapv min qa qb)
         s' (v- q' p')]
     (when (every? pos? s')
-      (aabb (mapv vector p' s')))))
+      (aabb (mapv (fn [a b] [a (+ a b)]) p' s')))))
 
 (comment (aabb-intersection (aabb [[0 2] [0 2] [0 2]]) (aabb [[-1 1] [0 2] [0 2]])))
 
-(defn all-pairs [coll]
-  (when-let [s (next coll)]
-    (lazy-cat (for [y s] [(first coll) y])
-              (all-pairs s))))
+(defn intersecting-boxes [input]
+  (->> (for [[coords toggle] input]
+         [(aabb coords) toggle])
+       (reduce (fn [existing [box toggle]]
+                 (let [e' (reduce-kv (fn [acc known ktoggle]
+                                       (if-let [isec (aabb-intersection known box)]
+                                         (assoc acc isec (not ktoggle))
+                                         acc))
+                                     existing existing)]
+                   (if toggle
+                     (assoc e' box toggle)
+                     e')))
+               {})))
 
-(for [[a b] (all-pairs (mapv (fn [[coords toggle]] (aabb coords))
-                             (parse "input")))
-      :when (aabb-overlap? a b)]
-  (aabb-intersection a b))
+(defn volumes [boxes]
+  (reduce (fn [acc [box toggle]] (let [v (volume box)]
+                                  ((if toggle + -) acc v)))
+          0 boxes))
+
+(let [[[a _] [b _]] (parse "example")]
+  [(aabb a) (aabb b) (aabb-intersection (aabb a) (aabb b))])
+
+(volumes (intersecting-boxes (parse "example")))
+(volumes (intersecting-boxes (parse "example2")))
 
