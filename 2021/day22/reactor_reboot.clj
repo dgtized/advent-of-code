@@ -48,14 +48,6 @@
 (assert (= 27 (volume (aabb [[10 12] [10 12] [10 12]]))))
 
 ;; cribbed from thi.ng/geom
-(defn aabb-overlap? [{pa :p size-a :size} {pb :p size-b :size}]
-  (let [qa (v+ pa size-a)
-        qb (v+ pb size-b)]
-    (when (and (<= (pa 0) (qb 0)) (<= (pb 0) (qa 0)))
-      (when (and (<= (pa 1) (qb 1)) (<= (pb 1) (qa 1)))
-        (and (<= (pa 2) (qb 2)) (<= (pb 2) (qa 2)))))))
-
-;; cribbed from thi.ng/geom
 (defn aabb-intersection [{pa :p size-a :size} {pb :p size-b :size}]
   (let [qa (v+ pa size-a)
         qb (v+ pb size-b)
