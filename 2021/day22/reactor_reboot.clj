@@ -71,24 +71,22 @@
   (->> (for [[coords toggle] input]
          [(aabb coords) toggle])
        (reduce (fn [existing [box toggle]]
-                 (let [e' (reduce-kv (fn [acc known ktoggle]
-                                       (if-let [isec (aabb-intersection known box)]
-                                         (assoc acc isec (not ktoggle))
-                                         acc))
-                                     existing existing)]
+                 (let [e' (reduce (fn [acc [cell cell-toggle]]
+                                    (if-let [isec (aabb-intersection box cell)]
+                                      (conj acc [isec (not cell-toggle)])
+                                      acc))
+                                  existing existing)]
                    (if toggle
-                     (assoc e' box toggle)
+                     (conj e' [box toggle])
                      e')))
-               {})))
+               [])))
 
 (defn volumes [boxes]
-  (reduce (fn [acc [box toggle]] (let [v (volume box)]
-                                  ((if toggle + -) acc v)))
+  (reduce (fn [acc [box toggle]]
+            ((if toggle + -) acc (volume box)))
           0 boxes))
 
-(let [[[a _] [b _]] (parse "example")]
-  [(aabb a) (aabb b) (aabb-intersection (aabb a) (aabb b))])
-
-(volumes (intersecting-boxes (parse "example")))
-(volumes (intersecting-boxes (parse "example2")))
+(assert (= 39 (volumes (intersecting-boxes (parse "example")))))
+;; off by 10?
+(assert (= 2758514936282235 (volumes (intersecting-boxes (parse "example2")))))
 
