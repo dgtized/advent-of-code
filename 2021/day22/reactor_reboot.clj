@@ -47,12 +47,25 @@
 
 (assert (= 27 (volume (aabb [[10 12] [10 12] [10 12]]))))
 
+;; cribbed from thi.ng/geom
 (defn aabb-overlap? [{pa :p size-a :size} {pb :p size-b :size}]
   (let [qa (v+ pa size-a)
         qb (v+ pb size-b)]
-    (if (and (<= (pa 0) (qb 0)) (<= (pb 0) (qa 0)))
-      (if (and (<= (pa 1) (qb 1)) (<= (pb 1) (qa 1)))
+    (when (and (<= (pa 0) (qb 0)) (<= (pb 0) (qa 0)))
+      (when (and (<= (pa 1) (qb 1)) (<= (pb 1) (qa 1)))
         (and (<= (pa 2) (qb 2)) (<= (pb 2) (qa 2)))))))
+
+;; cribbed from thi.ng/geom
+(defn aabb-intersection [{pa :p size-a :size} {pb :p size-b :size}]
+  (let [qa (v+ pa size-a)
+        qb (v+ pb size-b)
+        p' (mapv max pa pb)
+        q' (mapv min qa qb)
+        s' (v- q' p')]
+    (when (every? pos? s')
+      (aabb (mapv vector p' s')))))
+
+(comment (aabb-intersection (aabb [[0 2] [0 2] [0 2]]) (aabb [[-1 1] [0 2] [0 2]])))
 
 (defn all-pairs [coll]
   (when-let [s (next coll)]
@@ -62,5 +75,5 @@
 (for [[a b] (all-pairs (mapv (fn [[coords toggle]] (aabb coords))
                              (parse "input")))
       :when (aabb-overlap? a b)]
-  [a b])
+  (aabb-intersection a b))
 
