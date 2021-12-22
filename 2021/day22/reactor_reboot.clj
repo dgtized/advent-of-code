@@ -57,7 +57,9 @@
     (when (every? pos? s')
       (aabb (mapv (fn [a b] [a (+ a b)]) p' s')))))
 
-(comment (aabb-intersection (aabb [[0 2] [0 2] [0 2]]) (aabb [[-1 1] [0 2] [0 2]])))
+(comment (aabb-intersection (aabb [[0 2] [0 2] [0 2]]) (aabb [[-1 1] [0 2] [0 2]]))
+         (aabb-intersection (aabb [[0 2] [0 2] [0 2]]) (aabb [[1 3] [1 3] [1 3]]))
+         )
 
 (defn intersecting-boxes [input]
   (->> (for [[coords toggle] input]
