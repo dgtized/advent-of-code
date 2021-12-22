@@ -43,9 +43,9 @@
    :size (v- [x1 y1 z1] [x0 y0 z0])})
 
 (defn volume [{:keys [size]}]
-  (apply * (mapv inc size)))
+  (apply * size))
 
-(assert (= 27 (volume (aabb [[10 12] [10 12] [10 12]]))))
+(assert (= 27 (volume (aabb [[10 (inc 12)] [10 (inc 12)] [10 (inc 12)]]))))
 
 ;; cribbed from thi.ng/geom
 (defn aabb-intersection [{pa :p size-a :size} {pb :p size-b :size}]
@@ -62,8 +62,8 @@
          )
 
 (defn intersecting-boxes [input]
-  (->> (for [[coords toggle] input]
-         [(aabb coords) toggle])
+  (->> (for [[[[x0 x1] [y0 y1] [z0 z1]] toggle] input]
+         [(aabb [[x0 (inc x1)] [y0 (inc y1)] [z0 (inc z1)]]) toggle])
        (reduce (fn [existing [box on]]
                  (let [e' (reduce (fn [acc [cell cell-on]]
                                     (if-let [isec (aabb-intersection box cell)]
