@@ -83,4 +83,5 @@
 (assert (= 39 (volumes (intersecting-boxes (parse "example")))))
 ;; off by 10?
 (assert (= 2758514936282235 (volumes (intersecting-boxes (parse "example2")))))
+(assert (= 1263804707062415 (volumes (intersecting-boxes (parse "input")))))
 
