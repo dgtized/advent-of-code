@@ -62,14 +62,14 @@
 (defn intersecting-boxes [input]
   (->> (for [[coords toggle] input]
          [(aabb coords) toggle])
-       (reduce (fn [existing [box toggle]]
-                 (let [e' (reduce (fn [acc [cell cell-toggle]]
+       (reduce (fn [existing [box on]]
+                 (let [e' (reduce (fn [acc [cell cell-on]]
                                     (if-let [isec (aabb-intersection box cell)]
-                                      (conj acc [isec (not cell-toggle)])
+                                      (conj acc [isec (not cell-on)])
                                       acc))
                                   existing existing)]
-                   (if toggle
-                     (conj e' [box toggle])
+                   (if on
+                     (conj e' [box on])
                      e')))
                [])))
 
