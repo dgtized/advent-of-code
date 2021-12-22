@@ -43,7 +43,7 @@
    :size (v- [x1 y1 z1] [x0 y0 z0])})
 
 (defn volume [{:keys [size]}]
-  (apply * (mapv (fn [x] (Math/abs (inc x))) size)))
+  (apply * (mapv inc size)))
 
 (assert (= 27 (volume (aabb [[10 12] [10 12] [10 12]]))))
 
