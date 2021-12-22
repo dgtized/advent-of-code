@@ -32,3 +32,35 @@
 (assert (= 590784 (time (count (part1 (parse "example1"))))))
 (assert (= 582644 (time (count (part1 (parse "input"))))))
 
+(defn v- [a b]
+  (mapv - a b))
+
+(defn v+ [a b]
+  (mapv + a b))
+
+(defn aabb [[[x0 x1] [y0 y1] [z0 z1]]]
+  {:p [x0 y0 z0]
+   :size (v- [x1 y1 z1] [x0 y0 z0])})
+
+(defn volume [{:keys [size]}]
+  (apply * (mapv (fn [x] (Math/abs (inc x))) size)))
+
+(assert (= 27 (volume (aabb [[10 12] [10 12] [10 12]]))))
+
+(defn aabb-overlap? [{pa :p size-a :size} {pb :p size-b :size}]
+  (let [qa (v+ pa size-a)
+        qb (v+ pb size-b)]
+    (if (and (<= (pa 0) (qb 0)) (<= (pb 0) (qa 0)))
+      (if (and (<= (pa 1) (qb 1)) (<= (pb 1) (qa 1)))
+        (and (<= (pa 2) (qb 2)) (<= (pb 2) (qa 2)))))))
+
+(defn all-pairs [coll]
+  (when-let [s (next coll)]
+    (lazy-cat (for [y s] [(first coll) y])
+              (all-pairs s))))
+
+(for [[a b] (all-pairs (mapv (fn [[coords toggle]] (aabb coords))
+                             (parse "input")))
+      :when (aabb-overlap? a b)]
+  [a b])
+
