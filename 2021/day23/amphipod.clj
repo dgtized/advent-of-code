@@ -47,6 +47,9 @@
             #{}
             (sort-by second (pieces board)))))
 
+(defn corridor? [[x y]]
+  (= y 1))
+
 (assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
            (correct-pieces (parse "example"))))
 
@@ -83,10 +86,13 @@
 (defn legal-moves [board]
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
-          :let [legal (keep (fn [dest]
+          :let [constraints (if (corridor? c)
+                              (complement corridor?)
+                              corridor?)
+                legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
                                 [dest (* (count pathing) (int (Math/pow 10 (- (int v) (int \A)))))]))
-                            all-open)]
+                            (filter constraints all-open))]
           :when (seq legal)]
       [c v (into {} legal)])))
 
