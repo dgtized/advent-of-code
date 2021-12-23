@@ -89,12 +89,15 @@
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
 (defn legal-moves [board]
-  (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
+  (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))
+        expected (expected-locs)]
     (for [[c v] (pieces board)
-          :let [constraints (if (corridor? c)
-                              (fn [dest] (let [room (get (expected-locs) v)]
-                                          (and (room dest) (#{\. v} (get board (disj room dest))))))
-                              corridor?)
+          :let [room (get expected v)
+                constraints (if (corridor? c)
+                              (fn [dest] (let [other (first (disj room dest))]
+                                          (and (room dest) (#{\. v} (get board other)))))
+                              (fn [dest] (or (corridor? dest)
+                                            ((get (expected-locs) v) dest))))
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
                                 [dest (* (count pathing) (int (Math/pow 10 (- (int v) (int \A)))))]))
