@@ -26,11 +26,28 @@
 
 (defn movable-pieces [board]
   (filter (fn [[p _]]
-            (some (fn [[_ val]] (#{\.} val)) (neighbors board p)))
+            (some (fn [[_ val]] (= \. val)) (neighbors board p)))
           (pieces board)))
 
 (assert (= [[[7 2] \B] [[5 2] \C] [[9 2] \D] [[3 2] \B]]
            (movable-pieces (parse "example"))))
+
+(defn open-spaces [board]
+  (mapv first (filter (fn [[_ v]] (= \. v)) board)))
+
+(assert (= 11 (count (open-spaces (parse "example")))))
+
+(let [expected (update-vals (group-by second (pieces (parse "result")))
+                            #(set (map first %)))]
+  (defn valuation [board]
+    (reduce (fn [s [p v]] (if ((get expected v) p)
+                           (conj s [p v])
+                           s))
+            #{}
+            (sort-by second (pieces board)))))
+
+(assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
+           (valuation (parse "example"))))
 
 ;; (defn legal-moves [board [i j]])
 ;; (defn valuation [board])
