@@ -90,7 +90,8 @@
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
           :let [constraints (if (corridor? c)
-                              (complement corridor?)
+                              (fn [dest] (let [room (get (expected-locs) v)]
+                                          (and (room dest) (#{\. v} (get board (disj room dest))))))
                               corridor?)
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
@@ -101,3 +102,57 @@
 
 (assert (= 4 (count (legal-moves (parse "example")))))
 
+(defn ranked-moves [board]
+  (->> (for [[src piece destinations] (legal-moves board)
+             [dst cost] destinations]
+         [src dst piece cost])
+       (sort-by #(nth % 3))))
+
+(assert (= 28 (count (ranked-moves (parse "example")))))
+
+(defn move [board src dest]
+  (let [v (get board src)]
+    (assoc board dest v
+           src \.)))
+
+(defn solved? [board]
+  (= 8 (count (correct-pieces board))))
+
+(defn solve [board moves]
+  (cond (solved? board)
+        [moves]
+        (> (count moves) 8)
+        []
+        :else
+        (->> (ranked-moves board)
+             (remove (set moves))
+             (mapcat (fn [[src dst piece cost]]
+                       (solve (move board src dst) (conj moves [src dst piece cost])))))))
+
+;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
+(defn search [board]
+  (loop [visited {}
+         queue (dpm/priority-map-keyfn first board [0 0 nil])]
+    (when (seq queue)
+      (let [[current [_ value prev]] (peek queue)
+            visited' (assoc visited current prev)]
+        (if (solved? current)
+          (reverse (backtrack current visited'))
+          (recur visited'
+                 (reduce (fn [queue [node cost]]
+                           (let [score (+ value cost)]
+                             (if (and (not (contains? visited' node))
+                                      (or (not (contains? queue node))
+                                          (< score (get-in queue [node 1]))))
+                               (assoc queue node [(+ score 1) score current])
+                               queue)))
+                         (pop queue)
+                         (mapv (fn [[src dst _ cost]] [(move current src dst) cost])
+                               (ranked-moves current)))))))))
+
+
+;; (solve (parse "example") [])
+
+(ranked-moves (move (parse "example") [7 2] [8 1]))
+
+;; (search (parse "input"))
