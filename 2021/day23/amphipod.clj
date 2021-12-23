@@ -1,5 +1,6 @@
 (ns amphipod
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.data.priority-map :as dpm]))
 
 (defn parse [filename]
   (let [lines (str/split-lines (slurp filename))]
@@ -52,3 +53,34 @@
 ;; (defn legal-moves [board [i j]])
 ;; (defn valuation [board])
 ;; (defn )
+
+(defn open-neighbors [grid p]
+  (mapv first (filter (fn [[_ val]] (= val \.)) (neighbors grid p))))
+
+(defn backtrack [current visited]
+  (cons current
+        (lazy-seq (when-let [parent (get visited current)]
+                    (backtrack parent visited)))))
+
+;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
+(defn path [grid source target]
+  (loop [visited {}
+         queue (dpm/priority-map-keyfn first source [0 0 nil])]
+    (when (seq queue)
+      (let [[current [_ value prev]] (peek queue)
+            visited' (assoc visited current prev)]
+        (if (= current target)
+          (reverse (backtrack target visited'))
+          (recur visited'
+                 (reduce (fn [queue node]
+                           (let [score (+ value 1)]
+                             (if (and (not (contains? visited' node))
+                                      (or (not (contains? queue node))
+                                          (< score (get-in queue [node 1]))))
+                               (assoc queue node [(+ score 1) score current])
+                               queue)))
+                         (pop queue)
+                         (open-neighbors grid current))))))))
+
+(let [board (parse "example")]
+  (path (assoc board [6 1] \#) [7 2] [1 1]))
