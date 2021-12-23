@@ -50,10 +50,6 @@
 (assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
            (correct-pieces (parse "example"))))
 
-;; (defn legal-moves [board [i j]])
-;; (defn valuation [board])
-;; (defn )
-
 (defn open-neighbors [grid p]
   (mapv first (filter (fn [[_ val]] (= val \.)) (neighbors grid p))))
 
@@ -82,5 +78,17 @@
                          (pop queue)
                          (open-neighbors grid current))))))))
 
-(let [board (parse "example")]
-  (path (assoc board [6 1] \#) [7 2] [1 1]))
+(assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
+
+(defn legal-moves [board]
+  (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
+    (for [[c v] (pieces board)
+          :let [legal (keep (fn [dest]
+                              (when-let [pathing (path board c dest)]
+                                [dest (* (count pathing) (int (Math/pow 10 (- (int v) (int \A)))))]))
+                            all-open)]
+          :when (seq legal)]
+      [c v (into {} legal)])))
+
+(legal-moves (parse "example"))
+
