@@ -146,8 +146,10 @@
             visited' (assoc visited current prev)
             path' (assoc path current mpath)]
         (if (solved? current)
-          {:path (rest (map path' (reverse (backtrack current visited'))))
-           :states (count visited')}
+          (let [final (rest (map path' (reverse (backtrack current visited'))))]
+            {:path final
+             :cost (apply + (mapv #(nth % 2) final))
+             :states (count visited')})
           (recur visited'
                  path'
                  (reduce (fn [queue [node src dst cost]]
@@ -170,3 +172,7 @@
 
 ;; (search (parse "input"))
 (assert (search (move (parse "result") [7 2] [8 1])))
+
+(comment
+  (assert (= 12521 (:cost (search (parse "example")))))
+  (assert (= 10607 (:cost (search (parse "input"))))))
