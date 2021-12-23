@@ -56,6 +56,8 @@
 (assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
            (correct-pieces (parse "example"))))
 
+(assert (set (pieces (parse "result"))))
+
 (defn open-neighbors [grid p]
   (mapv first (filter (fn [[_ val]] (= val \.)) (neighbors grid p))))
 
@@ -117,6 +119,8 @@
 
 (defn solved? [board]
   (= 8 (count (correct-pieces board))))
+
+(assert (solved? (parse "result")))
 
 (defn solve [board moves]
   (cond (solved? board)
