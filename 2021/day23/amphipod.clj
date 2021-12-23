@@ -6,7 +6,7 @@
   (let [lines (str/split-lines (slurp filename))]
     (into {} (for [[j line] (map-indexed vector lines)
                    [i c] (map-indexed vector (seq line))
-                   :when (not= c \ )]
+                   :when (not (#{\  \#} c))]
                [[i j] c]))))
 
 (defn v+ [a b]
@@ -19,7 +19,7 @@
         :when value]
     [neighbor value]))
 
-(assert (= [[[6 3] \#] [[7 2] \B] [[7 4] \#] [[8 3] \#]]
+(assert (= [[[7 2] \B]]
            (neighbors (parse "example") [7 3])))
 
 (defn pieces [board]
