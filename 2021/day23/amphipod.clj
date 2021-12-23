@@ -39,7 +39,7 @@
 
 (let [expected (update-vals (group-by second (pieces (parse "result")))
                             #(set (map first %)))]
-  (defn valuation [board]
+  (defn correct-pieces [board]
     (reduce (fn [s [p v]] (if ((get expected v) p)
                            (conj s [p v])
                            s))
@@ -47,7 +47,7 @@
             (sort-by second (pieces board)))))
 
 (assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
-           (valuation (parse "example"))))
+           (correct-pieces (parse "example"))))
 
 ;; (defn legal-moves [board [i j]])
 ;; (defn valuation [board])
