@@ -1,6 +1,7 @@
 (ns amphipod
   (:require [clojure.string :as str]
-            [clojure.data.priority-map :as dpm]))
+            [clojure.data.priority-map :as dpm]
+            [clojure.set :as set]))
 
 (defn parse [filename]
   (let [lines (str/split-lines (slurp filename))]
@@ -50,6 +51,21 @@
             #{}
             (sort-by second (pieces board)))))
 
+
+(defn incorrect-pieces [board]
+  (set/difference (set (pieces board)) (correct-pieces board)))
+
+(defn move-cost [piece spaces]
+  (* spaces (int (Math/pow 10 (- (int piece) (int \A))))))
+
+(defn estimate-cost [board]
+  (reduce (fn [acc [_ piece]] (+ acc (move-cost piece 2)))
+          0
+          (incorrect-pieces board)))
+
+(assert (= 0 (estimate-cost (parse "result"))))
+(assert (= 2242 (estimate-cost (parse "example"))))
+
 (defn corridor? [[x y]]
   (= y 1))
 
@@ -94,13 +110,15 @@
     (for [[c v] (pieces board)
           :let [room (get expected v)
                 constraints (if (corridor? c)
-                              (fn [dest] (let [other (first (disj room dest))]
-                                          (and (room dest) (#{\. v} (get board other)))))
+                              (fn [dest]
+                                (and (room dest)
+                                     (every? (fn [other] #{\. v} (get board other))
+                                             (disj room dest))))
                               (fn [dest] (or (corridor? dest)
                                             ((get (expected-locs) v) dest))))
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
-                                [dest (* (dec (count pathing)) (int (Math/pow 10 (- (int v) (int \A)))))]))
+                                [dest (move-cost v (dec (count pathing)))]))
                             (filter constraints all-open))]
           :when (seq legal)]
       [c v (into {} legal)])))
@@ -157,7 +175,7 @@
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
                                           (< score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score 1) score current [src dst cost]])
+                               (assoc queue node [(+ score (estimate-cost current)) score current [src dst cost]])
                                queue)))
                          (pop queue)
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
