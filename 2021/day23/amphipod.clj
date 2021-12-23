@@ -100,7 +100,7 @@
                                             ((get (expected-locs) v) dest))))
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
-                                [dest (* (count pathing) (int (Math/pow 10 (- (int v) (int \A)))))]))
+                                [dest (* (dec (count pathing)) (int (Math/pow 10 (- (int v) (int \A)))))]))
                             (filter constraints all-open))]
           :when (seq legal)]
       [c v (into {} legal)])))
