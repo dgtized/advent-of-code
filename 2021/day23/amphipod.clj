@@ -139,22 +139,26 @@
 ;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
 (defn search [board]
   (loop [visited {}
-         queue (dpm/priority-map-keyfn first board [0 0 nil])]
+         path {}
+         queue (dpm/priority-map-keyfn first board [0 0 nil []])]
     (when (seq queue)
-      (let [[current [_ value prev]] (peek queue)
-            visited' (assoc visited current prev)]
+      (let [[current [_ value prev mpath]] (peek queue)
+            visited' (assoc visited current prev)
+            path' (assoc path current mpath)]
         (if (solved? current)
-          (reverse (backtrack current visited'))
+          {:path (rest (map path' (reverse (backtrack current visited'))))
+           :states (count visited')}
           (recur visited'
-                 (reduce (fn [queue [node cost]]
+                 path'
+                 (reduce (fn [queue [node src dst cost]]
                            (let [score (+ value cost)]
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
                                           (< score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score 1) score current])
+                               (assoc queue node [(+ score 1) score current [src dst cost]])
                                queue)))
                          (pop queue)
-                         (mapv (fn [[src dst _ cost]] [(move current src dst) cost])
+                         (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
                                (ranked-moves current)))))))))
 
 
@@ -162,4 +166,7 @@
 
 (ranked-moves (move (parse "example") [7 2] [8 1]))
 
+(legal-moves (move (parse "result") [7 2] [8 1]))
+
 ;; (search (parse "input"))
+(assert (search (move (parse "result") [7 2] [8 1])))
