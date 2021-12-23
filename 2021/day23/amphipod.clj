@@ -40,6 +40,9 @@
 
 (let [expected (update-vals (group-by second (pieces (parse "result")))
                             #(set (map first %)))]
+  (defn expected-locs []
+    expected)
+
   (defn correct-pieces [board]
     (reduce (fn [s [p v]] (if ((get expected v) p)
                            (conj s [p v])
@@ -96,5 +99,5 @@
           :when (seq legal)]
       [c v (into {} legal)])))
 
-(legal-moves (parse "example"))
+(assert (= 4 (count (legal-moves (parse "example")))))
 
