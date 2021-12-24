@@ -10,12 +10,9 @@
                    :when (not (#{\  \#} c))]
                [[i j] c]))))
 
-(defn v+ [a b]
-  (mapv + a b))
-
 (defn open-neighbors [board pos]
   (for [change [[-1 0] [0 -1] [0 1] [1 0]]
-        :let [neighbor (v+ pos change)
+        :let [neighbor (mapv + pos change)
               value (get board neighbor)]
         :when (= \. value)]
     neighbor))
