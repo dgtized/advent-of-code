@@ -49,3 +49,22 @@
             (edn/read-string (subs s x (inc x)))))))
 
 (assert (= [1 2 3 4] (num->digits 1234)))
+
+(assert (= {:w 0, :x 0, :y 1, :z 1 :input []}
+           (evaluate (num->digits 3) (parse "example2"))))
+
+(def monad (parse "input"))
+
+(defn valid? [n]
+  (let [{:keys [z]} (evaluate (num->digits n) monad)]
+    (if (= z 0)
+      true
+      false)))
+
+(assert (not (valid? 13579246899999)))
+
+(comment
+  (->> (range 99999999999999 11111111111111 -1)
+       (remove (fn [v] (re-find #"0" (str v))))
+       (drop-while (complement valid?))
+       first))
