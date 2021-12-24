@@ -26,14 +26,6 @@
 (defn pieces [board]
   (filter (fn [[_ v]] (#{\A \B \C \D} v)) board))
 
-(defn movable-pieces [board]
-  (filter (fn [[p _]]
-            (some (fn [[_ val]] (= \. val)) (neighbors board p)))
-          (pieces board)))
-
-(assert (= [[[7 2] \B] [[5 2] \C] [[9 2] \D] [[3 2] \B]]
-           (movable-pieces (parse "example"))))
-
 (defn open-spaces [board]
   (mapv first (filter (fn [[_ v]] (= \. v)) board)))
 
@@ -200,4 +192,5 @@
   (assert (= 10607 (:cost (time (search e1 (parse "input"))))))
 
   (def e2 (expected (parse "result2")))
-  (assert (= 44169 (:cost (search e2 (parse "example2"))))))
+  (assert (= 44169 (:cost (time (search e2 (parse "example2"))))))
+  (assert (= 44169 (:cost (time (search e2 (parse "input2")))))))
