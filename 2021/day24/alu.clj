@@ -65,8 +65,43 @@
 (assert (not (valid? 31111111111115)))
 (assert (not (valid? 99999999999999)))
 
+(defn remove-zeros [coll]
+  (remove (fn [v] (re-find #"0" (str v))) coll))
+
 (comment
-  (->> (range 99999999999999 11111111111111 -1)
-       (remove (fn [v] (re-find #"0" (str v))))
+  (->> (range 99999999999999 11111111111111 -1000000)
+       remove-zeros
        (filter valid?)
        (take 1)))
+
+(comment
+  (->> (range 11111111111111 11111111112111)
+       remove-zeros
+       (mapv (fn [n] [n (evaluate (num->digits n) monad)])))
+
+  (->> (range 51111111111111 51111111111911)
+       remove-zeros
+       (mapv (fn [n] [n (evaluate (num->digits n) monad)])))
+
+  (->> (range 99999999999999 99999999998999 -1)
+       remove-zeros
+       (mapv (fn [n] [n (evaluate (num->digits n) monad)])))
+
+  (for [n (remove-zeros (range 11 100))]
+    [n (evaluate (num->digits n) (take 36 monad))])
+
+  (for [n (random-sample 0.001 (remove-zeros (range 111111 999999 1)))]
+    [n (evaluate (num->digits n) (take (* 18 6) monad))])
+
+  (for [n (range 1 10)
+        part (partition 18 monad)]
+    [n (evaluate (num->digits n) (take 6 part))])
+
+
+  )
+
+;; every digit group is 18 instructions with identical operations to registers
+(assert (apply = (mapv (fn [digit] (map (partial take 2) digit)) (partition 18 monad))))
+
+;; most of the final args are same but a few columns vary
+(mapv (fn [digit] (map last digit)) (partition 18 monad))
