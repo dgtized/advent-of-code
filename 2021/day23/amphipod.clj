@@ -107,19 +107,14 @@
 
 (defn legal-moves [expected board]
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
-    (for [[c v] (pieces board)
-          :when (not (in-place? expected board [c v]))
-          :let [constraints (if (corridor? c)
-                              (fn [dest]
-                                (in-place? expected board [dest v]))
-                              (fn [dest] (or (corridor? dest)
-                                            (in-place? expected board [dest v]))))
-                legal (keep (fn [dest]
-                              (when-let [pathing (path board c dest)]
-                                [dest (move-cost v (dec (count pathing)))]))
-                            (filter constraints all-open))]
-          [lm cost] legal]
-      [c lm v cost])))
+    (for [[from v] (pieces board)
+          :when (not (in-place? expected board [from v]))
+          dest all-open
+          :when (or (and (not (corridor? from)) (corridor? dest))
+                    (in-place? expected board [dest v]))
+          :let [pathing (path board from dest)]
+          :when (seq pathing)]
+      [from dest v (move-cost v (dec (count pathing)))])))
 
 (assert (= 28 (count (legal-moves (expected (parse "result")) (parse "example")))))
 (assert (empty? (legal-moves (expected (parse "result2")) (parse "result2"))))
