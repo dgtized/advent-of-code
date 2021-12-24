@@ -115,16 +115,10 @@
 (defn legal-moves [expected board]
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
-          :let [room (get expected v)]
           :when (not (in-place? expected board [c v]))
-          :let [deepest (if-let [column (seq (filter (fn [r] (= \. (get board r))) room))]
-                          (apply max-key second column)
-                          nil)
-                constraints (if (corridor? c)
+          :let [constraints (if (corridor? c)
                               (fn [dest]
-                                (and (= deepest dest)
-                                     (every? (fn [other] (#{\. v} (get board other)))
-                                             (disj room dest))))
+                                (in-place? expected board [dest v]))
                               (fn [dest] (or (corridor? dest)
                                             ((get expected v) dest))))
                 legal (keep (fn [dest]
