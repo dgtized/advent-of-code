@@ -131,21 +131,13 @@
                               (when-let [pathing (path board c dest)]
                                 [dest (move-cost v (dec (count pathing)))]))
                             (filter constraints all-open))]
-          :when (seq legal)]
-      [c v (into {} legal)])))
+          [lm cost] legal]
+      [c lm v cost])))
 
-(assert (= 4 (count (legal-moves (expected (parse "result")) (parse "example")))))
+(assert (= 28 (count (legal-moves (expected (parse "result")) (parse "example")))))
 (assert (empty? (legal-moves (expected (parse "result2")) (parse "result2"))))
-
-(defn ranked-moves [expected board]
-  (->> (for [[src piece destinations] (legal-moves expected board)
-             [dst cost] destinations]
-         [src dst piece cost])
-       (sort-by #(nth % 3))))
-
-(assert (= 28 (count (ranked-moves (expected (parse "result")) (parse "example")))))
-(assert (= [[[4 1] [3 2] \A] 2]
-           (ranked-moves (expected (parse "result2")) (move (parse "result2") [3 2] [4 1]))))
+(assert (= [[[4 1] [3 2] \A 2]]
+           (legal-moves (expected (parse "result2")) (move (parse "result2") [3 2] [4 1]))))
 
 (defn solved? [expected board]
   (= (apply set/union (vals expected))
@@ -178,14 +170,9 @@
                                queue)))
                          (pop queue)
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
-                               (ranked-moves expected current)))))))))
+                               (legal-moves expected current)))))))))
 
-
-;; (solve (parse "example") [])
-
-(ranked-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
-(legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
-
+(assert (= 15 (count (legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1])))))
 (assert (search
          (expected (parse "result2"))
          (-> (parse "result2")
