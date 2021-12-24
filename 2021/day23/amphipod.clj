@@ -170,7 +170,7 @@
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
                                           (< score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score (estimate-cost expected current)) score current [src dst cost]])
+                               (assoc queue node [(+ score (estimate-cost expected node)) score current [src dst cost]])
                                queue)))
                          (pop queue)
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
@@ -180,6 +180,7 @@
 ;; (solve (parse "example") [])
 
 (ranked-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
+(legal-moves (expected (parse "result2")) (move (parse "result2") [7 2] [8 1]))
 
 (assert (search
          (expected (parse "result"))
