@@ -118,8 +118,7 @@
                           nil)
                 constraints (if (corridor? c)
                               (fn [dest]
-                                (and (room dest)
-                                     (every? (fn [other] #{\. v} (get board other))
+                                (and (every? (fn [other] #{\. v} (get board other))
                                              (disj room dest))
                                      (= deepest dest)))
                               (fn [dest] (or (corridor? dest)
