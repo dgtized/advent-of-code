@@ -144,6 +144,7 @@
      (set (mapv first (correct-pieces expected board)))))
 
 (assert (solved? (expected (parse "result")) (parse "result")))
+(assert (solved? (expected (parse "result2")) (parse "result2")))
 
 ;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
 (defn search [expected board]
@@ -166,7 +167,9 @@
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
                                           (< score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score (estimate-cost expected node)) score current [src dst cost]])
+                               (assoc queue
+                                      node
+                                      [(+ score (estimate-cost expected node)) score current [src dst cost]])
                                queue)))
                          (pop queue)
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
