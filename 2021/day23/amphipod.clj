@@ -39,38 +39,39 @@
 
 (assert (= 11 (count (open-spaces (parse "example")))))
 
-(let [expected (update-vals (group-by second (pieces (parse "result")))
-                            #(set (map first %)))]
-  (defn expected-locs []
-    expected)
+(defn expected [input]
+  (update-vals (group-by second (pieces input))
+               #(set (map first %))))
 
-  (defn correct-pieces [board]
-    (reduce (fn [s [p v]] (if ((get expected v) p)
-                           (conj s [p v])
-                           s))
-            #{}
-            (sort-by second (pieces board)))))
+(assert (expected (parse "result2")))
 
+(defn correct-pieces [expected board]
+  (reduce (fn [s [p v]] (if ((get expected v) p)
+                         (conj s [p v])
+                         s))
+          #{}
+          (sort-by second (pieces board))))
 
-(defn incorrect-pieces [board]
-  (set/difference (set (pieces board)) (correct-pieces board)))
+(defn incorrect-pieces [expected board]
+  (set/difference (set (pieces board))
+                  (correct-pieces expected board)))
 
 (defn move-cost [piece spaces]
   (* spaces (int (Math/pow 10 (- (int piece) (int \A))))))
 
-(defn estimate-cost [board]
+(defn estimate-cost [expected board]
   (reduce (fn [acc [_ piece]] (+ acc (move-cost piece 2)))
           0
-          (incorrect-pieces board)))
+          (incorrect-pieces expected board)))
 
-(assert (= 0 (estimate-cost (parse "result"))))
-(assert (= 2242 (estimate-cost (parse "example"))))
+(assert (= 0 (estimate-cost (expected (parse "result")) (parse "result"))))
+(assert (= 2242 (estimate-cost (expected (parse "result")) (parse "example"))))
 
 (defn corridor? [[x y]]
   (= y 1))
 
 (assert (= #{[[3 3] \A] [[9 2] \D] [[7 3] \C]}
-           (correct-pieces (parse "example"))))
+           (correct-pieces (expected (parse "result")) (parse "example"))))
 
 (assert (set (pieces (parse "result"))))
 
@@ -104,9 +105,8 @@
 
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
-(defn legal-moves [board]
-  (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))
-        expected (expected-locs)]
+(defn legal-moves [expected board]
+  (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
           :let [room (get expected v)
                 constraints (if (corridor? c)
@@ -115,7 +115,7 @@
                                      (every? (fn [other] #{\. v} (get board other))
                                              (disj room dest))))
                               (fn [dest] (or (corridor? dest)
-                                            ((get (expected-locs) v) dest))))
+                                            ((get expected v) dest))))
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
                                 [dest (move-cost v (dec (count pathing)))]))
@@ -123,28 +123,29 @@
           :when (seq legal)]
       [c v (into {} legal)])))
 
-(assert (= 4 (count (legal-moves (parse "example")))))
+(assert (= 4 (count (legal-moves (expected (parse "result")) (parse "example")))))
 
-(defn ranked-moves [board]
-  (->> (for [[src piece destinations] (legal-moves board)
+(defn ranked-moves [expected board]
+  (->> (for [[src piece destinations] (legal-moves expected board)
              [dst cost] destinations]
          [src dst piece cost])
        (sort-by #(nth % 3))))
 
-(assert (= 28 (count (ranked-moves (parse "example")))))
+(assert (= 28 (count (ranked-moves (expected (parse "result")) (parse "example")))))
 
 (defn move [board src dest]
   (let [v (get board src)]
     (assoc board dest v
            src \.)))
 
-(defn solved? [board]
-  (= 8 (count (correct-pieces board))))
+(defn solved? [expected board]
+  (= (apply set/union (vals expected))
+     (set (mapv first (correct-pieces expected board)))))
 
-(assert (solved? (parse "result")))
+(assert (solved? (expected (parse "result")) (parse "result")))
 
-(defn solve [board moves]
-  (cond (solved? board)
+(defn solve [expected board moves]
+  (cond (solved? expected board)
         [moves]
         (> (count moves) 8)
         []
@@ -152,10 +153,10 @@
         (->> (ranked-moves board)
              (remove (set moves))
              (mapcat (fn [[src dst piece cost]]
-                       (solve (move board src dst) (conj moves [src dst piece cost])))))))
+                       (solve expected (move board src dst) (conj moves [src dst piece cost])))))))
 
 ;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
-(defn search [board]
+(defn search [expected board]
   (loop [visited {}
          path {}
          queue (dpm/priority-map-keyfn first board [0 0 nil []])]
@@ -163,7 +164,7 @@
       (let [[current [_ value prev mpath]] (peek queue)
             visited' (assoc visited current prev)
             path' (assoc path current mpath)]
-        (if (solved? current)
+        (if (solved? expected current)
           (let [final (rest (map path' (reverse (backtrack current visited'))))]
             {:path final
              :cost (apply + (mapv #(nth % 2) final))
@@ -175,22 +176,31 @@
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
                                           (< score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score (estimate-cost current)) score current [src dst cost]])
+                               (assoc queue node [(+ score (estimate-cost expected current)) score current [src dst cost]])
                                queue)))
                          (pop queue)
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
-                               (ranked-moves current)))))))))
+                               (ranked-moves expected current)))))))))
 
 
 ;; (solve (parse "example") [])
 
-(ranked-moves (move (parse "example") [7 2] [8 1]))
+(ranked-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
 
-(legal-moves (move (parse "result") [7 2] [8 1]))
+(assert (search
+         (expected (parse "result"))
+         (-> (parse "result")
+             (move [7 2] [8 1])
+             (move [9 2] [7 2]))))
 
 ;; (search (parse "input"))
-(assert (search (move (parse "result") [7 2] [8 1])))
+(assert (search (expected (parse "result2"))
+                (move (parse "result2") [7 2] [8 1])))
 
 (comment
-  (assert (= 12521 (:cost (search (parse "example")))))
-  (assert (= 10607 (:cost (search (parse "input"))))))
+  (let [expected (expected (parse "result"))]
+    (assert (= 12521 (:cost (search expected (parse "example")))))
+    (assert (= 10607 (:cost (search expected (parse "input"))))))
+
+  (def e2 (expected (parse "result2")))
+  (assert (= 44169 (:cost (search e2 (parse "example2"))))))
