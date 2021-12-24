@@ -145,17 +145,6 @@
 
 (assert (solved? (expected (parse "result")) (parse "result")))
 
-(defn solve [expected board moves]
-  (cond (solved? expected board)
-        [moves]
-        (> (count moves) 8)
-        []
-        :else
-        (->> (ranked-moves board)
-             (remove (set moves))
-             (mapcat (fn [[src dst piece cost]]
-                       (solve expected (move board src dst) (conj moves [src dst piece cost])))))))
-
 ;; adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
 (defn search [expected board]
   (loop [visited {}
