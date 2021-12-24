@@ -101,18 +101,25 @@
 (assert (seq (path (parse "example") [7 2] [1 1])))
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
+(defn in-place? [expected board [c v]]
+  (let [room (get expected v)]
+    (and (room c)
+         (every? #(= v (get board %))
+                 (filter #(> (second %) (second c)) room)))))
+
 (defn legal-moves [expected board]
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
-          :let [room (get expected v)
-                deepest (if-let [column (seq (filter (fn [r] (= \. (get board r))) room))]
+          :let [room (get expected v)]
+          :when (not (in-place? expected board [c v]))
+          :let [deepest (if-let [column (seq (filter (fn [r] (= \. (get board r))) room))]
                           (apply max-key second column)
                           nil)
                 constraints (if (corridor? c)
                               (fn [dest]
-                                (and (every? (fn [other] #{\. v} (get board other))
-                                             (disj room dest))
-                                     (= deepest dest)))
+                                (and (= deepest dest)
+                                     (every? (fn [other] (#{\. v} (get board other)))
+                                             (disj room dest))))
                               (fn [dest] (or (corridor? dest)
                                             ((get expected v) dest))))
                 legal (keep (fn [dest]
@@ -177,8 +184,8 @@
 (legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
 
 (assert (search
-         (expected (parse "result"))
-         (-> (parse "result")
+         (expected (parse "result2"))
+         (-> (parse "result2")
              (move [7 2] [8 1])
              (move [9 2] [7 2]))))
 
