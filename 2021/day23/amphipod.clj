@@ -60,12 +60,15 @@
   (* spaces (int (Math/pow 10 (- (int piece) (int \A))))))
 
 (defn estimate-cost [expected board]
-  (reduce (fn [acc [_ piece]] (+ acc (move-cost piece 2)))
-          0
-          (incorrect-pieces expected board)))
+  (let [column {\A 3 \B 5 \C 7 \D 9}]
+    (reduce (fn [acc [[x _] piece]]
+              (+ acc (move-cost piece (+ (Math/abs (- x (column piece)))
+                                         2))))
+            0
+            (incorrect-pieces expected board))))
 
 (assert (= 0 (estimate-cost (expected (parse "result")) (parse "result"))))
-(assert (= 2242 (estimate-cost (expected (parse "result")) (parse "example"))))
+(assert (= 6488 (estimate-cost (expected (parse "result")) (parse "example"))))
 
 (defn corridor? [[x y]]
   (= y 1))
@@ -180,7 +183,7 @@
 ;; (solve (parse "example") [])
 
 (ranked-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
-(legal-moves (expected (parse "result2")) (move (parse "result2") [7 2] [8 1]))
+(legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1]))
 
 (assert (search
          (expected (parse "result"))
