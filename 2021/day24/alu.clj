@@ -24,18 +24,20 @@
     v
     (get state v)))
 
-(defn interpret [state instr]
+(defn interpret [{:keys [input] :as state} instr]
   (match [instr]
-    [[:inp a]] (assoc state a (read))
+    [[:inp a]] (assoc state a (first input)
+                      :input (rest input))
     [[:add a b]] (assoc state a (+ (value state a) (value state b)))
     [[:mul a b]] (assoc state a (* (value state a) (value state b)))
     [[:div a b]] (assoc state a (int (/ (value state a) (value state b))))
     [[:mod a b]] (assoc state a (mod (value state a) (value state b)))
     [[:eql a b]] (assoc state a (if (= (value state a) (value state b)) 1 0))))
 
-(defn evaluate [program]
-  (reduce interpret (init) program))
+(defn evaluate [input program]
+  (reduce interpret (assoc (init) :input input) program))
 
 ;; (reduce interpret (init) (parse "example"))
 
-(evaluate )
+(assert (= {:w 0, :x -1, :y 0, :z 0, :input []}
+           (evaluate [1] (parse "example"))))
