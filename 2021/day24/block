@@ -1,0 +1,32 @@
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26 ;; varies
+add x -14 ;; varies
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 13 ;; varies
+mul y x
+add z y
+
+inp w
+x <- (mod z 26)
+z <- (/ z [1 1 1 1 26 1 26 1 1 26 26 26 26 26])
+x <- (+ x [15 15 12 13 -12 10 -9 14 13 -14 -11 -2 -16 -14])
+x <- (= x w)
+x <- (= x 0)
+y <- (+ (* 25 x) 1)
+z <- (* z y)
+y <- (* x (+ w [15 10 2 16 12 11 5 16 6 15 3 12 10 13]))
+z <- (+ z y)
+
+
+
