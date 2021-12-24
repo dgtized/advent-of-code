@@ -105,3 +105,71 @@
 
 ;; most of the final args are same but a few columns vary
 (mapv (fn [digit] (map last digit)) (partition 18 monad))
+
+(defn eql [a b]
+  (if (= a b) 1 0))
+
+;; find all digit/pairs where z will be zeroed
+(for [a [15 15 12 13 -12 10 -9 14 13 -14 -11 -2 -16 -14]]
+  [a (for [z (range 0 26)
+           digit (range 1 10)
+           :when (= 0 (eql 0 (eql digit (+ (mod z 26) a))))]
+       [z digit])])
+
+;; possible solutions for first 4 leading to a 0 on block 5
+(for [n (remove-zeros (range 1111 (inc 9999)))
+      :let [{:keys [z]} (evaluate (num->digits n) (take (* 18 4) monad))]
+      :when (#{13 14 15 16 17 18 19 20 21} (mod z 26) )]
+  [n z])
+
+(def first-half
+  (doall (reverse (for [n (remove-zeros (range 8995 (inc 9999)))
+                        :let [{:keys [z]} (evaluate (num->digits n) (take (* 18 4) monad))]
+                        :when ((set (range 13 22)) (mod z 26) )
+                        d1 [9] #_(range 1 10)
+                        :let [n2 (edn/read-string (str n d1))
+                              {z2 :z} (evaluate (num->digits n2) (take (* 18 5) monad))]
+                        ;; :when (<= (count (str z2)) 5)
+                        d2 (range 1 10)
+                        :let [n3 (edn/read-string (str n2 d2))
+                              {z3 :z} (evaluate (num->digits n3) (take (* 18 6) monad))]
+                        :when ((set (range 10 19)) (mod z3 26))
+                        d3 (range 1 10)
+                        :let [n4 (edn/read-string (str n3 d3))
+                              {z4 :z} (evaluate (num->digits n4) (take (* 18 7) monad))]
+                        :when (<= (count (str z4)) 6)
+                        ]
+                    n4))))
+
+(count first-half)
+
+;;   89959791916939
+;; > 89959791916939
+(take 100 (for [n4 first-half
+                d4 [19 29 39 49] #_(remove-zeros (range 11 100))
+                :let [n5 (edn/read-string (str n4 d4))
+                      {z5 :z} (evaluate (num->digits n5) (take (* 18 9) monad))]
+                :when ((set (range 15 24)) (mod z5 26))
+                d5 [1] #_(range 1 10)
+                :let [n6 (edn/read-string (str n5 d5))
+                      {z6 :z} (evaluate (num->digits n6) (take (* 18 10) monad))]
+                :when ((set (range 12 21)) (mod z6 26))
+                d6 [6 7 8 9] #_(range 1 10)
+                :let [n7 (edn/read-string (str n6 d6))
+                      {z7 :z} (evaluate (num->digits n7) (take (* 18 11) monad))]
+                :when (and ((set (range 3 12)) (mod z7 26)))
+                d7 [9] #_(range 1 10)
+                :let [n8 (edn/read-string (str n7 d7))
+                      {z8 :z} (evaluate (num->digits n8) (take (* 18 12) monad))]
+                :when (and ((set (range 17 26)) (mod z8 26))
+                           #_(= z8 617))
+                d8 [3] #_(range 1 10)
+                :let [n9 (edn/read-string (str n8 d8))
+                      {z9 :z} (evaluate (num->digits n9) (take (* 18 13) monad))]
+                :when (and #_(= z9 23)
+                           ((set (range 15 24)) (mod z9 26)))
+                d9 [9] #_(range 1 10)
+                :let [n10 (edn/read-string (str n9 d9))
+                      {z10 :z} (evaluate (num->digits n10) monad)]
+                :when (= z10 0)]
+            [n10 [d4 z5] [d5 z6] [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
