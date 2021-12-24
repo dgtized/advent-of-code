@@ -110,11 +110,15 @@
   (let [all-open (remove #{[3 1] [5 1] [7 1] [9 1]} (open-spaces board))]
     (for [[c v] (pieces board)
           :let [room (get expected v)
+                deepest (if-let [column (seq (filter (fn [r] (= \. (get board r))) room))]
+                          (apply max-key second column)
+                          nil)
                 constraints (if (corridor? c)
                               (fn [dest]
                                 (and (room dest)
                                      (every? (fn [other] #{\. v} (get board other))
-                                             (disj room dest))))
+                                             (disj room dest))
+                                     (= deepest dest)))
                               (fn [dest] (or (corridor? dest)
                                             ((get expected v) dest))))
                 legal (keep (fn [dest]
@@ -188,9 +192,9 @@
                 (move (parse "result2") [7 2] [8 1])))
 
 (comment
-  (let [expected (expected (parse "result"))]
-    (assert (= 12521 (:cost (search expected (parse "example")))))
-    (assert (= 10607 (:cost (search expected (parse "input"))))))
+  (def e1 (expected (parse "result")))
+  (assert (= 12521 (:cost (time (search e1 (parse "example"))))))
+  (assert (= 10607 (:cost (time (search e1 (parse "input"))))))
 
   (def e2 (expected (parse "result2")))
   (assert (= 44169 (:cost (search e2 (parse "example2"))))))
