@@ -13,15 +13,14 @@
 (defn v+ [a b]
   (mapv + a b))
 
-(defn neighbors [board pos]
+(defn open-neighbors [board pos]
   (for [change [[-1 0] [0 -1] [0 1] [1 0]]
         :let [neighbor (v+ pos change)
               value (get board neighbor)]
-        :when value]
-    [neighbor value]))
+        :when (= \. value)]
+    neighbor))
 
-(assert (= [[[7 2] \B]]
-           (neighbors (parse "example") [7 3])))
+(assert (= [[6 1] [8 1]] (open-neighbors (parse "example") [7 1])))
 
 (defn pieces [board]
   (filter (fn [[_ v]] (#{\A \B \C \D} v)) board))
@@ -69,9 +68,6 @@
            (correct-pieces (expected (parse "result")) (parse "example"))))
 
 (assert (set (pieces (parse "result"))))
-
-(defn open-neighbors [grid p]
-  (mapv first (filter (fn [[_ val]] (= val \.)) (neighbors grid p))))
 
 (defn backtrack [current visited]
   (cons current
