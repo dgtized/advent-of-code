@@ -62,9 +62,11 @@
       false)))
 
 (assert (not (valid? 13579246899999)))
+(assert (not (valid? 31111111111115)))
+(assert (not (valid? 99999999999999)))
 
 (comment
   (->> (range 99999999999999 11111111111111 -1)
        (remove (fn [v] (re-find #"0" (str v))))
-       (drop-while (complement valid?))
-       first))
+       (filter valid?)
+       (take 1)))
