@@ -41,3 +41,11 @@
 
 (assert (= {:w 0, :x -1, :y 0, :z 0, :input []}
            (evaluate [1] (parse "example"))))
+
+(defn num->digits [n]
+  (let [s (str n)]
+    (into []
+          (for [x (range (count s))]
+            (edn/read-string (subs s x (inc x)))))))
+
+(assert (= [1 2 3 4] (num->digits 1234)))
