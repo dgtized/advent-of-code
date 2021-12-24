@@ -120,7 +120,7 @@
                               (fn [dest]
                                 (in-place? expected board [dest v]))
                               (fn [dest] (or (corridor? dest)
-                                            ((get expected v) dest))))
+                                            (in-place? expected board [dest v]))))
                 legal (keep (fn [dest]
                               (when-let [pathing (path board c dest)]
                                 [dest (move-cost v (dec (count pathing)))]))
@@ -169,7 +169,7 @@
                          (mapv (fn [[src dst _ cost]] [(move current src dst) src dst cost])
                                (legal-moves expected current)))))))))
 
-(assert (= 15 (count (legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1])))))
+(assert (= 14 (count (legal-moves (expected (parse "result2")) (move (parse "example2") [7 2] [8 1])))))
 (assert (search
          (expected (parse "result2"))
          (-> (parse "result2")
