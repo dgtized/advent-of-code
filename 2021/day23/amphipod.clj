@@ -103,6 +103,7 @@
                          (pop queue)
                          (open-neighbors grid current))))))))
 
+(assert (seq (path (parse "example") [7 2] [1 1])))
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
 (defn legal-moves [expected board]
