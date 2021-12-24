@@ -187,4 +187,4 @@
 
   (def e2 (expected (parse "result2")))
   (assert (= 44169 (:cost (time (search e2 (parse "example2"))))))
-  (assert (= 44169 (:cost (time (search e2 (parse "input2")))))))
+  (assert (= 59071 (:cost (time (search e2 (parse "input2")))))))
