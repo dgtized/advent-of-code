@@ -101,6 +101,11 @@
 (assert (seq (path (parse "example") [7 2] [1 1])))
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
+(defn move [board src dest]
+  (let [v (get board src)]
+    (assoc board dest v
+           src \.)))
+
 (defn in-place? [expected board [c v]]
   (let [room (get expected v)]
     (and (room c)
@@ -130,6 +135,7 @@
       [c v (into {} legal)])))
 
 (assert (= 4 (count (legal-moves (expected (parse "result")) (parse "example")))))
+(assert (empty? (legal-moves (expected (parse "result2")) (parse "result2"))))
 
 (defn ranked-moves [expected board]
   (->> (for [[src piece destinations] (legal-moves expected board)
@@ -138,11 +144,8 @@
        (sort-by #(nth % 3))))
 
 (assert (= 28 (count (ranked-moves (expected (parse "result")) (parse "example")))))
-
-(defn move [board src dest]
-  (let [v (get board src)]
-    (assoc board dest v
-           src \.)))
+(assert (= [[[4 1] [3 2] \A] 2]
+           (ranked-moves (expected (parse "result2")) (move (parse "result2") [3 2] [4 1]))))
 
 (defn solved? [expected board]
   (= (apply set/union (vals expected))
