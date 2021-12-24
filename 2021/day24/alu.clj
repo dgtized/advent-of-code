@@ -144,17 +144,6 @@
 
 (count first-half)
 
-(def first-half2
-  (doall (for [n (remove-zeros (range 600 (inc 899)))
-               d1 [15 26 37 48 59]
-               d2 [13 24 35 46 57]
-               :let [prefix (edn/read-string (str n d1 d2))
-                     {z :z} (evaluate (num->digits prefix) (take (* 18 7) monad))]
-               :when (<= (count (str z)) 5)]
-           prefix)))
-
-(count first-half2)
-
 ;;   89959791916939
 ;; > 89959791916939
 ;;   89959794919939
@@ -190,4 +179,38 @@
                            :when (= z10 0)]
                        [n10 [d4 z5] [d5 z6] [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
 
+(def first-half2
+  (doall (for [n (remove-zeros (range 111 (inc 899)))
+               d1 [15] #_[15 26 37 48 59]
+               d2 [13] #_[13 24 35 46 57]
+               :let [prefix (edn/read-string (str n d1 d2))
+                     {z :z} (evaluate (num->digits prefix) (take (* 18 7) monad))]
+               :when (<= (count (str z)) 5)]
+           prefix)))
+
+(count first-half2)
+
+;; 17115131916112
+(apply min-key first (for [n4 first-half2
+                           d4 [19]
+                           d5 [1] #_(range 1 10)
+                           d6 [6 7 8 9] #_(range 1 10)
+                           :let [n7 (edn/read-string (str n4 d4 d5 d6))
+                                 {z7 :z} (evaluate (num->digits n7) (take (* 18 11) monad))]
+                           :when (and ((set (range 3 12)) (mod z7 26)))
+                           d7 (range 1 10)
+                           :let [n8 (edn/read-string (str n7 d7))
+                                 {z8 :z} (evaluate (num->digits n8) (take (* 18 12) monad))]
+                           :when (and ((set (range 17 26)) (mod z8 26))
+                                      #_(= z8 617))
+                           d8 [1]
+                           :let [n9 (edn/read-string (str n8 d8))
+                                 {z9 :z} (evaluate (num->digits n9) (take (* 18 13) monad))]
+                           :when (and #_(= z9 23)
+                                      ((set (range 15 24)) (mod z9 26)))
+                           d9 [2]
+                           :let [n10 (edn/read-string (str n9 d9))
+                                 {z10 :z} (evaluate (num->digits n10) monad)]
+                           :when (= z10 0)]
+                       [n10 [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
 
