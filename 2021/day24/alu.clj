@@ -123,7 +123,7 @@
   [n z])
 
 (def first-half
-  (doall (reverse (for [n (remove-zeros (range 8995 (inc 9999)))
+  (doall (reverse (for [n (remove-zeros (range 8995 (inc 9000)))
                         :let [{:keys [z]} (evaluate (num->digits n) (take (* 18 4) monad))]
                         :when ((set (range 13 22)) (mod z 26) )
                         d1 [9] #_(range 1 10)
@@ -145,31 +145,32 @@
 
 ;;   89959791916939
 ;; > 89959791916939
-(take 100 (for [n4 first-half
-                d4 [19 29 39 49] #_(remove-zeros (range 11 100))
-                :let [n5 (edn/read-string (str n4 d4))
-                      {z5 :z} (evaluate (num->digits n5) (take (* 18 9) monad))]
-                :when ((set (range 15 24)) (mod z5 26))
-                d5 [1] #_(range 1 10)
-                :let [n6 (edn/read-string (str n5 d5))
-                      {z6 :z} (evaluate (num->digits n6) (take (* 18 10) monad))]
-                :when ((set (range 12 21)) (mod z6 26))
-                d6 [6 7 8 9] #_(range 1 10)
-                :let [n7 (edn/read-string (str n6 d6))
-                      {z7 :z} (evaluate (num->digits n7) (take (* 18 11) monad))]
-                :when (and ((set (range 3 12)) (mod z7 26)))
-                d7 [9] #_(range 1 10)
-                :let [n8 (edn/read-string (str n7 d7))
-                      {z8 :z} (evaluate (num->digits n8) (take (* 18 12) monad))]
-                :when (and ((set (range 17 26)) (mod z8 26))
-                           #_(= z8 617))
-                d8 [3] #_(range 1 10)
-                :let [n9 (edn/read-string (str n8 d8))
-                      {z9 :z} (evaluate (num->digits n9) (take (* 18 13) monad))]
-                :when (and #_(= z9 23)
-                           ((set (range 15 24)) (mod z9 26)))
-                d9 [9] #_(range 1 10)
-                :let [n10 (edn/read-string (str n9 d9))
-                      {z10 :z} (evaluate (num->digits n10) monad)]
-                :when (= z10 0)]
-            [n10 [d4 z5] [d5 z6] [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
+;;   89959794919939
+(apply max-key first (for [n4 first-half
+                           d4 (remove-zeros (range 11 100)) #_[19 29 39 49]
+                           :let [n5 (edn/read-string (str n4 d4))
+                                 {z5 :z} (evaluate (num->digits n5) (take (* 18 9) monad))]
+                           :when ((set (range 15 24)) (mod z5 26))
+                           d5 [1] #_(range 1 10)
+                           :let [n6 (edn/read-string (str n5 d5))
+                                 {z6 :z} (evaluate (num->digits n6) (take (* 18 10) monad))]
+                           :when ((set (range 12 21)) (mod z6 26))
+                           d6 [6 7 8 9] #_(range 1 10)
+                           :let [n7 (edn/read-string (str n6 d6))
+                                 {z7 :z} (evaluate (num->digits n7) (take (* 18 11) monad))]
+                           :when (and ((set (range 3 12)) (mod z7 26)))
+                           d7 [9] #_(range 1 10)
+                           :let [n8 (edn/read-string (str n7 d7))
+                                 {z8 :z} (evaluate (num->digits n8) (take (* 18 12) monad))]
+                           :when (and ((set (range 17 26)) (mod z8 26))
+                                      #_(= z8 617))
+                           d8 [3] #_(range 1 10)
+                           :let [n9 (edn/read-string (str n8 d8))
+                                 {z9 :z} (evaluate (num->digits n9) (take (* 18 13) monad))]
+                           :when (and #_(= z9 23)
+                                      ((set (range 15 24)) (mod z9 26)))
+                           d9 [9] #_(range 1 10)
+                           :let [n10 (edn/read-string (str n9 d9))
+                                 {z10 :z} (evaluate (num->digits n10) monad)]
+                           :when (= z10 0)]
+                       [n10 [d4 z5] [d5 z6] [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
