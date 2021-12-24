@@ -95,9 +95,9 @@
 (assert (not (path (assoc (parse "example") [6 1] \#) [7 2] [1 1])))
 
 (defn move [board src dest]
-  (let [v (get board src)]
-    (assoc board dest v
-           src \.)))
+  (assoc board
+         dest (get board src)
+         src \.))
 
 (defn in-place? [expected board [c v]]
   (let [room (get expected v)]
