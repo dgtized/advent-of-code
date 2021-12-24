@@ -122,32 +122,47 @@
       :when (#{13 14 15 16 17 18 19 20 21} (mod z 26) )]
   [n z])
 
+;; 8995
 (def first-half
-  (doall (reverse (for [n (remove-zeros (range 8995 (inc 9000)))
-                        :let [{:keys [z]} (evaluate (num->digits n) (take (* 18 4) monad))]
-                        :when ((set (range 13 22)) (mod z 26) )
-                        d1 [9] #_(range 1 10)
-                        :let [n2 (edn/read-string (str n d1))
-                              {z2 :z} (evaluate (num->digits n2) (take (* 18 5) monad))]
-                        ;; :when (<= (count (str z2)) 5)
-                        d2 (range 1 10)
-                        :let [n3 (edn/read-string (str n2 d2))
-                              {z3 :z} (evaluate (num->digits n3) (take (* 18 6) monad))]
-                        :when ((set (range 10 19)) (mod z3 26))
-                        d3 (range 1 10)
-                        :let [n4 (edn/read-string (str n3 d3))
-                              {z4 :z} (evaluate (num->digits n4) (take (* 18 7) monad))]
-                        :when (<= (count (str z4)) 6)
-                        ]
-                    n4))))
+  (doall (for [n (remove-zeros (range 7000 (inc 8995)))
+               :let [{:keys [z]} (evaluate (num->digits n) (take (* 18 4) monad))]
+               :when ((set (range 13 22)) (mod z 26) )
+               d1 (range 1 10) #_[9]
+               :let [n2 (edn/read-string (str n d1))
+                     {z2 :z} (evaluate (num->digits n2) (take (* 18 5) monad))]
+               ;; :when (<= (count (str z2)) 5)
+               d2 (range 1 10)
+               :let [n3 (edn/read-string (str n2 d2))
+                     {z3 :z} (evaluate (num->digits n3) (take (* 18 6) monad))]
+               :when ((set (range 10 19)) (mod z3 26))
+               d3 (range 1 10)
+               :let [n4 (edn/read-string (str n3 d3))
+                     {z4 :z} (evaluate (num->digits n4) (take (* 18 7) monad))]
+               :when (<= (count (str z4)) 5)
+               ]
+           n4)))
 
 (count first-half)
+
+(def first-half2
+  (doall (for [n (remove-zeros (range 600 (inc 899)))
+               d1 [15 26 37 48 59]
+               d2 [13 24 35 46 57]
+               :let [prefix (edn/read-string (str n d1 d2))
+                     {z :z} (evaluate (num->digits prefix) (take (* 18 7) monad))]
+               :when (<= (count (str z)) 5)]
+           prefix)))
+
+(count first-half2)
 
 ;;   89959791916939
 ;; > 89959791916939
 ;;   89959794919939
-(apply max-key first (for [n4 first-half
-                           d4 (remove-zeros (range 11 100)) #_[19 29 39 49]
+
+;; < 89959131916939
+;; < 89915131916939
+(apply min-key first (for [n4 first-half2
+                           d4 [19 29 39 49] #_(remove-zeros (range 11 100)) 
                            :let [n5 (edn/read-string (str n4 d4))
                                  {z5 :z} (evaluate (num->digits n5) (take (* 18 9) monad))]
                            :when ((set (range 15 24)) (mod z5 26))
@@ -174,3 +189,5 @@
                                  {z10 :z} (evaluate (num->digits n10) monad)]
                            :when (= z10 0)]
                        [n10 [d4 z5] [d5 z6] [d6 z7] [d7 z8] [d8 z9] [d9 z10]]))
+
+
