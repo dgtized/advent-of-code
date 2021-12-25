@@ -38,15 +38,17 @@
   (reduce (fn [g [a b]] (move g a b))
           grid moves))
 
-(defn step [grid]
+(defn step [[grid _]]
   (let [east-moves (->> grid
                         (facing \>)
-                        (keep (partial test-move east)))
+                        (keep (partial test-move grid east)))
         grid-east (grid-update grid east-moves)
         south-moves (->> grid-east
                          (facing \v)
-                         (keep (partial test-move south)))
+                         (keep (partial test-move grid-east south)))
         grid' (grid-update grid-east south-moves)]
-    grid'))
+    [grid' (+ (count east-moves) (count south-moves))]))
 
-(parse "example")
+(assert (= 58 (count (take-while (fn [[g steps]] (pos? steps)) (iterate step [(parse "example") 1])))))
+(assert (= 360 (count (take-while (fn [[g steps]] (pos? steps)) (iterate step [(parse "input") 1])))))
+
