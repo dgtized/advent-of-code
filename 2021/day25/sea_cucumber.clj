@@ -36,17 +36,21 @@
                    b (get grid a)))
           grid moves))
 
-(defn step [[grid _]]
-  (let [east-moves (->> grid
-                        (facing \>)
-                        (keep (partial build-move east grid)))
+(defn step [{:keys [grid]}]
+  (let [east-moves (keep (partial build-move east grid)
+                         (facing \> grid))
         grid-east (apply-moves grid east-moves)
-        south-moves (->> grid-east
-                         (facing \v)
-                         (keep (partial build-move south grid-east)))
-        grid' (apply-moves grid-east south-moves)]
-    [grid' (+ (count east-moves) (count south-moves))]))
+        south-moves (keep (partial build-move south grid-east)
+                          (facing \v grid-east))]
+    {:grid (apply-moves grid-east south-moves)
+     :steps (+ (count east-moves) (count south-moves))}))
 
-(assert (= 58 (count (take-while (fn [[g steps]] (pos? steps)) (iterate step [(parse "example") 1])))))
-(assert (= 360 (count (take-while (fn [[g steps]] (pos? steps)) (iterate step [(parse "input") 1])))))
+(defn count-steps [grid]
+  (->> {:grid grid :steps 1}
+       (iterate step)
+       (take-while (fn [{:keys [steps]}] (pos? steps)))
+       count))
+
+(assert (= 58 (count-steps (parse "example"))))
+(assert (= 360 (count-steps (parse "input"))))
 
