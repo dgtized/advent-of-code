@@ -19,7 +19,7 @@
     [0 j]
     [(inc i) j]))
 
-(defn test-move [grid direction pos]
+(defn build-move [direction grid pos]
   (let [p (direction grid pos)]
     (when (= \. (get grid p))
       [pos p])))
@@ -39,11 +39,11 @@
 (defn step [[grid _]]
   (let [east-moves (->> grid
                         (facing \>)
-                        (keep (partial test-move grid east)))
+                        (keep (partial build-move east grid)))
         grid-east (apply-moves grid east-moves)
         south-moves (->> grid-east
                          (facing \v)
-                         (keep (partial test-move grid-east south)))
+                         (keep (partial build-move south grid-east)))
         grid' (apply-moves grid-east south-moves)]
     [grid' (+ (count east-moves) (count south-moves))]))
 
