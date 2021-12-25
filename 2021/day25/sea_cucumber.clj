@@ -24,29 +24,27 @@
     (when (= \. (get grid p))
       [pos p])))
 
-(defn move [grid a b]
-  (assoc grid
-         a \.
-         b (get grid a)))
-
 (defn facing [face grid]
   (keep (fn [[p c]] (when (= c face) p)) grid))
 
 (assert (seq (facing \> (parse "example"))))
 
-(defn grid-update [grid moves]
-  (reduce (fn [g [a b]] (move g a b))
+(defn apply-moves [grid moves]
+  (reduce (fn [g [a b]]
+            (assoc g
+                   a \.
+                   b (get grid a)))
           grid moves))
 
 (defn step [[grid _]]
   (let [east-moves (->> grid
                         (facing \>)
                         (keep (partial test-move grid east)))
-        grid-east (grid-update grid east-moves)
+        grid-east (apply-moves grid east-moves)
         south-moves (->> grid-east
                          (facing \v)
                          (keep (partial test-move grid-east south)))
-        grid' (grid-update grid-east south-moves)]
+        grid' (apply-moves grid-east south-moves)]
     [grid' (+ (count east-moves) (count south-moves))]))
 
 (assert (= 58 (count (take-while (fn [[g steps]] (pos? steps)) (iterate step [(parse "example") 1])))))
