@@ -27,8 +27,6 @@
 (defn facing [face grid]
   (keep (fn [[p c]] (when (= c face) p)) grid))
 
-(assert (seq (facing \> (parse "example"))))
-
 (defn apply-moves [grid moves]
   (reduce (fn [g [a b]]
             (assoc g
