@@ -4,5 +4,25 @@
 (defn parse [filename]
   (str/split-lines (slurp filename)))
 
-(parse "day01.in.txt")
+;; first star
+(->> "day01.in.txt"
+     parse
+     (map (fn [s] (if-not (= s "") (parse-long s) s)))
+     (partition-by (fn [s] (= "" s)))
+     (remove (fn [group] (= [""] group)))
+     (map (fn [group] (reduce + group)))
+     sort
+     last)
+
+;; second star
+(->> "day01.in.txt"
+     parse
+     (map (fn [s] (if-not (= s "") (parse-long s) s)))
+     (partition-by (fn [s] (= "" s)))
+     (remove (fn [group] (= [""] group)))
+     (map (fn [group] (reduce + group)))
+     sort
+     (take-last 3)
+     (reduce +))
+
 
