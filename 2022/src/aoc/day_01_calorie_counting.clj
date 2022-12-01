@@ -1,26 +1,25 @@
 (ns aoc.day-01-calorie-counting
   (:require [clojure.string :as str]))
 
-(defn parse [filename]
-  (str/split-lines (slurp filename)))
+(defn parse-groups [filename]
+  (->> filename
+       slurp
+       str/split-lines
+       (map (fn [s] (if-not (= s "") (parse-long s) s)))
+       (partition-by (fn [s] (= "" s)))
+       (remove (fn [group] (= [""] group)))))
 
-;; first star
-(->> "day01.in.txt"
-     parse
-     (map (fn [s] (if-not (= s "") (parse-long s) s)))
-     (partition-by (fn [s] (= "" s)))
-     (remove (fn [group] (= [""] group)))
-     (map (fn [group] (reduce + group)))
+;; ### First Star
+(->> "input/day01.in.txt"
+     parse-groups
+     (map (partial apply +))
      sort
      last)
 
-;; second star
-(->> "day01.in.txt"
-     parse
-     (map (fn [s] (if-not (= s "") (parse-long s) s)))
-     (partition-by (fn [s] (= "" s)))
-     (remove (fn [group] (= [""] group)))
-     (map (fn [group] (reduce + group)))
+;; ### Second Star
+(->> "input/day01.in.txt"
+     parse-groups
+     (map (partial apply +))
      sort
      (take-last 3)
      (reduce +))
