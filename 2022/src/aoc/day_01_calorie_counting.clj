@@ -1,4 +1,4 @@
-(ns aoc.day-01
+(ns aoc.day-01-calorie-counting
   (:require [clojure.string :as str]))
 
 (defn parse [filename]
