@@ -44,21 +44,15 @@
       (+ (get move-score move)
          (get score b)))))
 
-(defn score-part1 [input]
-  (->> input
-       (mapv (fn [line] (str/split line #"\s")))
-       (map (partial apply round))
-       (apply +)))
-
-(defn score-part2 [input]
-  (->> input
-       (mapv (fn [line] (str/split line #"\s")))
-       (map (partial apply cheat))
-       (apply +)))
+(defn score [f input]
+  (let [r (->> input
+               (mapv (fn [line] (str/split line #"\s")))
+               (map (partial apply f)))]
+    [(apply + r) r]))
 
 ;; test
-(score-part1 (parse "input/day02.example"))
-(score-part1 (parse "input/day02.input"))
-(score-part2 (parse "input/day02.example"))
-(score-part2 (parse "input/day02.input"))
+(score round (parse "input/day02.example"))
+(score round (parse "input/day02.input"))
+(score cheat (parse "input/day02.example"))
+(score cheat (parse "input/day02.input"))
 
