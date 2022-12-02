@@ -13,16 +13,16 @@
                "Z" #{"B" "Y"}}
         score {"X" 1
                "Y" 2
-               "Z" 3}]
-    (let [loses (get beats a)
-          wins (get beats b)]
-      (+ (get score b)
-         (cond (contains? loses b)
-               0
-               (contains? wins a)
-               6
-               :else
-               3)))))
+               "Z" 3}
+        loses (get beats a)
+        wins (get beats b)]
+    (+ (get score b)
+       (cond (contains? loses b)
+             0
+             (contains? wins a)
+             6
+             :else
+             3))))
 
 (defn cheat [a b]
   (let [beats {"A" "C"
@@ -33,14 +33,14 @@
                     "C" 3}
         score {"X" 0
                "Y" 3
-               "Z" 6}]
-    (let [loss (get beats a)
-          move (case b
-                 "X" loss
-                 "Y" a
-                 "Z" (first (disj #{"A" "B" "C"} a loss)))]
-      (+ (get move-score move)
-         (get score b)))))
+               "Z" 6}
+        loss (get beats a)
+        move (case b
+               "X" loss
+               "Y" a
+               "Z" (first (disj #{"A" "B" "C"} a loss)))]
+    (+ (get move-score move)
+       (get score b))))
 
 (defn score [f input]
   (let [r (->> input
