@@ -4,8 +4,6 @@
 (defn parse [filename]
   (-> filename slurp str/split-lines))
 
-;; not invaliding cache?
-
 (defn round [a b]
   (let [beats {"A" #{"C" "Z"}
                "B" #{"A" "X"}
