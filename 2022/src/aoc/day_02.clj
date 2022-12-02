@@ -26,13 +26,39 @@
                :else
                3)))))
 
-(defn score [input]
+(defn cheat [a b]
+  (let [beats {"A" "C"
+               "B" "A"
+               "C" "B"}
+        move-score {"A" 1
+                    "B" 2
+                    "C" 3}
+        score {"X" 0
+               "Y" 3
+               "Z" 6}]
+    (let [loss (get beats a)
+          move (case b
+                 "X" loss
+                 "Y" a
+                 "Z" (first (disj #{"A" "B" "C"} a loss)))]
+      (+ (get move-score move)
+         (get score b)))))
+
+(defn score-part1 [input]
   (->> input
        (mapv (fn [line] (str/split line #"\s")))
        (map (partial apply round))
        (apply +)))
 
+(defn score-part2 [input]
+  (->> input
+       (mapv (fn [line] (str/split line #"\s")))
+       (map (partial apply cheat))
+       (apply +)))
+
 ;; test
-(score (parse "input/day02.example"))
-(score (parse "input/day02.input"))
+(score-part1 (parse "input/day02.example"))
+(score-part1 (parse "input/day02.input"))
+(score-part2 (parse "input/day02.example"))
+(score-part2 (parse "input/day02.input"))
 
