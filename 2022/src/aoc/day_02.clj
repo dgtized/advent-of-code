@@ -4,6 +4,8 @@
 (defn file-lines [filename]
   (-> filename slurp str/split-lines))
 
+;; not invaliding cache?
+
 ;; test
-(file-lines "input/day02.example")
+(file-lines "input/day02.example") 
 (file-lines "input/day02.input")
