@@ -1,4 +1,8 @@
-(ns aoc.utility)
+(ns aoc.utility
+  (:require [clojure.string :as str]))
+
+(defn file->lines [filename]
+  (-> filename slurp str/split-lines))
 
 ;; Cribbed from https://github.com/nextjournal/clerk/issues/233#issue-1415414121
 (defmacro verify [expression & [message]]

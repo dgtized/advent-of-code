@@ -1,9 +1,6 @@
 (ns aoc.day-02
   (:require [clojure.string :as str]
-            [aoc.utility :refer [verify]]))
-
-(defn parse [filename]
-  (-> filename slurp str/split-lines))
+            [aoc.utility :refer [file->lines verify]]))
 
 (defn round [a b]
   (let [beats {"A" #{"C" "Z"}
@@ -50,7 +47,7 @@
     [(apply + r) r]))
 
 ;; test
-(verify (= [15 [8 1 6]] (score round (parse "input/day02.example"))))
-(score round (parse "input/day02.input"))
-(verify (= [12 [4 1 7]] (score cheat (parse "input/day02.example"))))
-(score cheat (parse "input/day02.input"))
+(verify (= [15 [8 1 6]] (score round (file->lines "input/day02.example"))))
+(score round (file->lines "input/day02.input"))
+(verify (= [12 [4 1 7]] (score cheat (file->lines "input/day02.example"))))
+(score cheat (file->lines "input/day02.input"))
