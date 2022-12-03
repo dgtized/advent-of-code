@@ -1,6 +1,6 @@
 (ns aoc.utility
   (:require [clojure.string :as str]
-            ;; [nextjournal.clerk :as clerk]
+            [nextjournal.clerk :as clerk]
             ))
 
 (defn file->lines [filename]
@@ -11,10 +11,11 @@
   (let [msg (or message (pr-str expression))
         success-msg (str "✅ " msg)
         error-msg (str "❌ " msg " ;=> ")]
-    `(try
-       (let [ret# ~expression]
-         (if ret#
-           ~success-msg
-           (str ~error-msg (pr-str ret#))))
-       (catch Throwable ex#
-         (str ~error-msg "Error: " (ex-message ex#))))))
+    `(clerk/code
+      (try
+        (let [ret# ~expression]
+          (if ret#
+            ~success-msg
+            (str ~error-msg (pr-str ret#))))
+        (catch Throwable ex#
+          (str ~error-msg "Error: " (ex-message ex#)))))))
