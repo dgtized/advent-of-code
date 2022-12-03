@@ -1,5 +1,7 @@
 (ns aoc.utility
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            ;; [nextjournal.clerk :as clerk]
+            ))
 
 (defn file->lines [filename]
   (-> filename slurp str/split-lines))
