@@ -3,7 +3,6 @@
             [nextjournal.clerk :as clerk]
             [clojure.set :as set]))
 
-
 (defn score [c]
   (let [c (int c)]
     (inc (if (<= (int \A) c (int \Z))
@@ -23,3 +22,9 @@
 ^::clerk/no-cache
 (reduce + (map split-sack (file->lines "input/day03.input")))
 
+(defn partition-sack [lines]
+  (for [group (partition 3 lines)]
+    (apply set/intersection (map set group))))
+
+(reduce + (map (comp score first) (partition-sack (file->lines "input/day03.example"))))
+(reduce + (map (comp score first) (partition-sack (file->lines "input/day03.input"))))
