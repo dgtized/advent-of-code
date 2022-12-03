@@ -1,7 +1,7 @@
 (ns aoc.day-03
-  (:require [aoc.utility :refer [file->lines verify]]
-            [nextjournal.clerk :as clerk]
-            [clojure.set :as set]))
+  (:require
+   [aoc.utility :refer [file->lines verify]]
+   [clojure.set :as set]))
 
 (defn score [c]
   (let [c (int c)]
@@ -9,8 +9,8 @@
            (+ 26 (- c (int \A)))
            (- c (int \a))))))
 
-(comment (score \A)
-         (score \a))
+(verify (= 27 (score \A)))
+(verify (= 1 (score \a)))
 
 (defn split-sack [line]
   (let [n (count line)
