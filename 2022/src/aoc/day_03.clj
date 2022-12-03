@@ -24,7 +24,7 @@
 
 (defn partition-sack [lines]
   (for [group (partition 3 lines)]
-    (apply set/intersection (map set group))))
+    (first (apply set/intersection (map set group)))))
 
-(reduce + (map (comp score first) (partition-sack (file->lines "input/day03.example"))))
-(reduce + (map (comp score first) (partition-sack (file->lines "input/day03.input"))))
+(reduce + (map score (partition-sack (file->lines "input/day03.example"))))
+(reduce + (map score (partition-sack (file->lines "input/day03.input"))))
