@@ -17,14 +17,12 @@
         [c1 c2] (map set (split-at (/ n 2) line))]
     (score (first (set/intersection c1 c2)))))
 
-^::clerk/no-cache
 (reduce + (map split-sack (file->lines "input/day03.example")))
-^::clerk/no-cache
 (reduce + (map split-sack (file->lines "input/day03.input")))
 
 (defn partition-sack [lines]
   (for [group (partition 3 lines)]
-    (first (apply set/intersection (map set group)))))
+    (score (first (apply set/intersection (map set group))))))
 
-(reduce + (map score (partition-sack (file->lines "input/day03.example"))))
-(reduce + (map score (partition-sack (file->lines "input/day03.input"))))
+(reduce + (partition-sack (file->lines "input/day03.example")))
+(reduce + (partition-sack (file->lines "input/day03.input")))
