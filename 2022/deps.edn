@@ -1,5 +1,4 @@
 {:paths ["src" "resources"]
  :deps
  {org.clojure/clojure {:mvn/version "1.11.1"}
-  io.github.nextjournal/clerk
-  {:git/sha "bdf79084374fc89cd956ec076847c0845c80c911"}}}
+  io.github.nextjournal/clerk {:mvn/version "0.12.699"}}}
