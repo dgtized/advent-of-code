@@ -1,6 +1,6 @@
 (ns aoc.day-04
   (:require
-   [aoc.utility :refer [file->lines verify]]
+   [aoc.utility :refer [file->lines]]
    [nextjournal.clerk :as clerk]
    [clojure.string :as str]))
 
