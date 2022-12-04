@@ -5,8 +5,7 @@
    [clojure.string :as str]))
 
 (defn containing [[a b c d]]
-  (or (and (<= a c) (<= d b))
-      (and (<= c a) (<= b d))))
+  (or (<= a c d b) (<= c a b d)))
 
 (defn overlapping [[a b c d]]
   (and (<= a d) (<= c b)))
