@@ -1,6 +1,8 @@
 (ns aoc.day-04
+  {::clerk/visibility {:result :hide}}
   (:require
-   [aoc.utility :refer [answer-table file->lines]]))
+   [aoc.utility :refer [answer-table file->lines]]
+   [nextjournal.clerk :as clerk]))
 
 (defn containing [[a b c d]]
   (or (<= a c d b) (<= c a b d)))
@@ -14,6 +16,7 @@
 (defn parse [f]
   (filter (comp f ->ranges)))
 
+{::clerk/visibility {:result :show}}
 (answer-table
  [(parse containing) (parse overlapping)]
  ["input/day04.example" "input/day04.input"]
