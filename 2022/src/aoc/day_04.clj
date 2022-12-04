@@ -14,11 +14,12 @@
       (<= a c b)
       (<= a d b)))
 
+(defn parse-line [line]
+  (mapcat (fn [part] (map parse-long (str/split part #"-")))
+          (str/split line #",")))
+
 (defn parse [f input]
-  (->> input
-       (map (fn [line]
-              (mapcat (fn [part] (map parse-long (str/split part #"-"))) (str/split line #","))))
-       (filter f)))
+  (filter f (map parse-line input)))
 
 (clerk/table
  {:head ["input" "star" "answer"]
