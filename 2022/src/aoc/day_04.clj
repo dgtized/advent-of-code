@@ -13,7 +13,7 @@
   (map parse-long (re-seq #"\d+" line)))
 
 (defn parse [f input]
-  (filter f (map ->ranges input)))
+  (filter (comp f ->ranges) input))
 
 (clerk/table
  {:head ["input" "star" "answer"]
