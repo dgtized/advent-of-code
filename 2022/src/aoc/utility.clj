@@ -19,3 +19,11 @@
             (str ~error-msg (pr-str ret#))))
         (catch Throwable ex#
           (str ~error-msg "Error: " (ex-message ex#)))))))
+
+(defn answer-table [methods files f]
+  (clerk/table
+   {:head ["input" "star" "answer"]
+    :rows
+    (for [[star method] (map-indexed vector methods)
+          file files]
+      (f file (inc star) method))}))
