@@ -13,13 +13,13 @@
 (defn ->ranges [line]
   (map parse-long (re-seq #"\d+" line)))
 
-(defn parse [f]
-  (filter (comp f ->ranges)))
+(defn process [f]
+  (fn [file]
+    (filter (comp f ->ranges) (file->lines file))))
 
 {::clerk/visibility {:result :show}}
 (answer-table
- [(parse containing) (parse overlapping)]
+ [(process containing) (process overlapping)]
  ["input/day04.example" "input/day04.input"]
- (fn [file star method]
-   (let [result (into [] method (file->lines file))]
-     [file star (count result) result])))
+ (fn [file star result]
+   [file star (count result) result]))

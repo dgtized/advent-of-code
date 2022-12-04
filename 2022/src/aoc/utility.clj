@@ -24,6 +24,6 @@
   (clerk/table
    {:head ["input" "star" "answer"]
     :rows
-    (for [[star method] (map-indexed vector methods)
+    (for [[star process] (map-indexed vector methods)
           file files]
-      (f file (inc star) method))}))
+      (f file (inc star) (process file)))}))
