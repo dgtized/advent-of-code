@@ -21,5 +21,5 @@
 (answer-table
  [(process containing) (process overlapping)]
  ["input/day04.example" "input/day04.input"]
- (fn [file star result]
-   [file star (count result) result]))
+ (fn [{:keys [result]}]
+   [(count result) result]))
