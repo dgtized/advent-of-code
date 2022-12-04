@@ -9,10 +9,7 @@
       (and (<= c a) (<= b d))))
 
 (defn overlapping [[a b c d]]
-  (or (<= c a d)
-      (<= c b d)
-      (<= a c b)
-      (<= a d b)))
+  (and (<= a d) (<= c b)))
 
 (defn parse-line [line]
   (mapcat (fn [part] (map parse-long (str/split part #"-")))
