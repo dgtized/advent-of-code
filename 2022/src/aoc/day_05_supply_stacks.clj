@@ -1,4 +1,4 @@
-(ns aoc.day-05
+(ns aoc.day-05-supply-stacks
   {::clerk/visibility {:result :hide}}
   (:require
    [aoc.utility :refer [answer-table file->lines]]
