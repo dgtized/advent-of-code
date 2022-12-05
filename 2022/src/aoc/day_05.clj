@@ -19,21 +19,22 @@
           (mapv (comp reverse (partial remove #{"_"}))))
      (map (fn [line] (map parse-long (re-seq #"\d+" line))) (rest moves))]))
 
-(defn move [stacks n from to]
+(defn move [op stacks n from to]
   (let [src (nth stacks (dec from))
         dst (nth stacks (dec to))]
     (-> stacks
         (assoc (dec from) (drop-last n src))
-        (assoc (dec to) (concat dst (reverse (take-last n src)))))))
+        (assoc (dec to) (concat dst (op (take-last n src)))))))
 
-(defn process [file]
-  (let [[stacks moves] (parse file)]
-    (reductions (fn [s m] (apply move s m))
-                stacks moves)))
+(defn process [op]
+  (fn [file]
+    (let [[stacks moves] (parse file)]
+      (reductions (fn [s m] (apply (partial move op) s m))
+                  stacks moves))))
 
 {::clerk/visibility {:result :show}}
 (answer-table
- [process]
+ [(process reverse) (process identity)]
  ["input/day05.example" "input/day05.input"]
  (fn [{:keys [result]}]
    [(apply str (map last (last result)))]))
