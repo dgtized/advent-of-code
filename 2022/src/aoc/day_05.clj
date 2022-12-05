@@ -7,11 +7,16 @@
 
 (defn parse [file]
   (let [[stacks moves]
-        (split-with (fn [line] (not= line ""))
-                    (file->lines file))]
+        (->> file
+             file->lines
+             (split-with (fn [line] (not= line ""))))]
     [(->> stacks
           butlast
-          (map (fn [line] (mapv str (str/replace (str/replace line #"\s\s\s\s" "[_]") #"[\[\]\s+]" ""))))
+          (map (fn [line]
+                 (as-> line _
+                   (str/replace _ #"\s\s\s\s" "[_]")
+                   (str/replace _ #"[\[\]\s+]" "")
+                   (mapv str _))))
           (apply map vector)
           (mapv (comp reverse (partial remove #{"_"}))))
      (map (fn [line] (map parse-long (re-seq #"\d+" line))) (rest moves))]))
