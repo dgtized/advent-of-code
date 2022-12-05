@@ -14,14 +14,26 @@
                     (file->lines file))]
     [(->> stacks
           butlast
-          (map (fn [line] (mapv str (str/replace (str/replace line #"\s\s\s" "_") #"[\[\]\s+]" ""))))
+          (map (fn [line] (mapv str (str/replace (str/replace line #"\s\s\s\s" "[_]") #"[\[\]\s+]" ""))))
           transpose
           (mapv (comp reverse (partial remove #{"_"}))))
-     (map (fn [line] (re-seq #"\d+" line)) (rest moves))]))
+     (map (fn [line] (map parse-long (re-seq #"\d+" line))) (rest moves))]))
+
+(defn move [stacks n from to]
+  (let [src (nth stacks (dec from))
+        dst (nth stacks (dec to))]
+    (-> stacks
+        (assoc (dec from) (drop-last n src))
+        (assoc (dec to) (concat dst (reverse (take-last n src)))))))
+
+(defn process [file]
+  (let [[stacks moves] (parse file)]
+    (reductions (fn [s m] (apply move s m))
+                stacks moves)))
 
 {::clerk/visibility {:result :show}}
 (answer-table
- [parse]
+ [process]
  ["input/day05.example" "input/day05.input"]
  (fn [{:keys [result]}]
-   [(count result) result]))
+   [(apply str (map last (last result)))]))
