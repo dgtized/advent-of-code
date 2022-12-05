@@ -26,7 +26,7 @@
     :rows
     (for [[star process] (map-indexed vector methods)
           file files]
-      (concat [file star]
+      (concat [file (inc star)]
               (f {:file file
                   :star (inc star)
                   :result (process file)})))}))
