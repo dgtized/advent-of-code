@@ -5,9 +5,6 @@
    [nextjournal.clerk :as clerk]
    [clojure.string :as str]))
 
-(defn transpose [xs]
-  (apply map vector xs))
-
 (defn parse [file]
   (let [[stacks moves]
         (split-with (fn [line] (not= line ""))
@@ -15,7 +12,7 @@
     [(->> stacks
           butlast
           (map (fn [line] (mapv str (str/replace (str/replace line #"\s\s\s\s" "[_]") #"[\[\]\s+]" ""))))
-          transpose
+          (apply map vector)
           (mapv (comp reverse (partial remove #{"_"}))))
      (map (fn [line] (map parse-long (re-seq #"\d+" line))) (rest moves))]))
 
