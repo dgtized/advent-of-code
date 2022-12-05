@@ -26,12 +26,12 @@
 (defn process [op]
   (fn [file]
     (let [[stacks moves] (parse file)]
-      (reductions (fn [s m] (apply (partial move op) s m))
-                  stacks moves))))
+      (reduce (fn [s m] (apply (partial move op) s m))
+              stacks moves))))
 
 {::clerk/visibility {:result :show}}
 (answer-table
  [(process reverse) (process identity)]
  ["input/day05.example" "input/day05.input"]
  (fn [{:keys [result]}]
-   [(apply str (map last (last result)))]))
+   [(apply str (map last result))]))
