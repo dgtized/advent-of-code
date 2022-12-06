@@ -1,8 +1,9 @@
 (ns aoc.day-06
-  ;; {::clerk/visibility {:result :hide}}
   (:require
-   [aoc.utility :refer [answer-table file->lines]]))
+   [aoc.utility :refer [answer-table file->lines]]
+   [nextjournal.clerk :as clerk]))
 
+{::clerk/visibility {:result :hide}}
 (defn process [size file]
   (->> file
        file->lines
@@ -13,7 +14,7 @@
                (when (= (count (set group)) size)
                  (+ size i))))))
 
-;; {::clerk/visibility {:result :show}}
+{::clerk/visibility {:result :show}}
 (answer-table
  [(partial process 4) (partial process 14)]
  ["input/day06.example" "input/day06.input"]
