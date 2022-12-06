@@ -1,13 +1,12 @@
 (ns aoc.day-06
   (:require
-   [aoc.utility :refer [answer-table file->lines]]
+   [aoc.utility :refer [answer-table]]
    [nextjournal.clerk :as clerk]))
 
 {::clerk/visibility {:result :hide}}
 (defn process [size file]
   (->> file
-       file->lines
-       first
+       slurp
        (partition size 1)
        (map-indexed vector)
        (some (fn [[i group]]
