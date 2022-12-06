@@ -18,4 +18,4 @@
 (answer-table
  [(partial process 4) (partial process 14)]
  ["input/day06.example" "input/day06.input"]
- (fn [{:keys [result]}] [result]))
+ (fn [{:keys [result]}] result))

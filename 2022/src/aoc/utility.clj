@@ -27,6 +27,9 @@
     (for [[star process] (map-indexed vector methods)
           file files]
       (concat [file (inc star)]
-              (f {:file file
-                  :star (inc star)
-                  :result (process file)})))}))
+              (let [r (f {:file file
+                          :star (inc star)
+                          :result (process file)})]
+                (if (sequential? r)
+                  r
+                  [r]))))}))
