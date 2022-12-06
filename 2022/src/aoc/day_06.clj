@@ -4,18 +4,20 @@
    [aoc.utility :refer [answer-table file->lines]]
    [nextjournal.clerk :as clerk]))
 
-(defn process [file]
+(defn process [file size]
   (->> file
        file->lines
        first
-       (partition 4 1)
+       (partition size 1)
        (map-indexed vector)
        (some (fn [[i group]]
-               (when (= (count (set group)) 4)
-                 (+ 4 i))))))
+               (when (= (count (set group)) size)
+                 (+ size i))))))
 
-(process "input/day06.example")
-(process "input/day06.input")
+(process "input/day06.example" 4)
+(process "input/day06.input" 4)
+(process "input/day06.example" 14)
+(process "input/day06.input" 14)
 
 ;; {::clerk/visibility {:result :show}} 
 (answer-table
