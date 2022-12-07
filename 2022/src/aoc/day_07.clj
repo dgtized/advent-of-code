@@ -46,7 +46,7 @@
       parent
       (recur index parent))))
 
-(defn process [file]
+(defn dir-sizes [file]
   (let [dirs (directories file)
         isized (->> (for [[dir files] dirs]
                       {:dir dir :size (reduce + (map :size files))})
@@ -57,15 +57,27 @@
                      (update index parent (fnil + 0) (get index dir))
                      index))
                  (into {} (map (juxt :dir :size)) isized))
-         (filter (fn [[f s]] (<= s 100000)))
          )))
+
+(defn part1 [file]
+  (->> (dir-sizes file)
+       (filter (fn [[f s]] (<= s 100000)))))
+
+(defn part2 [file]
+  (let [sizes (dir-sizes file)
+        root (get sizes "/")
+        target (- 70000000 root)
+        threshold (- 30000000 target)]
+    [root target threshold (some (fn [d] (when (> (second d) threshold)
+                                          (second d)))
+                                 (sort-by second < sizes))]))
 
 #_(process "input/day07.example")
 #_(process "input/day07.input")
 
 {::clerk/visibility {:result :show}}
 (answer-table
- [(partial process)]
+ [part1 part2]
  ["input/day07.example" "input/day07.input"]
- (fn [{:keys [result]}] [(apply + (map second result))
+ (fn [{:keys [result]}] [#_(apply + (map second result))
                         result]))
