@@ -59,25 +59,26 @@
                  (into {} (map (juxt :dir :size)) isized))
          )))
 
+#_(dir-sizes "input/day07.example")
+#_(dir-sizes "input/day07.input")
+
 (defn part1 [file]
-  (->> (dir-sizes file)
-       (filter (fn [[f s]] (<= s 100000)))))
+  (let [r (->> (dir-sizes file)
+               (filter (fn [[_ s]] (<= s 100000))))]
+    [(apply + (map second r)) r]))
 
 (defn part2 [file]
   (let [sizes (dir-sizes file)
         root (get sizes "/")
         target (- 70000000 root)
         threshold (- 30000000 target)]
-    [root target threshold (some (fn [d] (when (> (second d) threshold)
-                                          (second d)))
-                                 (sort-by second < sizes))]))
-
-#_(process "input/day07.example")
-#_(process "input/day07.input")
+    [(some (fn [d] (when (> (second d) threshold)
+                    (second d)))
+           (sort-by second < sizes))
+     threshold]))
 
 {::clerk/visibility {:result :show}}
 (answer-table
  [part1 part2]
  ["input/day07.example" "input/day07.input"]
- (fn [{:keys [result]}] [#_(apply + (map second result))
-                        result]))
+ (fn [{:keys [result]}] result))
