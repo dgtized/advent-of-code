@@ -64,8 +64,30 @@
         not-occluded (remove (fn [[_ {:keys [visible]}]] (empty? visible)) occluded)]
     [(count not-occluded) #_occluded]))
 
+(defn visible-from [grid pos]
+  (let [height (:tree (get grid pos))]
+    (into {}
+          (for [[_ dir] dirs
+                :let [consider (map #(:tree (get grid %))
+                                    (rest (positions grid pos dir)))
+                      found (take-while #(< % height) consider)]]
+            [dir
+             (if-let [n (nth consider (count found) nil)]
+               (concat found [n])
+               found)]))))
+
+(defn score-position [grid pos]
+  (apply * (map count (vals (visible-from grid pos)))))
+
+(visible-from (indexed-grid "input/day08.example") [2 1])
+(score-position (indexed-grid "input/day08.example") [2 1])
+(visible-from (indexed-grid "input/day08.example") [2 3])
+(score-position (indexed-grid "input/day08.example") [2 3])
+
 (defn part2 [file]
-  [])
+  (let [grid (indexed-grid file)]
+    (apply max (map (partial score-position grid)
+                    (keys grid)))))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
