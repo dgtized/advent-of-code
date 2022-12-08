@@ -1,7 +1,8 @@
 (ns aoc.utility
-  (:require [clojure.string :as str]
-            [nextjournal.clerk :as clerk]
-            ))
+  (:require
+   [babashka.fs :as fs]
+   [clojure.string :as str]
+   [nextjournal.clerk :as clerk]))
 
 (defn file->lines [filename]
   (-> filename slurp str/split-lines))
@@ -19,6 +20,11 @@
             (str ~error-msg (pr-str ret#))))
         (catch Throwable ex#
           (str ~error-msg "Error: " (ex-message ex#)))))))
+
+(defn input-files [prefix]
+  (map str (fs/glob "." (str "input/" prefix "*"))))
+
+(input-files "day07")
 
 (defn answer-table [methods files f]
   (clerk/table
