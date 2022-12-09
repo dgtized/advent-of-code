@@ -24,7 +24,14 @@
 (defn input-files [prefix]
   (map str (fs/glob "." (str "input/" prefix "*"))))
 
-(input-files "day07")
+(defn day-input [& {:keys [day name] :or {name "input"}}]
+  (let [content ""
+        filename (format "input/day%02d.%s" day name)]
+    (if (fs/exists? filename)
+      (println (str "! " filename " already exists"))
+      (spit filename content))))
+
+#_(day-input :day 9)
 
 (defn answer-table [methods files f]
   (clerk/table
