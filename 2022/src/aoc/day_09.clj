@@ -55,19 +55,6 @@
                   (v+ pos (delta pos head))))
               path))
 
-(defn path->grid [path]
-  (let [cols (apply max (map first path))
-        rows (apply max (map second path))]
-    (into []
-          (for [j (range (inc rows))]
-            (apply str
-                   (for [i (range (inc cols))]
-                     (if (contains? path [i j])
-                       "."
-                       "#")))))))
-
-#_(path->grid (set (follow (head-path (take 2 (parse "input/day09.example"))))))
-
 (defn pair-path [file]
   (let [path (head-path (parse file))]
     (map vector (follow path) path)))
@@ -88,3 +75,19 @@
  [star1 star2]
  (aoc/input-files "day09")
  (fn [{:keys [result]}] result))
+
+(defn path->grid [path]
+  (let [cols (+ 2 (apply max (map first path)))
+        rows (+ 2 (apply max (map second path)))]
+    (into []
+          (for [j (reverse (range rows))]
+            (into []
+                  (for [i (range cols)]
+                    (if (contains? path [i j])
+                      1
+                      0)))))))
+
+(clerk/with-viewers (clerk/add-viewers
+                     [{:pred (fn [x] (and (vector? x) (every? vector? x)))
+                       :transform-fn (fn [i] (clerk/table (get i :nextjournal/value)))}])
+  (path->grid (set (follow (head-path (parse "input/day09.example"))))))
