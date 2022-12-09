@@ -42,12 +42,15 @@
 
 #_(fetch-input :day 7)
 
-(defn day-input [& {:keys [day year name]
-                    :or {year 2022 name "input"}}]
+(defn day-input [& {:keys [day year name content force]
+                    :or {year 2022
+                         name "input"
+                         force false}}]
   (let [filename (format "input/day%02d.%s" day name)]
-    (if (fs/exists? filename)
-      (println (str "! " filename " already exists"))
-      (spit filename (fetch-input :day day :year year)))))
+    (if (or force (not (fs/exists? filename)))
+      (spit filename (or content
+                         (fetch-input :day day :year year)))
+      (println (str "! " filename " already exists")))))
 
 #_(day-input :day 8)
 
