@@ -11,8 +11,6 @@
 
 (defn v+ [a b] (mapv + a b))
 (defn v- [a b] (mapv - a b))
-(defn v* [[x y] c]
-  [(* x c) (* y c)])
 
 (defn touching? [[x0 y0] [x1 y1]]
   (and (<= (Math/abs (- x1 x0)) 1)
@@ -48,7 +46,6 @@
 
 #_(delta [1 1] [3 1])
 #_(delta [1 1] [3 2])
-
 #_(delta [2 4] [4 3])
 
 (defn follow [path]
