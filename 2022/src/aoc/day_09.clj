@@ -82,7 +82,9 @@
     [(count (set path))]))
 
 (defn star2 [file]
-  file)
+  (let [path (head-path (parse file))
+        tail (last (take 10 (iterate follow path)))]
+    [(count (set tail))]))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
