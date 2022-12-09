@@ -1,9 +1,10 @@
 (ns aoc.day-03
-  {:nextjournal.clerk/visibility {:result :hide}}
   (:require
    [aoc.utility :refer [file->lines verify]]
    [clojure.set :as set]
    [nextjournal.clerk :as clerk]))
+
+{:nextjournal.clerk/visibility {:result :hide}}
 
 (def sum (partial reduce +))
 

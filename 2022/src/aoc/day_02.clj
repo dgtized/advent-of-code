@@ -2,6 +2,8 @@
   (:require [clojure.string :as str]
             [aoc.utility :refer [file->lines verify]]))
 
+{:nextjournal.clerk/visibility {:result :hide}}
+
 (defn round [a b]
   (let [beats {"A" #{"C" "Z"}
                "B" #{"A" "X"}
@@ -47,6 +49,7 @@
     [(apply + r) r]))
 
 ;; test
+{:nextjournal.clerk/visibility {:result :show}}
 (verify (= [15 [8 1 6]] (score round (file->lines "input/day02.example"))))
 (score round (file->lines "input/day02.input"))
 (verify (= [12 [4 1 7]] (score cheat (file->lines "input/day02.example"))))

@@ -1,9 +1,9 @@
 (ns aoc.day-04
-  {::clerk/visibility {:result :hide}}
   (:require
    [aoc.utility :refer [answer-table file->lines]]
    [nextjournal.clerk :as clerk]))
 
+{::clerk/visibility {:result :hide}}
 (defn containing [[a b c d]]
   (or (<= a c d b) (<= c a b d)))
 

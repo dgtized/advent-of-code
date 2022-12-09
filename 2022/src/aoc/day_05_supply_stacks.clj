@@ -1,10 +1,10 @@
 (ns aoc.day-05-supply-stacks
-  {::clerk/visibility {:result :hide}}
   (:require
    [aoc.utility :refer [answer-table file->lines]]
    [nextjournal.clerk :as clerk]
    [clojure.string :as str]))
 
+{::clerk/visibility {:result :hide}}
 (defn parse [file]
   (let [[stacks moves]
         (->> file
