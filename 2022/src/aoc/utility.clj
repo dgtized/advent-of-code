@@ -1,6 +1,7 @@
 (ns aoc.utility
   (:require
    [babashka.fs :as fs]
+   [babashka.curl :as curl]
    [clojure.string :as str]
    [nextjournal.clerk :as clerk]))
 
@@ -24,14 +25,31 @@
 (defn input-files [prefix]
   (map str (fs/glob "." (str "input/" prefix "*"))))
 
-(defn day-input [& {:keys [day name] :or {name "input"}}]
-  (let [content ""
-        filename (format "input/day%02d.%s" day name)]
+;; Cribbed from https://github.com/borkdude/advent-of-babashka/blob/main/bb/new_day.clj
+(defn fetch-input [& {:keys [day year] :or {year 2022}}]
+  (if-let [session (System/getenv "AOC_SESSION")]
+    (let [input-url (format "https://adventofcode.com/%d/day/%d/input" year day)
+          headers {"Cookie" (str "session=" session)
+                   "User-Agent" "github.com/dgtized/advent-of-code dgtized@gmail.com"}]
+      (println "retrieving input from " input-url)
+      (let [{:keys [status body] :as resp} (curl/get input-url {:headers headers})]
+        (if (= 200 status)
+          body
+          (throw (ex-info "unable to download"
+                          {:day day
+                           :year year
+                           :response resp})))))))
+
+#_(fetch-input :day 7)
+
+(defn day-input [& {:keys [day year name]
+                    :or {year 2022 name "input"}}]
+  (let [filename (format "input/day%02d.%s" day name)]
     (if (fs/exists? filename)
       (println (str "! " filename " already exists"))
-      (spit filename content))))
+      (spit filename (fetch-input :day day :year year)))))
 
-#_(day-input :day 9)
+#_(day-input :day 8)
 
 (defn answer-table [methods files f]
   (clerk/table

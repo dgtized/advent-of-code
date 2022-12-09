@@ -1,4 +1,5 @@
 {:paths ["src" "resources"]
  :deps
  {org.clojure/clojure {:mvn/version "1.11.1"}
-  io.github.nextjournal/clerk {:mvn/version "0.12.707"}}}
+  io.github.nextjournal/clerk {:mvn/version "0.12.707"}
+  babashka/babashka.curl {:mvn/version "0.1.2"}}}
