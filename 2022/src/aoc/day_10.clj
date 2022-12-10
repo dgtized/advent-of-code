@@ -60,12 +60,12 @@
 
 (defn star2 [file]
   (let [states (interpret (parse file))]
-    (into [] (partition 40 (map sprite-hit states)))))
+    (partition 40 (map sprite-hit states))))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
- [star1 star2]
- (remove #{"input/day10.example"} (aoc/input-files "day10"))
+ [star1]
+ ["input/day10.example2" "input/day10.input"]
  (fn [{:keys [result]}] result))
 
 ^{::clerk/viewer aoc/grid->table}
