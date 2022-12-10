@@ -68,23 +68,9 @@
  (remove #{"input/day10.example"} (aoc/input-files "day10"))
  (fn [{:keys [result]}] result))
 
-(def grid->table
-  {:pred seq
-   :transform-fn clerk/mark-presented
-   :render-fn '(fn [grid]
-                 (into [:table]
-                       (for [row grid]
-                         (into [:tr]
-                               (for [n row]
-                                 [:td
-                                  {:style {:width 20 :height 20}
-                                   :class (if (pos? n)
-                                            "bg-black"
-                                            "bg-white border-grey border-solid border-2")}])))))})
-
-^{::clerk/viewer grid->table}
+^{::clerk/viewer aoc/grid->table}
 (star2 "input/day10.example2")
 
-^{::clerk/viewer grid->table}
+^{::clerk/viewer aoc/grid->table}
 (star2 "input/day10.input")
 ;; PLEFULPB

@@ -67,3 +67,18 @@
                 (if (sequential? r)
                   r
                   [r]))))}))
+
+(def grid->table
+  {:pred seq
+   :transform-fn clerk/mark-presented
+   :render-fn
+   '(fn [grid]
+      (into [:table]
+            (for [row grid]
+              (into [:tr]
+                    (for [n row]
+                      [:td
+                       {:style {:width 20 :height 20}
+                        :class (if (pos? n)
+                                 "bg-black"
+                                 "bg-white border-grey border-solid border-2")}])))))})
