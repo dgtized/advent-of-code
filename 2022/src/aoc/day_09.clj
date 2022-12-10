@@ -87,7 +87,15 @@
                       1
                       0)))))))
 
-(clerk/with-viewers (clerk/add-viewers
-                     [{:pred (fn [x] (and (vector? x) (every? vector? x)))
-                       :transform-fn (fn [i] (clerk/table (get i :nextjournal/value)))}])
+(clerk/with-viewers
+  [{:pred integer?
+    :render-fn '(fn [n] [:div.inline-block
+                        {:style {:width 20 :height 20}
+                         :class (if (pos? n)
+                                  "bg-black"
+                                  "bg-white border-grey border-solid border-2")}])}
+   {:pred (fn [x] (and (vector? x) (every? vector? x)))
+    :render-fn '(fn [rows opts] (into [:div.flex.flex-col] (v/inspect-children opts) rows))}
+   {:pred (fn [x] (and (vector? x) (every? int? x)))
+    :render-fn '(fn [row opts] (into [:div.flex.inline-flex] (v/inspect-children opts) row))}]
   (path->grid (set (follow (head-path (parse "input/day09.example"))))))
