@@ -8,6 +8,8 @@
 
 {::clerk/visibility {:result :hide}}
 
+(def e-mod (* 23 19 13 17))
+
 (def example
   [{:items [79 98]
     :op (fn [x] (* x 19))
@@ -21,6 +23,8 @@
    {:items [74]
     :op (fn [x] (+ x 3))
     :test (fn [x] (if (= 0 (mod x 17)) 0 1))}])
+
+(def i-mod (* 19 7 17 13 11 2 5 3))
 
 (def input
   [{:items [72 97]
@@ -71,9 +75,32 @@
        (take 2)
        (apply *)))
 
-(defn star2 [input]
-  [])
+(defn monkey2 [lcm input i]
+  (let [{:keys [items op] :as monkey} (nth input i)]
+    (-> (reduce (fn [input item]
+                  (let [worry (mod (op item) lcm)
+                        to ((:test monkey) worry)]
+                    (update-in input [to :items] conj worry)))
+                input items)
+        (assoc-in [i :items] [])
+        (assoc-in [i :inspections] (count items)))))
+
+(defn round2 [lcm input]
+  (reduce (partial monkey2 lcm) input (range (count input))))
+
+(defn star2 [input lcm]
+  (->> (iterate (partial round2 lcm) input)
+       rest
+       (take 10000)
+       (mapv (fn [step] (map :inspections step)))
+       (reduce (partial mapv +))
+       (sort >)
+       (take 2)
+       (apply *)
+       ))
 
 {::clerk/visibility {:result :show}}
 (star1 example)
 (star1 input)
+(star2 example e-mod) ;; 2713310158
+(star2 input i-mod)
