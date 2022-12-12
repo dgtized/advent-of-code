@@ -9,12 +9,6 @@
 
 {::clerk/visibility {:result :hide}}
 
-(defn split-on-empty-line [file]
-  (str/split (slurp file) #"\n\n"))
-
-(defn parse-ints [line]
-  (mapv parse-long (re-seq #"\d+" line)))
-
 (defn parse-arg [arg]
   (when-not (= arg "old")
     (parse-long arg)))
@@ -22,8 +16,8 @@
 (defn parse-monkey [lines]
   (let [[_ items operation & condition] (str/split-lines lines)
         [_ a op b] (re-find #"=\s([^\s]+)\s([\*\+])\s([^\s]+)" operation)
-        [divisor on-true on-false] (mapv (comp first parse-ints) condition)]
-    {:items (parse-ints items)
+        [divisor on-true on-false] (mapv (comp first aoc/parse-ints) condition)]
+    {:items (aoc/parse-ints items)
      :op (fn [x] ((get {"*" * "+" +} op)
                  (or (parse-arg a) x)
                  (or (parse-arg b) x)))
@@ -34,7 +28,7 @@
   (apply * (mapv :divisor input)))
 
 (defn parse [file]
-  (mapv parse-monkey (split-on-empty-line file)))
+  (mapv parse-monkey (aoc/split-empty-lines (slurp file))))
 
 (def example (parse "input/day11.example"))
 (def e-mod (lcm example))

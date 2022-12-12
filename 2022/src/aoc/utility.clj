@@ -82,3 +82,9 @@
                         :class (if (pos? n)
                                  "bg-black"
                                  "bg-white border-grey border-solid border-2")}])))))})
+
+(defn split-empty-lines [s]
+  (str/split s #"\n\n"))
+
+(defn parse-ints [line]
+  (mapv parse-long (re-seq #"\d+" line)))
