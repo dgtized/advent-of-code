@@ -28,10 +28,13 @@
   (apply * (mapv :divisor input)))
 
 (defn parse [file]
-  (mapv parse-monkey (aoc/split-empty-lines (slurp file))))
+  (->> file
+       slurp
+       aoc/split-empty-lines
+       (mapv parse-monkey)))
 
-(def example (parse "input/day11.example"))
-(def input (parse "input/day11.input"))
+#_(def example (parse "input/day11.example"))
+#_(def input (parse "input/day11.input"))
 
 (defn monkey [lcm input i]
   (let [{:keys [items op] :as monkey} (nth input i)]
@@ -58,14 +61,15 @@
        (take 2)
        (apply *)))
 
-(defn star1 [input]
-  (process input 20 nil))
+(defn star1 [file]
+  (process (parse file) 20 nil))
 
-(defn star2 [input]
-  (process input 10000 (lcm input)))
+(defn star2 [file]
+  (let [input (parse file)]
+    (process input 10000 (lcm input))))
 
 {::clerk/visibility {:result :show}}
-(star1 example)
-(star1 input)
-(star2 example) ;; 2713310158
-(star2 input)
+(aoc/answer-table
+ [star1 star2]
+ (aoc/input-files "day11")
+ (fn [{:keys [result]}] result))
