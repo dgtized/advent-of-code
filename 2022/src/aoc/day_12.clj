@@ -65,11 +65,18 @@
 (defn star1 [file]
   (let [grid (->grid (parse file))
         src (find-loc grid \S)
-        dst (find-loc grid \E)]
-    (count (rest (path (assoc grid src \a dst \z) src dst)))))
+        dst (find-loc grid \E)
+        grid (assoc grid src \a dst \z)]
+    (count (rest (path grid src dst)))))
 
 (defn star2 [file]
-  file)
+  (let [grid (->grid (parse file))
+        src (find-loc grid \S)
+        dst (find-loc grid \E)
+        grid (assoc grid src \a dst \z)]
+    (apply min (remove #{0}
+                       (map (fn [s] (count (rest (path grid s dst))))
+                            (keep (fn [[pos v]] (when (= v \a) pos)) grid))))))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
