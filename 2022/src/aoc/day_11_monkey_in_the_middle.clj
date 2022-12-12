@@ -67,26 +67,21 @@
 (defn round [lcm input]
   (reduce (partial monkey lcm) input (range (count input))))
 
-(defn star1 [input]
-  (->> (iterate (partial round nil) input)
+(defn process [input rounds lcm]
+  (->> (iterate (partial round lcm) input)
        rest
-       (take 20)
+       (take rounds)
        (mapv (fn [step] (map :inspections step)))
        (reduce (partial mapv +))
        (sort >)
        (take 2)
        (apply *)))
 
+(defn star1 [input]
+  (process input 20 nil))
+
 (defn star2 [input lcm]
-  (->> (iterate (partial round lcm) input)
-       rest
-       (take 10000)
-       (mapv (fn [step] (map :inspections step)))
-       (reduce (partial mapv +))
-       (sort >)
-       (take 2)
-       (apply *)
-       ))
+  (process input 10000 lcm))
 
 {::clerk/visibility {:result :show}}
 (star1 example)
