@@ -54,16 +54,24 @@
 
 #_(day-input :day 8)
 
+(defmacro with-time
+  [expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     [ret# (/ (double (- (. System (nanoTime)) start#)) 1000000.0)]))
+
 (defn answer-table [methods files f]
   (clerk/table
-   {:head ["input" "star" "answer"]
+   {:head ["input" "star" "ms" "answer"]
     :rows
     (for [[star process] (map-indexed vector methods)
-          file files]
-      (concat [file (inc star)]
+          file files
+          :let [[result duration] (with-time (process file))]]
+      (concat [file (inc star) (format "%.1f" duration)]
               (let [r (f {:file file
                           :star (inc star)
-                          :result (process file)})]
+                          :result result
+                          :duration duration})]
                 (if (sequential? r)
                   r
                   [r]))))}))
