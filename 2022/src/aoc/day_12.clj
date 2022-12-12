@@ -42,18 +42,19 @@
                  (constantly 1)
                  src dst))
 
-(defn star1 [file]
+(defn prepare [file]
   (let [grid (->grid (parse file))
         src (find-loc grid \S)
         dst (find-loc grid \E)
         grid (assoc grid src \a dst \z)]
+    [grid src dst]))
+
+(defn star1 [file]
+  (let [[grid src dst] (prepare file)]
     (count (rest (path grid src dst)))))
 
 (defn star2 [file]
-  (let [grid (->grid (parse file))
-        src (find-loc grid \S)
-        dst (find-loc grid \E)
-        grid (assoc grid src \a dst \z)]
+  (let [[grid _ dst] (prepare file)]
     (apply min (remove #{0}
                        (map (fn [s] (count (rest (path grid s dst))))
                             (keep (fn [[pos v]] (when (= v \a) pos)) grid))))))
