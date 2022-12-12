@@ -31,10 +31,7 @@
   (mapv parse-monkey (aoc/split-empty-lines (slurp file))))
 
 (def example (parse "input/day11.example"))
-(def e-mod (lcm example))
-
 (def input (parse "input/day11.input"))
-(def i-mod (lcm input))
 
 (defn monkey [lcm input i]
   (let [{:keys [items op] :as monkey} (nth input i)]
@@ -64,11 +61,11 @@
 (defn star1 [input]
   (process input 20 nil))
 
-(defn star2 [input lcm]
-  (process input 10000 lcm))
+(defn star2 [input]
+  (process input 10000 (lcm input)))
 
 {::clerk/visibility {:result :show}}
 (star1 example)
 (star1 input)
-(star2 example e-mod) ;; 2713310158
-(star2 input i-mod)
+(star2 example) ;; 2713310158
+(star2 input)
