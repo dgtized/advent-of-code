@@ -41,7 +41,7 @@
     (-> (reduce (fn [input item]
                   (let [worry (if lcm
                                 (mod (op item) lcm)
-                                (int (/ (op item) 3)))
+                                (quot (op item) 3))
                         to ((:test monkey) worry)]
                     (update-in input [to :items] conj worry)))
                 input items)
