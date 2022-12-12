@@ -52,21 +52,23 @@
     :op (fn [x] (* x 7))
     :test (fn [x] (if (= 0 (mod x 3)) 2 3))}])
 
-(defn monkey [input i]
+(defn monkey [lcm input i]
   (let [{:keys [items op] :as monkey} (nth input i)]
     (-> (reduce (fn [input item]
-                  (let [worry (int (/ (op item) 3))
+                  (let [worry (if lcm
+                                (mod (op item) lcm)
+                                (int (/ (op item) 3)))
                         to ((:test monkey) worry)]
                     (update-in input [to :items] conj worry)))
                 input items)
         (assoc-in [i :items] [])
         (assoc-in [i :inspections] (count items)))))
 
-(defn round [input]
-  (reduce monkey input (range (count input))))
+(defn round [lcm input]
+  (reduce (partial monkey lcm) input (range (count input))))
 
 (defn star1 [input]
-  (->> (iterate round input)
+  (->> (iterate (partial round nil) input)
        rest
        (take 20)
        (mapv (fn [step] (map :inspections step)))
@@ -75,21 +77,8 @@
        (take 2)
        (apply *)))
 
-(defn monkey2 [lcm input i]
-  (let [{:keys [items op] :as monkey} (nth input i)]
-    (-> (reduce (fn [input item]
-                  (let [worry (mod (op item) lcm)
-                        to ((:test monkey) worry)]
-                    (update-in input [to :items] conj worry)))
-                input items)
-        (assoc-in [i :items] [])
-        (assoc-in [i :inspections] (count items)))))
-
-(defn round2 [lcm input]
-  (reduce (partial monkey2 lcm) input (range (count input))))
-
 (defn star2 [input lcm]
-  (->> (iterate (partial round2 lcm) input)
+  (->> (iterate (partial round lcm) input)
        rest
        (take 10000)
        (mapv (fn [step] (map :inspections step)))
