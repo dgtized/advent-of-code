@@ -1,7 +1,8 @@
 (ns aoc.utility
   (:require
-   [babashka.fs :as fs]
    [babashka.curl :as curl]
+   [babashka.fs :as fs]
+   [clojure.data.priority-map :as dpm]
    [clojure.string :as str]
    [nextjournal.clerk :as clerk]))
 
@@ -96,3 +97,28 @@
 
 (defn parse-ints [line]
   (mapv parse-long (re-seq #"\d+" line)))
+
+;; originally adapted from https://github.com/arttuka/astar/blob/master/src/astar/core.cljc
+(defn backtrack [current visited]
+  (cons current
+        (lazy-seq (when-let [parent (get visited current)]
+                    (backtrack parent visited)))))
+
+(defn a*-search [successors cost heuristic source target]
+  (loop [visited {}
+         queue (dpm/priority-map-keyfn first source [0 0 nil])]
+    (when (seq queue)
+      (let [[current [_ value prev]] (peek queue)
+            visited' (assoc visited current prev)]
+        (if (= current target)
+          (reverse (backtrack target visited'))
+          (recur visited'
+                 (reduce (fn [queue node]
+                           (let [score (+ value (cost current node))]
+                             (if (and (not (contains? visited' node))
+                                      (or (not (contains? queue node))
+                                          (< score (get-in queue [node 1]))))
+                               (assoc queue node [(+ score (heuristic node)) score current])
+                               queue)))
+                         (pop queue)
+                         (successors current))))))))
