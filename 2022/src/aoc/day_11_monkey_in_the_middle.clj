@@ -12,8 +12,8 @@
 (defn split-on-empty-line [file]
   (str/split (slurp file) #"\n\n"))
 
-(defn parse-one-int [line]
-  (parse-long (first (re-seq #"\d+" line))))
+(defn parse-ints [line]
+  (mapv parse-long (re-seq #"\d+" line)))
 
 (defn parse-arg [arg]
   (when-not (= arg "old")
@@ -22,8 +22,8 @@
 (defn parse-monkey [lines]
   (let [[_ items operation & condition] (str/split-lines lines)
         [_ a op b] (re-find #"=\s([^\s]+)\s([\*\+])\s([^\s]+)" operation)
-        [divisor on-true on-false] (mapv parse-one-int condition)]
-    {:items (mapv parse-long (re-seq #"\d+" items))
+        [divisor on-true on-false] (mapv (comp first parse-ints) condition)]
+    {:items (parse-ints items)
      :op (fn [x] ((get {"*" * "+" +} op)
                  (or (parse-arg a) x)
                  (or (parse-arg b) x)))
