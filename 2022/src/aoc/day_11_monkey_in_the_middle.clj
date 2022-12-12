@@ -24,9 +24,6 @@
      :divisor divisor
      :test (fn [x] (if (= 0 (mod x divisor)) on-true on-false))}))
 
-(defn lcm [input]
-  (apply * (mapv :divisor input)))
-
 (defn parse [file]
   (->> file
        slurp
@@ -35,6 +32,9 @@
 
 #_(def example (parse "input/day11.example"))
 #_(def input (parse "input/day11.input"))
+
+(defn lcm [input]
+  (apply * (mapv :divisor input)))
 
 (defn monkey [lcm input i]
   (let [{:keys [items op] :as monkey} (nth input i)]
