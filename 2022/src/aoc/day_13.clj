@@ -17,30 +17,35 @@
 #_(parse "input/day13.example")
 #_(parse "input/day13.input")
 
+(defn kind [x]
+  (cond (integer? x) :int
+        (vector? x) :vec))
+
 (defn check [l r]
-  (cond (and (integer? l) (integer? r))
-        (cond (< l r)
-              true
-              (> l r)
-              false
-              :else
-              nil)
-        (and (vector? l) (vector? r))
-        (loop [left l right r]
-          (let [lv (first left)
-                rv (first right)]
-            (condp = [(nil? lv) (nil? rv)]
-              [true false] true
-              [false true] false
-              [true true] nil
-              (let [result (check lv rv)]
-                (if-not (nil? result)
-                  result
-                  (recur (rest left) (rest right)))))))
-        (and (integer? l) (vector? r))
-        (check [l] r)
-        (and (vector? l) (integer? r))
-        (check l [r])))
+  (condp = [(kind l) (kind r)]
+    [:int :int]
+    (cond (< l r)
+          true
+          (> l r)
+          false
+          :else
+          nil)
+    [:vec :vec]
+    (loop [left l right r]
+      (let [lv (first left)
+            rv (first right)]
+        (condp = [(nil? lv) (nil? rv)]
+          [true false] true
+          [false true] false
+          [true true] nil
+          (let [result (check lv rv)]
+            (if-not (nil? result)
+              result
+              (recur (rest left) (rest right)))))))
+    [:int :vec]
+    (check [l] r)
+    [:vec :int]
+    (check l [r])))
 
 (comment
   (check [1 1 3 1 1] [1 1 5 1 1])
