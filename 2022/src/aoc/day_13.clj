@@ -53,18 +53,34 @@
   (check [[[]]] [[]]))
 
 (defn star1 [file]
-  (keep (fn [[i v]] (when v i))
-        (map-indexed (fn [i x] [(inc i) (apply check x)])
-                     (parse file))))
+  (->> file
+       parse
+       (map-indexed (fn [i x] [(inc i) (apply check x)]))
+       (keep (fn [[i v]] (when v i)))
+       (apply +)))
 
 (star1 "input/day13.example")
 
 (defn star2 [file]
-  [])
+  (let [dividers [[[2]] [[6]]]]
+    (->> (parse file)
+         (mapcat identity)
+         (concat dividers)
+         (sort (fn [a b]
+                 (let [r (check a b)]
+                   (case r
+                     true -1
+                     false 1
+                     nil 0))))
+         (map-indexed (fn [i v] [(inc i) v]))
+         (keep (fn [[i v]] (when (contains? (set dividers) v) i)))
+         (apply *))))
+
+(star2 "input/day13.example")
+(star2 "input/day13.input") ;; 26289
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
  [star1 star2]
  (aoc/input-files "day13")
- (fn [{:keys [result]}]
-   [(apply + result) result]))
+ (fn [{:keys [result]}] result))
