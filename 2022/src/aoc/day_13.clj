@@ -23,13 +23,14 @@
 
 (defn check [l r]
   (condp = [(kind l) (kind r)]
-    [:int :int]
-    (cond (< l r)
-          true
-          (> l r)
-          false
-          :else
-          nil)
+    [:int :vec] (check [l] r)
+    [:vec :int] (check l [r])
+    [:int :int] (cond (< l r)
+                      true
+                      (> l r)
+                      false
+                      :else
+                      nil)
     [:vec :vec]
     (loop [left l right r]
       (let [lv (first left)
@@ -41,11 +42,7 @@
           (let [result (check lv rv)]
             (if-not (nil? result)
               result
-              (recur (rest left) (rest right)))))))
-    [:int :vec]
-    (check [l] r)
-    [:vec :int]
-    (check l [r])))
+              (recur (rest left) (rest right)))))))))
 
 (comment
   (check [1 1 3 1 1] [1 1 5 1 1])
