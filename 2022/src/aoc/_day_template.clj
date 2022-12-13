@@ -3,10 +3,10 @@
    [aoc.utility :as aoc]
    [nextjournal.clerk :as clerk]))
 
+{::clerk/visibility {:result :hide}}
+
 #_(aoc/day-input :day 10 :name "example" :content "")
 #_(aoc/day-input :day 10)
-
-{::clerk/visibility {:result :hide}}
 
 (defn star1 [file]
   file)
