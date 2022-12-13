@@ -29,17 +29,14 @@
         (loop [left l right r]
           (let [lv (first left)
                 rv (first right)]
-            (cond (and (nil? lv) (not (nil? rv)))
-                  true
-                  (and (nil? rv) (not (nil? lv)))
-                  false
-                  (and (nil? rv) (nil? lv))
-                  nil
-                  :else
-                  (let [result (check lv rv)]
-                    (if-not (nil? result)
-                      result
-                      (recur (rest left) (rest right)))))))
+            (condp = [(nil? lv) (nil? rv)]
+              [true false] true
+              [false true] false
+              [true true] nil
+              (let [result (check lv rv)]
+                (if-not (nil? result)
+                  result
+                  (recur (rest left) (rest right)))))))
         (and (integer? l) (vector? r))
         (check [l] r)
         (and (vector? l) (integer? r))
