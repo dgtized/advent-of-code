@@ -45,27 +45,88 @@
   (= (coords [[498 4] [498 6] [496 6] [496 8]])
      [[498 4] [498 5] [498 6] [497 6] [496 6] [496 7] [496 8]]))
 
-(defn ->grid [input]
-  (reduce (fn [grid polyline] (reduce (fn [g l] (assoc g l "#"))
-                                     grid (coords polyline))) {[500 0] "+"} input))
-
-(defn show-grid [grid]
+(defn grid-range [grid]
   (let [xs (map first (keys grid))
         x0 (apply min xs)
         x1 (inc (apply max xs))
         ys (map second (keys grid))
         y0 (apply min ys)
         y1 (inc (apply max ys))]
+    [[x0 y0] [x1 y1]]))
+
+(defn fill-empty [grid]
+  (let [[[x0 y0] [x1 y1]] (grid-range grid)]
+    (reduce (fn [g l]
+              (if (contains? g l)
+                g
+                (assoc g l ".")))
+            grid
+            (for [x (range x0 x1)
+                  y (range y0 y1)]
+              [x y]))))
+
+(defn ->grid [input]
+  (->> input
+       (reduce (fn [grid polyline]
+                 (reduce (fn [g l] (assoc g l "#"))
+                         grid (coords polyline))) {[500 0] "+"})
+       fill-empty))
+
+(defn show-grid [grid]
+  (let [[[x0 y0] [x1 y1]] (grid-range grid)]
     (into []
           (for [y (range y0 y1)]
             (apply str (for [x (range x0 x1)]
-                         (get grid [x y] ".")))))))
+                         (get grid [x y])))))))
 
-(show-grid (->grid (parse "input/day14.example")))
-(show-grid (->grid (parse "input/day14.input")))
+(defn v+ [a b] (mapv + a b))
+
+(defn check [grid pos]
+  (let [v (get grid pos)]
+    (cond (= "." v)
+          :open
+          (#{"o" "#"} v)
+          :blocked
+          (nil? v)
+          :infinite)))
+
+(defn add-grain [grid]
+  (loop [grid grid pos [500 0]]
+    (let [below (v+ pos [0 1])
+          left (v+ pos [-1 1])
+          right (v+ pos [1 1])]
+      (cond (= (check grid below) :open)
+            (recur grid below)
+            (= (check grid below) :infinite)
+            grid
+            (= (check grid below) :blocked)
+            (cond (#{:open :infinite} (check grid left))
+                  (recur grid left)
+                  (#{:open :infinite} (check grid right))
+                  (recur grid right)
+                  :else
+                  (assoc grid pos "o"))))))
+
+(defn add-till-fixed [grid]
+  (reduce
+   (fn [g _]
+     (let [g' (add-grain g)]
+       (if (= g g')
+         (reduced g)
+         g')))
+   grid
+   (range)))
+
+(comment
+  (let [grid (add-till-fixed (->grid (parse "input/day14.example")))]
+    [(count (filter #{"o"} (vals grid))) (show-grid grid)])
+  ;; 1513
+  (let [grid (add-till-fixed (->grid (parse "input/day14.input")))]
+    [(count (filter #{"o"} (vals grid))) (show-grid grid)])
+  (show-grid (->grid (parse "input/day14.input"))))
 
 (defn star1 [file]
-  (parse file))
+  file)
 
 (defn star2 [file]
   file)
