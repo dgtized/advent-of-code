@@ -65,12 +65,19 @@
                   y (range y0 y1)]
               [x y]))))
 
+(defn fill-empty+floor [grid]
+  (let [[[x0 y0] [x1 y1]] (grid-range grid)]
+    (fill-empty
+     (reduce (fn [g l] (assoc g l "#"))
+             grid
+             (for [x (range (- x0 y1 5) (+ x1 y1 5))]
+               [x (+ y1 1)])))))
+
 (defn ->grid [input]
-  (->> input
-       (reduce (fn [grid polyline]
-                 (reduce (fn [g l] (assoc g l "#"))
-                         grid (coords polyline))) {[500 0] "+"})
-       fill-empty))
+  (reduce (fn [grid polyline]
+            (reduce (fn [g l] (assoc g l "#"))
+                    grid (coords polyline))) {[500 0] "+"}
+          input))
 
 (defn show-grid [grid]
   (let [[[x0 y0] [x1 y1]] (grid-range grid)]
@@ -118,15 +125,24 @@
    (range)))
 
 (comment
-  (let [grid (add-till-fixed (->grid (parse "input/day14.example")))]
+  (let [grid (add-till-fixed (fill-empty (->grid (parse "input/day14.example"))))]
     [(count (filter #{"o"} (vals grid))) (show-grid grid)])
   ;; 1513
-  (let [grid (add-till-fixed (->grid (parse "input/day14.input")))]
+  (let [grid (add-till-fixed (fill-empty (->grid (parse "input/day14.input"))))]
     [(count (filter #{"o"} (vals grid))) (show-grid grid)])
+
   (show-grid (->grid (parse "input/day14.input"))))
 
 (defn star1 [file]
   file)
+
+(comment
+  (let [grid (add-till-fixed (fill-empty+floor (->grid (parse "input/day14.example"))))]
+    [(count (filter #{"o"} (vals grid))) (show-grid grid)])
+
+  ;; 22646
+  (let [grid (add-till-fixed (fill-empty+floor (->grid (parse "input/day14.input"))))]
+    [(count (filter #{"o"} (vals grid))) (show-grid grid)]))
 
 (defn star2 [file]
   file)
