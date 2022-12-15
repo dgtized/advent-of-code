@@ -66,7 +66,7 @@
               [x y]))))
 
 (defn fill-empty+floor [grid]
-  (let [[[x0 y0] [x1 y1]] (grid-range grid)]
+  (let [[[x0 _] [x1 y1]] (grid-range grid)]
     (fill-empty
      (reduce (fn [g l] (assoc g l "#"))
              grid
