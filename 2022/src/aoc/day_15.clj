@@ -69,7 +69,7 @@
          (occluded [5 0] 5 4)
          (occluded [5 0] 5 5))
 
-(defn sweep [ranges]
+(defn combine [ranges]
   (let [rs (remove empty? ranges)]
     (reverse
      (reduce (fn [acc r]
@@ -77,16 +77,16 @@
                  (cons r acc)
                  (let [[a b] (first acc)
                        [c d] r]
-                   (if (< b c)
-                     (cons [c d] acc)
-                     (cons [(min a c) (max b d)] (rest acc))))))
+                   (if (>= (inc b) c)
+                     (cons [(min a c) (max b d)] (rest acc))
+                     (cons [c d] acc)))))
              '()
              rs))))
 
 (defn count-ranges [ranges]
   (apply + (map (fn [[a b]] (- b a)) ranges)))
 
-(comment (sweep [[0 1] [] [1 2] [2] [4 5]]))
+(comment (combine [[0 1] [1 2] [2 2] [4 5] [6 7]]))
 
 (defn count-range [r]
   (case (count r)
@@ -104,12 +104,39 @@
      :sensors (mapv (fn [sensor] [sensor (get sensors sensor) ((juxt identity count-range) (occluded sensor (get sensors sensor) row))])
                     (sort-by (fn [sensor] (manhattan [fx sensor])) (map first sensor-beacons)))
      ;; :beacons (sort-by (fn [sensor] (manhattan [fx sensor])) (map second sensor-beacons))
-     :ranges (count-ranges (sweep (mapv (fn [sensor] (occluded sensor (get sensors sensor) row))
-                                        (sort-by (fn [sensor] (manhattan [fx sensor])) (map first sensor-beacons)))))}))
+     :ranges (count-ranges (combine (mapv (fn [sensor] (occluded sensor (get sensors sensor) row))
+                                          (sort-by (fn [sensor] (manhattan [fx sensor])) (map first sensor-beacons)))))}))
 
-(defn star2 [file]
-  file)
+(defn gap [row ranges]
+  (when (> (count ranges) 1)
+    (some (fn [[[_ a] [b _]]] (when (< a b) [[a b] row]))
+          (partition 2 ranges))))
+
+(defn star2 [file rows]
+  (let [sensor-beacons (parse file)
+        sensors (into {} (map (juxt first manhattan) sensor-beacons))
+        xs (map first (apply concat sensor-beacons))
+        x0 (apply min xs)
+        all-sensors (map first sensor-beacons)]
+    (some (fn [row]
+            (let [fx [x0 row]
+                  ranges (mapv (fn [sensor] (occluded sensor (get sensors sensor) row))
+                               (sort-by (fn [sensor] (manhattan [fx sensor])) all-sensors))]
+              (when-let [g (gap row (combine (combine ranges)))]
+                g)))
+          rows)))
 
 {::clerk/visibility {:result :show}}
 (star1 "input/day15.example" 10)
 (star1 "input/day15.input" 2000000) ;; 4665948
+
+(time (some identity (pmap #(star2 "input/day15.example" %) (partition 10 (range 21)))))
+;; (time (some identity (pmap #(star2 "input/day15.input" %) (partition 10000 (range 4000000)))))
+;; "Elapsed time: 680982.024932 msecs"
+;; [[3385921 3385923] 2671045]
+(+ (* 3385922 4000000) 2671045)
+13543690671045
+
+(/ (* 0.006 (/ 4000000 20)) (* 60))
+
+
