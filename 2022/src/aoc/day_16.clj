@@ -110,14 +110,15 @@
 (defn path-flow [input path]
   (:total (sim-path input path)))
 
-(defn hillclimb-swaps [input best path]
-  (let [[cost swap]
-        (apply max-key first
-               (for [swap (concat (gen-k-swaps path 3) (gen-k-swaps (shuffle path) 2))]
-                 [(path-flow input swap) swap]))]
-    (println [best path] [cost swap])
+(defn hillclimb-swaps [input evaluate best path]
+  (let [best (if (zero? best) (evaluate input path) best)
+        states (distinct (concat (gen-k-swaps path 4) (gen-k-swaps (shuffle path) 2)))
+        [cost swap] (->> states
+                         (pmap (fn [swap] [(evaluate input swap) swap]))
+                         (apply max-key first))]
+    (println (count states) [best path] [cost swap])
     (cond (> cost best)
-          (recur input cost swap)
+          (recur input evaluate cost swap)
           :else
           [best path])))
 
@@ -137,14 +138,16 @@
 (= (star1 "input/day16.example") [["DD" "BB" "JJ" "HH" "EE" "CC"] 1651])
 #_(star1 "input/day16.input")
 
-#_(hillclimb-swaps example 1640 ["DD" "JJ" "BB" "HH" "EE" "CC"])
+#_(hillclimb-swaps example path-flow 1640 ["DD" "JJ" "BB" "HH" "EE" "CC"])
+#_(hillclimb-swaps example path-flow 0 (shuffle (useful-valves example)))
+(gen-k-swaps ["DD" "JJ" "BB" "HH" "EE" "CC"] 5)
 
 ;; [["GR" "GV" "HX" "JI" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]
 ;;  1645] -- too low
 
 (path-flow input ["GR" "GV" "JI" "HX" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"])
 
-#_(hillclimb-swaps input 0 (shuffle ["GR" "HX" "JI" "GV" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]))
+#_(hillclimb-swaps input path-flow 0 (shuffle ["GR" "HX" "JI" "GV" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]))
 ;; lucky hillclimb start gave:
 ;; [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN TS LC HX]] [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN LC HX TS]]
 
