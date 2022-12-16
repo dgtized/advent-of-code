@@ -160,6 +160,40 @@
 ;; lucky hillclimb start gave:
 ;; [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN TS LC HX]] [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN LC HX TS]]
 
+(defn sim-move [{:keys [active] :as state} input valve-key open-path]
+  (let [valve (valve-key state)
+        next-valve (first (remove (set (keys active)) open-path))
+        valve-flow (get-in input [valve :flow] 0)]
+    (if next-valve
+      (if (= next-valve valve)
+        (assoc-in state [:active valve] valve-flow)
+        (assoc state valve-key (second (path input valve next-valve))))
+      state)))
+
+(defn sim-dual-path [input mpath epath]
+  (reduce
+   (fn [{:keys [active] :as state} t]
+     (let [flow (apply + (vals active))]
+       (-> state
+           (sim-move input :mvalve mpath)
+           (sim-move input :evalve epath)
+           (assoc :time t :flow flow)
+           (update :total + flow))))
+   {:time 0 :active {} :flow 0 :total 0 :mvalve "AA" :evalve "AA"}
+   (range 1 27)))
+
+#_(sim-dual-path example ["JJ" "BB" "CC"] ["DD" "HH" "EE"])
+
+(defn eval-dual-path [input dpath]
+  (->> (range (count dpath))
+       (map (fn [i]
+              (let [[mpath epath] (split-at i dpath)]
+                (:total (sim-dual-path input mpath epath)))))
+       (apply max)))
+
+#_(hillclimb-swaps example eval-dual-path (shuffle (useful-valves example)))
+#_(hillclimb-swaps input eval-dual-path (shuffle (useful-valves input)))
+
 (defn star2 [file]
   file)
 
