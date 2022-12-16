@@ -118,14 +118,18 @@
   ([input evaluate best path memo]
    (let [states (pmap (fn [swap] [(if-let [score (get memo swap)]
                                    score (evaluate input swap)) swap])
-                      (distinct (concat (gen-k-swaps path 4) (gen-k-swaps (shuffle path) 2))))
+                      (distinct (concat (gen-k-swaps path 4)
+                                        (gen-k-swaps (shuffle path) 2)
+                                        (gen-k-swaps (shuffle path) 2)
+                                        (gen-k-swaps (shuffle path) 2))))
          [cost swap] (apply max-key first states)]
-     (println (count states) [best path] [cost swap])
      (cond (> cost best)
-           (recur input evaluate cost swap
-                  (reduce (fn [m [s p]] (assoc m p s)) memo states))
+           (do (println (count states) best "->" [cost swap])
+               (recur input evaluate cost swap
+                      (reduce (fn [m [s p]] (assoc m p s)) memo states)))
            :else
-           [best path]))))
+           (do (println [best path])
+               [best path])))))
 
 (defn star1 [file]
   (let [input (parse file)]
