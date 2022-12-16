@@ -110,17 +110,22 @@
 (defn path-flow [input path]
   (:total (sim-path input path)))
 
-(defn hillclimb-swaps [input evaluate best path]
-  (let [best (if (zero? best) (evaluate input path) best)
-        states (distinct (concat (gen-k-swaps path 4) (gen-k-swaps (shuffle path) 2)))
-        [cost swap] (->> states
-                         (pmap (fn [swap] [(evaluate input swap) swap]))
-                         (apply max-key first))]
-    (println (count states) [best path] [cost swap])
-    (cond (> cost best)
-          (recur input evaluate cost swap)
-          :else
-          [best path])))
+(defn hillclimb-swaps
+  ([input evaluate start]
+   (let [cost (evaluate input start)]
+     (println "start" start cost)
+     (hillclimb-swaps input evaluate cost start {start cost})))
+  ([input evaluate best path memo]
+   (let [states (pmap (fn [swap] [(if-let [score (get memo swap)]
+                                   score (evaluate input swap)) swap])
+                      (distinct (concat (gen-k-swaps path 4) (gen-k-swaps (shuffle path) 2))))
+         [cost swap] (apply max-key first states)]
+     (println (count states) [best path] [cost swap])
+     (cond (> cost best)
+           (recur input evaluate cost swap
+                  (reduce (fn [m [s p]] (assoc m p s)) memo states))
+           :else
+           [best path]))))
 
 (defn star1 [file]
   (let [input (parse file)]
@@ -138,8 +143,8 @@
 (= (star1 "input/day16.example") [["DD" "BB" "JJ" "HH" "EE" "CC"] 1651])
 #_(star1 "input/day16.input")
 
-#_(hillclimb-swaps example path-flow 1640 ["DD" "JJ" "BB" "HH" "EE" "CC"])
-#_(hillclimb-swaps example path-flow 0 (shuffle (useful-valves example)))
+#_(hillclimb-swaps example path-flow ["DD" "JJ" "BB" "HH" "EE" "CC"])
+#_(hillclimb-swaps example path-flow (shuffle (useful-valves example)))
 (gen-k-swaps ["DD" "JJ" "BB" "HH" "EE" "CC"] 5)
 
 ;; [["GR" "GV" "HX" "JI" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]
@@ -147,7 +152,7 @@
 
 (path-flow input ["GR" "GV" "JI" "HX" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"])
 
-#_(hillclimb-swaps input path-flow 0 (shuffle ["GR" "HX" "JI" "GV" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]))
+#_(hillclimb-swaps input path-flow (shuffle ["GR" "HX" "JI" "GV" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]))
 ;; lucky hillclimb start gave:
 ;; [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN TS LC HX]] [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN LC HX TS]]
 
