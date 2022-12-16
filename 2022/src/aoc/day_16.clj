@@ -45,20 +45,10 @@
 
 #_(paths-cost example "AA" 0)
 
-(defn find-next [input valve t]
-  (->> (dissoc input valve)
-       keys
-       (apply max-key
-              (fn [x]
-                (let [flow (get-in input [x :flow])
-                      t-rem (- 30 t)]
-                  (* (- t-rem (count (path input valve x))) flow))))))
-
 (defn sim-path [input open-path]
   (reduce
    (fn [{:keys [active valve] :as state} t]
-     (let [;; next-valve (find-next (apply dissoc input (keys active)) valve t)
-           next-valve (first (remove (set (keys active)) open-path))
+     (let [next-valve (first (remove (set (keys active)) open-path))
            valve-flow (get-in input [valve :flow] 0)
            flow (apply + (vals active))
            state' (if next-valve
@@ -77,9 +67,6 @@
 
 #_(sim-path example ["DD" "BB" "JJ" "HH" "EE" "CC"])
 
-(defn choose [s k]
-  (lazy-seq))
-
 (defn useful-valves [input]
   (filter (fn [x] (> (get-in input [x :flow]) 0)) (keys input)))
 
@@ -87,15 +74,45 @@
 (count (useful-valves input))
 #_(count (mc/permutations (useful-valves input)))
 
-(defn star1 [file]
-  (let [input (parse file)
-        valves (useful-valves input)]
-    (sort-by second >
-             (for [subset (mc/permuted-combinations valves 3)
-                   path-cost (mapv (fn [path] [path (:total (sim-path input path))]) [(concat subset (remove (set subset) valves))])]
-               path-cost))))
+(defn max-order [input visited]
+  (:visited
+   (reduce (fn [{:keys [valve visited] :as state} t]
+             (let [remaining (remove (set visited) (useful-valves input))]
+               (if (seq remaining)
+                 (let [next (apply max-key
+                                   (fn [x]
+                                     (let [flow (get-in input [x :flow])
+                                           t-rem (- 30 t)]
+                                       (* (- t-rem (count (path input valve x))) flow)))
+                                   remaining)]
+                   (-> state
+                       (assoc :valve next)
+                       (update :visited conj next)))
+                 state)))
+           {:valve (if (empty? visited) "AA" (last visited)) :visited visited}
+           (range 30))))
 
-#_(star1 "input/day16.example")
+#_(max-order example [])
+#_(max-order example ["DD"])
+
+(defn star1 [file]
+  (let [input (parse file)]
+    (loop [valves (useful-valves input) prefix []]
+      (if (empty? valves)
+        [prefix (:total (sim-path input prefix))]
+        (let [[_ subset] (apply max-key first
+                                (for [subset (mc/permuted-combinations valves (min 4 (count valves)))]
+                                  (let [trial (concat prefix subset (max-order input (concat prefix subset)))]
+                                    [(:total (sim-path input trial)) subset])))]
+          (recur (remove (set (take 1 subset)) valves) (into prefix (take 1 subset))))))))
+
+(count (mc/permuted-combinations (useful-valves input) 4))
+
+(= (star1 "input/day16.example") [["DD" "BB" "JJ" "HH" "EE" "CC"] 1651])
+#_(star1 "input/day16.input")
+
+;; [["GR" "GV" "HX" "JI" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]
+;;  1645] -- too low
 
 (defn star2 [file]
   file)
