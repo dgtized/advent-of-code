@@ -1,6 +1,7 @@
 (ns aoc.day-16
   (:require
    [aoc.utility :as aoc]
+   [clojure.math.combinatorics :as mc]
    [nextjournal.clerk :as clerk]))
 
 {::clerk/visibility {:result :hide}}
@@ -20,7 +21,6 @@
 (defn path [input src dst]
   (let [successors (fn [x] (get-in input [x :tunnels]))]
     (aoc/a*-search successors (fn [_ _] 1) (fn [_] 1) src dst)))
-
 
 #_(path example "AA" "JJ")
 
@@ -77,26 +77,22 @@
 
 #_(sim-path example ["DD" "BB" "JJ" "HH" "EE" "CC"])
 
-(defn permutations [s]
-  (lazy-seq
-   (if (seq (rest s))
-     (apply concat (for [x s]
-                     (map #(cons x %) (permutations (remove #{x} s)))))
-     [s])))
+(defn choose [s k]
+  (lazy-seq))
 
 (defn useful-valves [input]
   (filter (fn [x] (> (get-in input [x :flow]) 0)) (keys input)))
 
-#_(count (permutations (useful-valves example)))
+#_(count (mc/permutations (useful-valves example)))
 (count (useful-valves input))
-#_(count (permutations (useful-valves input)))
+#_(count (mc/permutations (useful-valves input)))
 
 (defn star1 [file]
-  (let [input (parse file)
-        best (last (sort-by (fn [path] (:total (sim-path input path))) (permutations (useful-valves input))))]
-    [path (sim-path input best)]))
+  (let [input (parse file)]
+    (for [path (sort-by (fn [path] (:total (sim-path input path))) (mc/permutations (useful-valves input)))]
+      [path (:total (sim-path input path))])))
 
-(star1 "input/day16.example")
+#_(star1 "input/day16.example")
 
 (defn star2 [file]
   file)
