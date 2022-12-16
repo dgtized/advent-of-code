@@ -88,9 +88,12 @@
 #_(count (mc/permutations (useful-valves input)))
 
 (defn star1 [file]
-  (let [input (parse file)]
-    (for [path (sort-by (fn [path] (:total (sim-path input path))) (mc/permutations (useful-valves input)))]
-      [path (:total (sim-path input path))])))
+  (let [input (parse file)
+        valves (useful-valves input)]
+    (sort-by second >
+             (for [subset (mc/permuted-combinations valves 3)
+                   path-cost (mapv (fn [path] [path (:total (sim-path input path))]) [(concat subset (remove (set subset) valves))])]
+               path-cost))))
 
 #_(star1 "input/day16.example")
 
