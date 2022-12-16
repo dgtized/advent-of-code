@@ -95,6 +95,32 @@
 #_(max-order example [])
 #_(max-order example ["DD"])
 
+(defn gen-swaps [path]
+  (distinct (for [i (range (count path))
+                  j (range (count path))
+                  :when (not= i j)]
+              (assoc (assoc path i (nth path j)) j (nth path i)))))
+
+(defn gen-k-swaps [path k]
+  (->> [(vec path)]
+       (iterate (fn [paths] (distinct (mapcat gen-swaps paths))))
+       (take k)
+       last))
+
+(defn path-flow [input path]
+  (:total (sim-path input path)))
+
+(defn hillclimb-swaps [input best path]
+  (let [[cost swap]
+        (apply max-key first
+               (for [swap (concat (gen-k-swaps path 3) (gen-k-swaps (shuffle path) 2))]
+                 [(path-flow input swap) swap]))]
+    (println [best path] [cost swap])
+    (cond (> cost best)
+          (recur input cost swap)
+          :else
+          [best path])))
+
 (defn star1 [file]
   (let [input (parse file)]
     (loop [valves (useful-valves input) prefix []]
@@ -103,16 +129,24 @@
         (let [[_ subset] (apply max-key first
                                 (for [subset (mc/permuted-combinations valves (min 4 (count valves)))]
                                   (let [trial (concat prefix subset (max-order input (concat prefix subset)))]
-                                    [(:total (sim-path input trial)) subset])))]
-          (recur (remove (set (take 1 subset)) valves) (into prefix (take 1 subset))))))))
+                                    [(path-flow input trial) subset])))]
+          (recur (remove (set (take 2 subset)) valves) (into prefix (take 2 subset))))))))
 
 (count (mc/permuted-combinations (useful-valves input) 4))
 
 (= (star1 "input/day16.example") [["DD" "BB" "JJ" "HH" "EE" "CC"] 1651])
 #_(star1 "input/day16.input")
 
+#_(hillclimb-swaps example 1640 ["DD" "JJ" "BB" "HH" "EE" "CC"])
+
 ;; [["GR" "GV" "HX" "JI" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]
 ;;  1645] -- too low
+
+(path-flow input ["GR" "GV" "JI" "HX" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"])
+
+#_(hillclimb-swaps input 0 (shuffle ["GR" "HX" "JI" "GV" "XM" "OH" "BX" "UN" "CQ" "OK" "IR" "GB" "TS" "HF" "LC"]))
+;; lucky hillclimb start gave:
+;; [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN TS LC HX]] [1673 [OK HF CQ GV GR JI XM OH GB BX IR UN LC HX TS]]
 
 (defn star2 [file]
   file)
