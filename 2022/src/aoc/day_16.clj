@@ -118,7 +118,7 @@
   ([input evaluate best path memo]
    (let [states (pmap (fn [swap] [(if-let [score (get memo swap)]
                                    score (evaluate input swap)) swap])
-                      (distinct (concat (gen-k-swaps path 4)
+                      (distinct (concat (gen-k-swaps path 3)
                                         (gen-k-swaps (shuffle path) 2)
                                         (gen-k-swaps (shuffle path) 2)
                                         (gen-k-swaps (shuffle path) 2))))
@@ -193,6 +193,24 @@
 
 #_(hillclimb-swaps example eval-dual-path (shuffle (useful-valves example)))
 #_(hillclimb-swaps input eval-dual-path (shuffle (useful-valves input)))
+
+;; best thus far
+;; start [UN HF CQ IR OK BX JI OH HX GV GB LC GR XM TS] 1429
+;; 143745 1429 -> [1922 [OK HF CQ GV UN GR JI OH HX IR GB LC BX XM TS]]
+;; 143745 1922 -> [2238 [OK HF CQ GV UN GR JI XM OH BX GB LC IR HX TS]]
+;; 143745 2238 -> [2278 [OK HF CQ GV HX GR JI XM OH BX GB IR LC TS UN]]
+
+;; smaller iterations resulted in correct answer
+;; start [TS UN LC CQ OK HX GR XM JI IR BX OH GV HF GB] 1176
+;; 5321 1176 -> [1751 [GV UN LC CQ OK HX GR IR JI XM BX OH TS HF GB]]
+;; 5321 1751 -> [2011 [GV HF LC CQ OK HX IR GR JI XM BX OH TS UN GB]]
+;; 5321 2011 -> [2186 [OK HF GV CQ LC HX IR GR JI XM BX OH TS UN GB]]
+;; 5321 2186 -> [2265 [OK HF CQ GV IR HX LC GR JI XM BX OH TS UN GB]]
+;; 5321 2265 -> [2342 [OK HF CQ GV HX IR LC GR JI XM OH BX TS UN GB]]
+;; 5321 2342 -> [2343 [OK HF CQ GV HX IR LC GR JI XM OH BX GB TS UN]]
+;; [2343 [OK HF CQ GV HX IR LC GR JI XM OH BX GB TS UN]]
+
+#_(hillclimb-swaps input eval-dual-path ["OK" "HF" "CQ" "GV" "HX" "GR" "JI" "XM" "OH" "BX" "GB" "IR" "LC" "TS" "UN"])
 
 (defn star2 [file]
   file)
