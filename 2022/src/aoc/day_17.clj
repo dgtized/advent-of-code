@@ -118,20 +118,40 @@
   (* (count rocks) (count example))
   (* (count rocks) (count input)))
 
+(defn match-cycle [deltas base len]
+  (when (every? (fn [i] (= (nth deltas (+ base i))
+                          (nth deltas (+ base len i) nil)
+                          (nth deltas (+ base (* 2 len) i) nil)))
+                (range len))
+    (let [cycles 1000000000000
+          height (reduce + (subvec deltas 0 base))
+          delta (reduce + (subvec deltas base (+ base len)))]
+      {:base base
+       :length len
+       :height height
+       :delta delta
+       :total (+ height (* delta (quot (- cycles base) len))
+                 (reduce + (subvec deltas base (+ base (rem (- cycles base) len)))))})))
+
+(defn rock-cycles [jets n]
+  (loop [grid {} rocks (cycle rocks) jets (cycle jets) i 0 deltas []]
+    (if (< i n)
+      (let [[steps grid'] (rock-fall grid (first rocks) jets)
+            h (height grid')]
+        (recur grid' (rest rocks) (drop steps jets) (inc i)
+               (conj deltas (- h (height grid)))))
+      (some (fn [base]
+              (some (fn [len] (match-cycle deltas base len))
+                    (range 20 (/ (count deltas) 4))))
+            (range 0 (/ (count deltas) 2))))))
+
+#_(time (rock-cycles example 300))
+#_(time (rock-cycles input 10000))
+;; "Elapsed time: 148359.660382 msecs"
+;; {:base 532, :length 1725, :height 800, :delta 2630, :total 1524637681145}
+
 (defn star2 [file]
-  (let [input (parse file)
-        n 1000000000000
-        multiple (* (count rocks) (count input))
-        base (height (drop-rocks input multiple))
-        base2 (height (drop-rocks input (* 2 multiple)))
-        base3 (height (drop-rocks input (* 3 multiple)))
-        base4 (height (drop-rocks input (* 4 multiple)))
-        base5 (height (drop-rocks input (* 5 multiple)))
-        delta (- base2 base)
-        delta2 (- base3 base2)
-        delta3 (- base4 base3)
-        delta4 (- base5 base4)]
-    [multiple base delta delta2 delta3 delta4 (quot n multiple) (rem n multiple)]))
+  (rock-cycles (parse file) 5000))
 
 #_(star2 "input/day17.example")
 #_(star2 "input/day17.input")
