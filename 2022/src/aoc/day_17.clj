@@ -86,8 +86,7 @@
         ;; (doseq [line (show-grid (place-rock grid rock'))]
         ;;   (println line))
         (if (and (= rock rock') (= dir [0 -1]))
-          (do (println "rest")
-              [(/ (inc steps) 2) (place-rock grid rock)])
+          [(/ (inc steps) 2) (place-rock grid rock)]
           (recur rock' (rest directions) (inc steps)))))))
 
 (defn drop-rocks [jets n]
@@ -98,19 +97,47 @@
       (let [[steps grid'] (rock-fall grid (first rocks) jets)]
         (recur grid' (rest rocks) (drop steps jets) (dec n))))))
 
-(show-grid (second (rock-fall {} (first rocks) example)))
-(show-grid (second (rock-fall {} (nth rocks 2) example)))
-(show-grid (place-rock {} (nth rocks 2)))
-(show-grid (drop-rocks example 10))
+(comment
+  (show-grid (second (rock-fall {} (first rocks) example)))
+  (show-grid (second (rock-fall {} (nth rocks 2) example)))
+  (show-grid (place-rock {} (nth rocks 2)))
+  (show-grid (drop-rocks example 10)))
 
 (defn star1 [file]
   (height (drop-rocks (parse file) 2022)))
 
+(comment
+  (map (fn [n]
+         (let [v (height (drop-rocks example n))
+               p (height (drop-rocks example (dec n)))]
+           [n v (mod n 5) (mod n (count example)) (- v p)])) (range 1 300))
+
+  (- 125 66)
+  (- 184 125)
+
+  (* (count rocks) (count example))
+  (* (count rocks) (count input)))
+
 (defn star2 [file]
-  file)
+  (let [input (parse file)
+        n 1000000000000
+        multiple (* (count rocks) (count input))
+        base (height (drop-rocks input multiple))
+        base2 (height (drop-rocks input (* 2 multiple)))
+        base3 (height (drop-rocks input (* 3 multiple)))
+        base4 (height (drop-rocks input (* 4 multiple)))
+        base5 (height (drop-rocks input (* 5 multiple)))
+        delta (- base2 base)
+        delta2 (- base3 base2)
+        delta3 (- base4 base3)
+        delta4 (- base5 base4)]
+    [multiple base delta delta2 delta3 delta4 (quot n multiple) (rem n multiple)]))
+
+#_(star2 "input/day17.example")
+#_(star2 "input/day17.input")
 
 {::clerk/visibility {:result :show}}
-(aoc/answer-table
- [star1 star2]
- (aoc/input-files "day17")
- (fn [{:keys [result]}] result))
+#_(aoc/answer-table
+   [star1 star2]
+   (aoc/input-files "day17")
+   (fn [{:keys [result]}] result))
