@@ -220,3 +220,19 @@
 ;;  [star1 star2]
 ;;  (aoc/input-files "day16")
 ;;  (fn [{:keys [result]}] result))
+
+(comment
+  (defn search
+    [input cost-fn neighborhood-fn]
+    (let [evaluate (partial cost-fn input)
+          start (useful-valves input)]
+      (loop [queue '(start)
+             best (evaluate start)
+             best-path start
+             memo {start best}]
+        (if (empty? queue)
+          [best path]
+          (let [trial (first queue)
+                cost (evaluate trial)
+                [best best-path] (if (> cost best) [cost trial] [best best-path])]
+            (recur (rest queue) best best-path (assoc memo trial cost))))))))
