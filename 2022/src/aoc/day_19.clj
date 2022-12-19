@@ -1,8 +1,8 @@
 (ns aoc.day-19
   (:require
    [aoc.utility :as aoc]
-   [nextjournal.clerk :as clerk]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [nextjournal.clerk :as clerk]))
 
 {::clerk/visibility {:result :hide}}
 
@@ -31,11 +31,15 @@
 (defn time-to-purchase [ingrediants bots blueprint-cost]
   (if (every? (fn [[k _]] (> (get bots k 0) 0)) blueprint-cost)
     (->> blueprint-cost
-         (mapv (fn [[k v]] (quot (- v (get k ingrediants 0)) (get bots k)))))
+         (mapv (fn [[k v]] (Math/ceil (/ (- v (get k ingrediants 0)) (get bots k))))))
     [25]))
 
 (defn +ingrediants [bots]
-  (fn [i] (reduce-kv (fn [i kind n] (update i kind + n)) i bots)))
+  (fn [i] (merge-with + i bots)))
+
+(def START
+  {:bots {:ore 1 :clay 0 :obsidian 0 :geode 0}
+   :ingrediants {:ore 0 :clay 0 :obsidian 0 :geode 0}})
 
 (defn simulate [blueprint path]
   (reduce
@@ -49,13 +53,11 @@
                  (update :path rest))
              state)
            (update :ingrediants (+ingrediants bots)))))
-   {:bots {:ore 1 :clay 0 :obsidian 0 :geode 0}
-    :ingrediants {:ore 0 :clay 0 :obsidian 0 :geode 0}
-    :path path}
+   (assoc START :path path)
    (range 1 25)))
 
 (comment
-  (simulate (second (second example))
+  (simulate (second (first example))
             [:clay :clay :clay :obsidian :clay :obsidian :geode :geode]))
 
 (defn score [{:keys [ingrediants path]}]
@@ -99,22 +101,38 @@
 (comment
   (mapcat expand-paths (expand-paths [:clay :obsidian :geode])))
 
+(def better-table
+  {:ore :clay
+   :clay :obsidian
+   :obsidian :geode
+   :geode :geode})
+
 (defn greedy-bot [ingrediants bots blueprint]
   (let [purchasable (keep (fn [[bot cost]]
-                            (when (can-purchase? ingrediants cost)
+                            (when (and (can-purchase? ingrediants cost)
+                                       (<= (inc (get bots bot))
+                                          (apply max (map #(get % bot 0) (vals blueprint)))))
                               bot))
-                          blueprint)
-        future (map (fn [[bot cost]] [bot (time-to-purchase ingrediants bots cost)]) blueprint)]
-    [purchasable
-     future
-     (mapv (fn [[bot _]]
-             (let [bots' (update bots bot inc)]
-               (map (fn [[bot cost]]
-                      [bot (time-to-purchase ((+ingrediants bots') ingrediants) bots' cost)]
-                      )
-                    blueprint)))
-           future)
-     (first (remove (set purchasable) (keys blueprint)))]))
+                          blueprint)]
+    (if (seq purchasable)
+      (let [best (last purchasable)
+            next-best (get better-table best)]
+        (cond (= best :geode)
+              [:geode]
+              ;; (let [time (time-to-purchase ingrediants bots
+              ;;                              (get blueprint next-best))
+              ;;       time-greedy
+              ;;       (let [bots' (update bots best inc)]
+              ;;         (time-to-purchase ((+ingrediants bots')
+              ;;                            (purchase ingrediants (get blueprint best)))
+              ;;                           bots'
+              ;;                           (get blueprint next-best)))
+              ;;       ]
+              ;;   (or (= (apply min time) (apply min time-greedy))))
+              ;; (concat purchasable [next-best])
+              :else
+              (conj purchasable nil)))
+      [nil])))
 
 (comment
   (greedy-bot {:ore 0 :clay 0 :obsidian 0 :geode 0}
@@ -133,25 +151,71 @@
               {:ore 1 :clay 2 :obsidian 0 :geode 0}
               (second (first example))))
 
-(defn simulate-greedy [blueprint]
-  (reductions
-   (fn [{:keys [bots ingrediants] :as state} _]
-     (let [bot (greedy-bot ingrediants bots blueprint)
-           blueprint-cost (get blueprint bot nil)]
-       (-> (if (and bot (can-purchase? ingrediants blueprint-cost))
-             (-> state
-                 (update-in [:bots bot] inc)
-                 (assoc :ingrediants (purchase ingrediants blueprint-cost)))
-             state)
-           (update :ingrediants (+ingrediants bots)))))
-   {:bots {:ore 1 :clay 0 :obsidian 0 :geode 0}
-    :ingrediants {:ore 0 :clay 0 :obsidian 0 :geode 0}}
-   (range 1 25)))
+(defn max-bot [blueprint bot]
+  (apply max 0 (map #(get % bot 0) (vals blueprint))))
 
-(comment (simulate-greedy (second (first example))))
+(comment
+  (let [blueprint (second (first example))]
+    (map (fn [bot] [bot (max-bot blueprint bot)])
+         (keys blueprint))))
+
+(defn collected [resource]
+  (fn [s] (get-in s [:ingrediants resource])))
+
+(defn score-state [t-remain {:keys [ingrediants bots]}]
+  (->> [:ore :clay :obsidian :geode]
+       (map-indexed (fn [i bot]
+                      (* (Math/pow 10 i)
+                         (+ (get ingrediants bot)
+                            (* t-remain (get bots bot))))))
+       (reduce +)))
+
+(defn purchasable [{:keys [ingrediants bots]} blueprint]
+  (conj (keep (fn [[bot cost]]
+                (when (and (can-purchase? ingrediants cost)
+                           (if (= bot :geode)
+                             true
+                             (< (get bots bot) (max-bot blueprint bot))))
+                  bot))
+              blueprint)
+        nil))
+
+(comment
+  (let [blueprint (second (first example))]
+    [(purchasable START blueprint)
+     (purchasable (-> START
+                      (assoc-in [:ingrediants :ore] 20)
+                      (assoc-in [:ingrediants :obsidian] 20))
+                  blueprint)]))
+
+(defn simulate-search [blueprint limit]
+  (loop [time 1
+         states #{START}
+         seen #{}]
+    (let [max-geodes (apply max 0 (map (collected :geode) states))]
+      (if (= time limit)
+        max-geodes
+        (recur (inc time)
+               (set (for [{:keys [bots ingrediants] :as state} states
+                          bot (purchasable state blueprint)
+                          :let [state' (cond-> state
+                                         bot (update-in [:bots bot] inc)
+                                         bot (assoc :ingrediants
+                                                    (purchase ingrediants (get blueprint bot)))
+                                         true (update :ingrediants (+ingrediants bots)))]
+                          :when (and (not (seen state'))
+                                     (>= ((collected :geode) state') max-geodes))]
+                      state'))
+               (into seen states))))))
+
+(comment (simulate-search (second (first example)) 25)
+         (simulate-search (second (second example)) 25))
 
 (defn star1 [file]
-  file)
+  (->> file
+       parse
+       (pmap (fn [[i blueprint]] (* i (simulate-search blueprint 25))))
+       (reduce +)))
 
 (defn star2 [file]
   file)
