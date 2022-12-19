@@ -54,9 +54,9 @@
     :path path}
    (range 1 25)))
 
-(simulate (second (second example))
-          [:clay :clay :clay :obsidian :clay :obsidian :geode :geode])
-
+(comment
+  (simulate (second (second example))
+            [:clay :clay :clay :obsidian :clay :obsidian :geode :geode]))
 
 (defn score [{:keys [ingrediants path]}]
   (- (get ingrediants :geode) (count path)))
@@ -66,26 +66,27 @@
             :obsidian [:ore :clay :obsidian :geode]
             :geode [:ore :clay :obsidian :geode]})
 
-(let [blueprint (second (second example))]
-  (apply max-key
-         (fn [[_ run]] (score run))
-         (pmap (fn [path] [path (simulate blueprint path)])
-               (for [a [:ore nil]
-                     b [:ore nil]
-                     c [:ore :clay]
-                     d [:ore :clay :obsidian nil]
-                     e [:ore :clay :obsidian nil]
-                     f [:clay :obsidian :geode nil]
-                     g [:clay :obsidian :geode nil]
-                     h [:clay :obsidian :geode nil]
-                     i [:clay :obsidian :geode nil]
-                     j [:clay :obsidian :geode nil]
-                     k [:clay :obsidian :geode nil]
-                     l [:clay :obsidian :geode nil]
-                     m [:clay :obsidian :geode]
-                     n [:obsidian :geode]
-                     :let [s [a b c d e f g h i j k l m n :geode :geode :geode :geode :geode :geode]]]
-                 (filter some? s)))))
+(comment
+  (let [blueprint (second (second example))]
+    (apply max-key
+           (fn [[_ run]] (score run))
+           (pmap (fn [path] [path (simulate blueprint path)])
+                 (for [a [:ore nil]
+                       b [:ore nil]
+                       c [:ore :clay]
+                       d [:ore :clay :obsidian nil]
+                       e [:ore :clay :obsidian nil]
+                       f [:clay :obsidian :geode nil]
+                       g [:clay :obsidian :geode nil]
+                       h [:clay :obsidian :geode nil]
+                       i [:clay :obsidian :geode nil]
+                       j [:clay :obsidian :geode nil]
+                       k [:clay :obsidian :geode nil]
+                       l [:clay :obsidian :geode nil]
+                       m [:clay :obsidian :geode]
+                       n [:obsidian :geode]
+                       :let [s [a b c d e f g h i j k l m n :geode :geode :geode :geode :geode :geode]]]
+                   (filter some? s))))))
 
 (defn expand-paths [path]
   (mapcat
@@ -95,10 +96,8 @@
           (range (inc (count path)))))
    [:ore :clay :obsidian :geode]))
 
-(mapcat expand-paths (expand-paths [:clay :obsidian :geode]))
-
-(defn search [blueprint]
-  (loop [queue []]))
+(comment
+  (mapcat expand-paths (expand-paths [:clay :obsidian :geode])))
 
 (defn greedy-bot [ingrediants bots blueprint]
   (let [purchasable (keep (fn [[bot cost]]
@@ -117,21 +116,22 @@
            future)
      (first (remove (set purchasable) (keys blueprint)))]))
 
-(greedy-bot {:ore 0 :clay 0 :obsidian 0 :geode 0}
-            {:ore 1 :clay 0 :obsidian 0 :geode 0}
-            (second (first example)))
+(comment
+  (greedy-bot {:ore 0 :clay 0 :obsidian 0 :geode 0}
+              {:ore 1 :clay 0 :obsidian 0 :geode 0}
+              (second (first example)))
 
-;; clay
+  ;; clay
 
-(greedy-bot {:ore 2 :clay 0 :obsidian 0 :geode 0}
-            {:ore 1 :clay 0 :obsidian 0 :geode 0}
-            (second (first example)))
+  (greedy-bot {:ore 2 :clay 0 :obsidian 0 :geode 0}
+              {:ore 1 :clay 0 :obsidian 0 :geode 0}
+              (second (first example)))
 
-;; clay
+  ;; clay
 
-(greedy-bot {:ore 2 :clay 3 :obsidian 0 :geode 0}
-            {:ore 1 :clay 2 :obsidian 0 :geode 0}
-            (second (first example)))
+  (greedy-bot {:ore 2 :clay 3 :obsidian 0 :geode 0}
+              {:ore 1 :clay 2 :obsidian 0 :geode 0}
+              (second (first example))))
 
 (defn simulate-greedy [blueprint]
   (reductions
@@ -148,7 +148,7 @@
     :ingrediants {:ore 0 :clay 0 :obsidian 0 :geode 0}}
    (range 1 25)))
 
-(simulate-greedy (second (first example)))
+(comment (simulate-greedy (second (first example))))
 
 (defn star1 [file]
   file)
