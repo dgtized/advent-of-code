@@ -87,6 +87,16 @@
                      :let [s [a b c d e f g h i j k l m n :geode :geode :geode :geode :geode :geode]]]
                  (filter some? s)))))
 
+(defn expand-paths [path]
+  (mapcat
+   (fn [insert]
+     (map (fn [i] (let [[a b] (split-at i path)]
+                   (concat a [insert] b)))
+          (range (inc (count path)))))
+   [:ore :clay :obsidian :geode]))
+
+(mapcat expand-paths (expand-paths [:clay :obsidian :geode]))
+
 (defn search [blueprint]
   (loop [queue []]))
 
