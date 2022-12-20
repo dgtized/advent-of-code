@@ -14,20 +14,21 @@
 (def example (parse "input/day20.example"))
 (def input (parse "input/day20.input"))
 
-(defn mix [input]
-  (let [len (dec (count input))]
-    (map second
-         (reduce
-          (fn [state [i n]]
-            (if (zero? n)
-              state
-              (let [idx (.indexOf state [i n])
-                    state' (into [] (concat (take idx state) (drop (inc idx) state)))
-                    pos (mod (+ idx n) len)
-                    [before after] (split-at (if (zero? pos) len pos) state')]
-                (concat before [[i n]] after))))
-          (map-indexed vector input)
-          (map-indexed vector input)))))
+(defn move [len]
+  (fn [state [i n]]
+    (if (zero? n)
+      state
+      (let [idx (.indexOf state [i n])
+            state' (into [] (concat (take idx state) (drop (inc idx) state)))
+            pos (mod (+ idx n) len)
+            [before after] (split-at (if (zero? pos) len pos) state')]
+        (concat before [[i n]] after)))))
+
+(defn mix [input n]
+  (let [len (dec (count input))
+        indexed (map-indexed vector input)
+        f (fn [xs] (reduce (move len) xs indexed))]
+    (map second (first (drop n (iterate f indexed))))))
 
 (def expected [[1 2 -3 3 -2 0 4]
                [2 1 -3 3 -2 0 4]
@@ -37,7 +38,7 @@
                [1 2 -3 0 3 4 -2]
                [1 2 -3 4 0 3 -2]])
 
-#_(mix example)
+#_(mix example 1)
 
 (defn coordinates [input]
   (let [len (count input)
@@ -46,11 +47,12 @@
          [1000 2000 3000])))
 
 (defn star1 [file]
-  (let [c (coordinates (mix (parse file)))]
+  (let [c (coordinates (mix (parse file) 1))]
     [(apply + c) c]))
 
 (defn star2 [file]
-  file)
+  (let [c (coordinates (mix (map (fn [n] (* n 811589153)) (parse file)) 10))]
+    [(apply + c) c]))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
