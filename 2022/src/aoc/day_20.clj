@@ -15,14 +15,14 @@
 (def input (parse "input/day20.input"))
 
 (defn move [len]
-  (fn [state [i n]]
+  (fn [state [_ n :as el]]
     (if (zero? n)
       state
-      (let [idx (.indexOf state [i n])
+      (let [idx (.indexOf state el)
             state' (into [] (concat (take idx state) (drop (inc idx) state)))
             pos (mod (+ idx n) len)
             [before after] (split-at (if (zero? pos) len pos) state')]
-        (concat before [[i n]] after)))))
+        (concat before [el] after)))))
 
 (defn mix [input n]
   (let [len (dec (count input))
