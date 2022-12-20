@@ -14,26 +14,20 @@
 (def example (parse "input/day20.example"))
 (def input (parse "input/day20.input"))
 
-(defn bias [idx len n]
-  (cond (and (neg? n) (<= (+ idx n) 0))
-        -1
-        (and (pos? n) (> (+ idx n) len))
-        1
-        :else 0))
-
 (defn mix [input]
-  (let [len (count input)]
-    (reduce
-     (fn [state n]
-       (let [state' (remove #{n} state)]
-         (if (zero? n)
-           state
-           (let [idx (.indexOf state n)
-                 pos (mod (+ idx n (bias idx len n)) len)
-                 [before after] (split-at pos state')]
-             (concat before [n] after)))))
-     input
-     input)))
+  (let [len (dec (count input))]
+    (map second
+         (reduce
+          (fn [state [i n]]
+            (if (zero? n)
+              state
+              (let [idx (.indexOf state [i n])
+                    state' (into [] (concat (take idx state) (drop (inc idx) state)))
+                    pos (mod (+ idx n) len)
+                    [before after] (split-at (if (zero? pos) len pos) state')]
+                (concat before [[i n]] after))))
+          (map-indexed vector input)
+          (map-indexed vector input)))))
 
 (def expected [[1 2 -3 3 -2 0 4]
                [2 1 -3 3 -2 0 4]
