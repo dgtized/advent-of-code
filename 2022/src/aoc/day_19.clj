@@ -26,7 +26,7 @@
           blueprint-cost))
 
 (defn purchase [ingrediants blueprint-cost]
-  (reduce-kv (fn [i k v] (update i k - v)) ingrediants blueprint-cost))
+  (merge-with - ingrediants blueprint-cost))
 
 (defn time-to-purchase [ingrediants bots blueprint-cost]
   (if (every? (fn [[k _]] (> (get bots k 0) 0)) blueprint-cost)
@@ -189,7 +189,7 @@
                   blueprint)]))
 
 (defn simulate-search [blueprint limit]
-  (loop [time 1
+  (loop [time 0
          states #{START}
          seen #{}]
     (let [max-geodes (apply max 0 (map (collected :geode) states))]
@@ -199,22 +199,25 @@
                (set (for [{:keys [bots ingrediants] :as state} states
                           bot (purchasable state blueprint)
                           :let [state' (cond-> state
-                                         bot (update-in [:bots bot] inc)
                                          bot (assoc :ingrediants
                                                     (purchase ingrediants (get blueprint bot)))
+                                         bot (update-in [:bots bot] inc)
                                          true (update :ingrediants (+ingrediants bots)))]
                           :when (and (not (seen state'))
                                      (>= ((collected :geode) state') max-geodes))]
                       state'))
                (into seen states))))))
 
-(comment (simulate-search (second (first example)) 25)
-         (simulate-search (second (second example)) 25))
+(comment (simulate-search (second (first example)) 24)
+         ;; 9
+         (simulate-search (second (second example)) 24)
+         ;; 12
+         )
 
 (defn star1 [file]
   (->> file
        parse
-       (pmap (fn [[i blueprint]] (* i (simulate-search blueprint 25))))
+       (pmap (fn [[i blueprint]] (* i (simulate-search blueprint 24))))
        (reduce +)))
 
 (defn star2 [file]
