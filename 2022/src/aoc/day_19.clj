@@ -171,14 +171,16 @@
        (reduce +)))
 
 (defn purchasable [{:keys [ingrediants bots]} blueprint]
-  (conj (keep (fn [[bot cost]]
-                (when (and (can-purchase? ingrediants cost)
-                           (if (= bot :geode)
-                             true
-                             (< (get bots bot) (max-bot blueprint bot))))
-                  bot))
-              blueprint)
-        nil))
+  (let [options (keep (fn [[bot cost]]
+                        (when (and (can-purchase? ingrediants cost)
+                                   (if (= bot :geode)
+                                     true
+                                     (< (get bots bot) (max-bot blueprint bot))))
+                          bot))
+                      blueprint)]
+    (if (some #{:geode} options)
+      [:geode]
+      (conj options nil))))
 
 (comment
   (let [blueprint (second (first example))]
@@ -220,11 +222,23 @@
        (pmap (fn [[i blueprint]] (* i (simulate-search blueprint 24))))
        (reduce +)))
 
+(comment (simulate-search (second (first example)) 32)
+         ;; 56
+         (simulate-search (second (second example)) 32)
+         ;; 62
+         )
+
 (defn star2 [file]
-  file)
+  (->> file
+       parse
+       (take 3)
+       (pmap (fn [[_ blueprint]] (simulate-search blueprint 32)))
+       (reduce *)))
+
+#_(star2 "input/day19.input") ;; 29348
 
 {::clerk/visibility {:result :show}}
-(aoc/answer-table
- [star1 star2]
- (aoc/input-files "day19")
- (fn [{:keys [result]}] result))
+#_(aoc/answer-table
+   [star1 star2]
+   (aoc/input-files "day19")
+   (fn [{:keys [result]}] result))
