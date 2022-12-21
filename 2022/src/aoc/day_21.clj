@@ -38,18 +38,6 @@
   (let [graph (parse file)]
     (evaluate graph "root")))
 
-(defn binary-search [graph rhs expected]
-  (let [zero (evaluate (assoc graph "humn" 0) rhs)]
-    (loop [guess 1 last-guess 0 last-value zero]
-      (println guess)
-      (let [value (evaluate (assoc graph "humn" guess) rhs)]
-        (cond (= value expected)
-              guess
-              (> value expected)
-              (recur (* guess 2) guess value)
-              (< value expected)
-              (recur (/ (+ guess last-guess) 2) guess value))))))
-
 (defn simplify [graph]
   (let [path (reverse (aoc/a*-search (fn [x] (:deps (get graph x)))
                                      (constantly 1)
