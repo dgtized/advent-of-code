@@ -80,22 +80,26 @@
                 [0 0]
                 (butlast pathing))))
 
-(reverse-eval (simplify example))
-(reverse-eval (simplify input))
+#_(reverse-eval (simplify example))
+#_(reverse-eval (simplify input))
 
-(defn star2 [file human]
+(defn star2 [file]
   (let [graph (parse file)
         root (get graph "root")
         [rhs lhs] (:deps root)
         expected (evaluate graph lhs)
-        value (evaluate (assoc graph "humn" human) rhs)]
-    [value expected (= value expected)]))
+        human (first (last (reverse-eval (simplify graph))))
+        result (evaluate (assoc graph "humn" human) rhs)]
+    {:human human
+     :result result
+     :expected expected
+     :checksum (= result expected)}))
 
-(star2 "input/day21.example" 301)
-(star2 "input/day21.input" 3059361893920)
+#_(star2 "input/day21.example")
+#_(star2 "input/day21.input")
 
 {::clerk/visibility {:result :show}}
-#_(aoc/answer-table
-   [star1 star2]
-   (aoc/input-files "day21")
-   (fn [{:keys [result]}] result))
+(aoc/answer-table
+ [star1 star2]
+ (aoc/input-files "day21")
+ (fn [{:keys [result]}] result))
