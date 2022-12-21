@@ -27,24 +27,22 @@
 (def example (parse "input/day21.example"))
 (def input (parse "input/day21.input"))
 
-(defn evaluate [show graph monkey]
+(defn evaluate [graph monkey]
   (let [value (get graph monkey)]
-    (when show
-      (println monkey ": " value))
     (if (number? value)
       value
       (let [{:keys [op deps]} value]
-        (apply op (map (partial evaluate show graph) deps))))))
+        (apply op (map (partial evaluate graph) deps))))))
 
 (defn star1 [file]
   (let [graph (parse file)]
-    (evaluate false graph "root")))
+    (evaluate graph "root")))
 
 (defn binary-search [graph rhs expected]
-  (let [zero (evaluate false (assoc graph "humn" 0) rhs)]
+  (let [zero (evaluate (assoc graph "humn" 0) rhs)]
     (loop [guess 1 last-guess 0 last-value zero]
       (println guess)
-      (let [value (evaluate false (assoc graph "humn" guess) rhs)]
+      (let [value (evaluate (assoc graph "humn" guess) rhs)]
         (cond (= value expected)
               guess
               (> value expected)
@@ -62,7 +60,7 @@
               (let [{:keys [op deps]} (get graph' parent)
                     [lhs rhs] deps
                     other (if (= child lhs) rhs lhs)
-                    value (evaluate false graph' other)]
+                    value (evaluate graph' other)]
                 (conj pathing
                       [parent {:op op
                                :deps (replace {other value} [lhs rhs])}])))
@@ -101,8 +99,8 @@
   (let [graph (parse file)
         root (get graph "root")
         [rhs lhs] (:deps root)
-        expected (evaluate false graph lhs)
-        value (evaluate false (assoc graph "humn" human) rhs)]
+        expected (evaluate graph lhs)
+        value (evaluate (assoc graph "humn" human) rhs)]
     [value expected (= value expected)]))
 
 (star2 "input/day21.example" 301)
