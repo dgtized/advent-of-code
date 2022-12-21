@@ -20,7 +20,7 @@
 
 (defn path [input src dst]
   (let [successors (fn [x] (get-in input [x :tunnels]))]
-    (aoc/a*-search successors (fn [_ _] 1) (fn [_] 1) src dst)))
+    (aoc/a*-search successors src dst)))
 
 #_(path example "AA" "JJ")
 

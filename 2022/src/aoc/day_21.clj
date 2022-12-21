@@ -40,8 +40,6 @@
 
 (defn simplify [graph]
   (let [path (reverse (aoc/a*-search (fn [x] (:deps (get graph x)))
-                                     (constantly 1)
-                                     (constantly 1)
                                      "root" "humn"))
         graph' (assoc-in graph ["root" :op] =)]
     (reduce (fn [pathing [child parent]]

@@ -37,10 +37,7 @@
     neighbor))
 
 (defn path [grid src dst]
-  (aoc/a*-search (partial neighbors grid)
-                 (constantly 1)
-                 (constantly 1)
-                 src dst))
+  (aoc/a*-search (partial neighbors grid) src dst))
 
 (defn prepare [file]
   (let [grid (->grid (parse file))
