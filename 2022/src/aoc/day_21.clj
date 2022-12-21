@@ -29,7 +29,6 @@
 
 (defn evaluate [graph monkey]
   (let [value (get graph monkey)]
-    (println "e: " monkey value)
     (if (number? value)
       value
       (let [{:keys [op deps]} value]
