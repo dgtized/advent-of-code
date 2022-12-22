@@ -1,6 +1,7 @@
 (ns aoc.day-22
   (:require
    [aoc.utility :as aoc]
+   [clojure.set :as set]
    [clojure.string :as str]
    [nextjournal.clerk :as clerk]))
 
@@ -49,9 +50,67 @@
         [j [(ffirst row) (first (last row))]]))]))
 
 (extents example)
+(extents input)
 
+(def cw-dir {[1 0] [0 1] [0 1] [-1 0] [-1 0] [0 -1] [0 -1] [1 0]})
+(def ccw-dir (set/map-invert cw-dir))
+(defn v+ [a b] (mapv + a b))
+
+(defn translate [grid extent pos facing]
+  (let [pos' (v+ pos facing)
+        [x y] pos
+        [y0 y1] (some (fn [[[x0 x1] y-range]] (when (<= x0 x x1) y-range)) (first extent))
+        [x0 x1] (some (fn [[[y0 y1] x-range]] (when (<= y0 y y1) x-range)) (second extent))]
+    (if (grid pos')
+      pos'
+      (do
+        (println "t:" pos pos' [x0 x1] [y0 y1])
+        (case facing
+          [1 0] [x0 y]
+          [0 1] [x y0]
+          [-1 0] [x1 y]
+          [0 -1] [x y1])))))
+
+(comment
+  (translate (:grid example) (extents example) [10 6] [1 0])
+  (translate (:grid example) (extents example) [11 6] [1 0])
+
+  (translate (:grid example) (extents example) [5 4] [0 1])
+  (translate (:grid example) (extents example) [5 4] [0 -1]))
+
+(defn move [grid extent pos facing steps]
+  (loop [pos pos n steps]
+    (let [pos' (translate grid extent pos facing)
+          loc (get grid pos')]
+      (cond (zero? n)
+            pos
+            (= loc \#)
+            pos
+            (= loc \.)
+            (recur pos' (dec n))
+            :else
+            [pos pos' loc]))))
+
+(defn follow [{:keys [grid path start] :as input}]
+  (let [extent (extents input)]
+    (reductions
+     (fn [[pos facing] op]
+       (println pos facing op)
+       (cond (= "R" op)
+             [pos (cw-dir facing)]
+             (= "L" op)
+             [pos (ccw-dir facing)]
+             (number? op)
+             [(move grid extent pos facing op) facing]))
+     [start [1 0]]
+     path)))
 (defn star1 [file]
-  file)
+  (let [input (parse file)
+        [[x y] facing] (last (follow input))
+        row (inc y)
+        col (inc x)
+        face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
+    [row col facing face (+ (* 1000 row) (* 4 col) face)]))
 
 (defn star2 [file]
   file)
