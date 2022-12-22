@@ -19,9 +19,9 @@
 (defn parse [file]
   (let [[grid dirs] (aoc/split-empty-lines (slurp file))]
     {:grid (parse-grid grid)
-     :path (map vector
-                (re-seq #"[RL]" dirs)
-                (map parse-long (re-seq #"\d+" dirs)))}))
+     :path (->> dirs
+                (re-seq #"([RL]|\d+)")
+                (mapv (fn [[_ m]] (or (parse-long m) m))))}))
 
 (def example (parse "input/day22.example"))
 (def input (parse "input/day22.input"))
