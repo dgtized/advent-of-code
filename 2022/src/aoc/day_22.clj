@@ -228,12 +228,12 @@
 (defn translate-rot [grid pos facing]
   (let [pos' (v+ pos facing)
         faces (if (< (count grid) 100) example-faces input-faces)
-        rotations (if (< (count grid) 100) example-rots input-rots)
-        [x y] pos]
+        rotations (if (< (count grid) 100) example-rots input-rots)]
     (if (grid pos')
       [pos' facing]
       (let [side (get dirs facing)
             face (face grid pos)
+            [x y] pos
             [[x0 x1] [y0 y1]] (nth faces face)
             [face' side'] (get rotations [(inc face) side])
             [[x0' x1'] [y0' y1']] (nth faces (dec face'))]
@@ -253,8 +253,7 @@
            [:R :L] [x0' (+ y0' (- y y0))]
            [:R :R] [x1' (+ y0' (- y y0))]
            [:R :U] [(+ x0' (- y1 y)) y0']
-           [:R :D] [(+ x0' (- y y0)) y1']
-           )
+           [:R :D] [(+ x0' (- y y0)) y1'])
          (map (fn [x] (- x)) (get (set/map-invert dirs) side'))]))))
 
 (defn star2 [file]
