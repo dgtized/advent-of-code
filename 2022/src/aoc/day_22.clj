@@ -63,13 +63,11 @@
         [x0 x1] (some (fn [[[y0 y1] x-range]] (when (<= y0 y y1) x-range)) (second extent))]
     [(if (grid pos')
        pos'
-       (do
-         (println "t:" pos pos' [x0 x1] [y0 y1])
-         (case facing
-           [1 0] [x0 y]
-           [0 1] [x y0]
-           [-1 0] [x1 y]
-           [0 -1] [x y1])))
+       (case facing
+         [1 0] [x0 y]
+         [0 1] [x y0]
+         [-1 0] [x1 y]
+         [0 -1] [x y1]))
      facing]))
 
 (comment
@@ -95,7 +93,7 @@
 (defn follow [{:keys [grid path start]} translate]
   (reductions
    (fn [[pos facing] op]
-     (println pos facing op)
+     ;; (println pos facing op)
      (cond (= "R" op)
            [pos (cw-dir facing)]
            (= "L" op)
