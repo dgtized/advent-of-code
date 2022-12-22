@@ -104,6 +104,7 @@
              [(move grid extent pos facing op) facing]))
      [start [1 0]]
      path)))
+
 (defn star1 [file]
   (let [input (parse file)
         [[x y] facing] (last (follow input))
@@ -111,6 +112,15 @@
         col (inc x)
         face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
     [row col facing face (+ (* 1000 row) (* 4 col) face)]))
+
+;;   1133
+;;   1133
+;;   22
+;;   22
+;; 4466
+;; 4466
+;; 55
+;; 55
 
 (defn star2 [file]
   file)
