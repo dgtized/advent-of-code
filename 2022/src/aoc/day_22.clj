@@ -26,6 +26,26 @@
 (def example (parse "input/day22.example"))
 (def input (parse "input/day22.input"))
 
+(defn simplify-extent [extent]
+  (->> extent
+       (partition-by second)
+       (map (fn [group] [[(ffirst group) (first (last group))] (second (first group))]))
+       (into {})))
+
+(defn extents [{:keys [grid]}]
+  (let [max-y (apply max (map second (keys grid)))
+        max-x (apply max (map first (keys grid)))]
+    [(simplify-extent
+      (for [i (range 0 (inc max-x))
+            :let [column (keep (fn [j] (when (grid [i j]) [i j])) (range 0 (inc max-y)))]]
+        [i [(second (first column)) (second (last column))]]))
+     (simplify-extent
+      (for [j (range 0 (inc max-y))
+            :let [row (keep (fn [i] (when (grid [i j]) [i j])) (range 0 (inc max-x)))]]
+        [j [(ffirst row) (first (last row))]]))]))
+
+(extents example)
+
 (defn star1 [file]
   file)
 
