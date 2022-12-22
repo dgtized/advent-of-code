@@ -56,74 +56,216 @@
 (def ccw-dir (set/map-invert cw-dir))
 (defn v+ [a b] (mapv + a b))
 
-(defn translate [grid extent pos facing]
+(defn translate [extent grid pos facing]
   (let [pos' (v+ pos facing)
         [x y] pos
         [y0 y1] (some (fn [[[x0 x1] y-range]] (when (<= x0 x x1) y-range)) (first extent))
         [x0 x1] (some (fn [[[y0 y1] x-range]] (when (<= y0 y y1) x-range)) (second extent))]
-    (if (grid pos')
-      pos'
-      (do
-        (println "t:" pos pos' [x0 x1] [y0 y1])
-        (case facing
-          [1 0] [x0 y]
-          [0 1] [x y0]
-          [-1 0] [x1 y]
-          [0 -1] [x y1])))))
+    [(if (grid pos')
+       pos'
+       (do
+         (println "t:" pos pos' [x0 x1] [y0 y1])
+         (case facing
+           [1 0] [x0 y]
+           [0 1] [x y0]
+           [-1 0] [x1 y]
+           [0 -1] [x y1])))
+     facing]))
 
 (comment
-  (translate (:grid example) (extents example) [10 6] [1 0])
-  (translate (:grid example) (extents example) [11 6] [1 0])
+  (translate (extents example) (:grid example) [10 6] [1 0])
+  (translate (extents example) (:grid example) [11 6] [1 0])
 
-  (translate (:grid example) (extents example) [5 4] [0 1])
-  (translate (:grid example) (extents example) [5 4] [0 -1]))
+  (translate (extents example) (:grid example) [5 4] [0 1])
+  (translate (extents example) (:grid example) [5 4] [0 -1]))
 
-(defn move [grid extent pos facing steps]
-  (loop [pos pos n steps]
-    (let [pos' (translate grid extent pos facing)
+(defn move [translate grid pos facing steps]
+  (loop [pos pos facing facing n steps]
+    (let [[pos' facing'] (translate grid pos facing)
           loc (get grid pos')]
       (cond (zero? n)
             pos
             (= loc \#)
             pos
             (= loc \.)
-            (recur pos' (dec n))
+            (recur pos' facing' (dec n))
             :else
             [pos pos' loc]))))
 
-(defn follow [{:keys [grid path start] :as input}]
-  (let [extent (extents input)]
-    (reductions
-     (fn [[pos facing] op]
-       (println pos facing op)
-       (cond (= "R" op)
-             [pos (cw-dir facing)]
-             (= "L" op)
-             [pos (ccw-dir facing)]
-             (number? op)
-             [(move grid extent pos facing op) facing]))
-     [start [1 0]]
-     path)))
+(defn follow [{:keys [grid path start]} translate]
+  (reductions
+   (fn [[pos facing] op]
+     (println pos facing op)
+     (cond (= "R" op)
+           [pos (cw-dir facing)]
+           (= "L" op)
+           [pos (ccw-dir facing)]
+           (number? op)
+           [(move translate grid pos facing op) facing]
+           :else
+           (reduced [pos facing op])))
+   [start [1 0]]
+   path))
 
 (defn star1 [file]
   (let [input (parse file)
-        [[x y] facing] (last (follow input))
+        extent (extents input)
+        translate (partial translate extent)
+        [[x y] facing] (last (follow input translate))
         row (inc y)
         col (inc x)
         face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
     [row col facing face (+ (* 1000 row) (* 4 col) face)]))
 
-;;   1133
-;;   1133
-;;   22
-;;   22
-;; 4466
-;; 4466
-;; 55
-;; 55
+;;     11
+;;     11
+;; 223344
+;; 223344
+;;     5566
+;;     5566
+
+;; 1U -> 2U facing D
+;; 1L -> 3U facing D
+;; 1R -> 6R facing L
+;; 2U -> 1U facing D
+;; 2L -> 6D facing U
+;; 2D -> 5D facing U
+;; 3U -> 1L facing R
+;; 3D -> 5L facing R
+;; 4R -> 6U facing D
+;; 5L -> 3D facing U
+;; 5D -> 2D facing U
+;; 6U -> 4R facing L
+;; 6R -> 1R facing L
+;; 6D -> 2L facing R
+
+;;   1122
+;;   1122
+;;   33
+;;   33
+;; 4455
+;; 4455
+;; 66
+;; 66
+
+;; 1U -> 6L facing R
+;; 1L -> 4L facing R
+;; 2U -> 6D facing U
+;; 2R -> 5R facing L
+;; 2D -> 3R facing L
+;; 3L -> 4U facing D
+;; 3R -> 2D facing U
+;; 4U -> 3L facing R
+;; 4L -> 1L facing R
+;; 5R -> 2D facing U
+;; 5D -> 6R facing L
+;; 6L -> 1U facing D
+;; 6D -> 2U facing D
+;; 6R -> 5D facing U
+
+(def example-faces
+  [[[8 11] [0 3]]
+   [[0 3] [4 7]]
+   [[4 7] [4 7]]
+   [[8 11] [4 7]]
+   [[8 11] [8 11]]
+   [[12 15] [8 11]]])
+
+(def input-faces
+  [[[50 99] [0 50]]
+   [[100 149] [0 49]]
+   [[50 99] [50 99]]
+   [[0 49] [100 149]]
+   [[50 99] [100 149]]
+   [[0 49] [150 199]]])
+
+
+(defn face [grid [x y]]
+  (->> (if (< (count grid) 100) example-faces input-faces)
+       (map-indexed vector)
+       (some (fn [[face [[x0 x1] [y0 y1]]]]
+               (when (and (<= x0 x x1) (<= y0 y y1)) face)))))
+
+(def example-rots
+  {[1 :U] [2 :U]
+   [1 :L] [3 :U]
+   [1 :R] [6 :R]
+   [2 :U] [1 :U]
+   [2 :L] [6 :D]
+   [2 :D] [5 :D]
+   [3 :U] [1 :L]
+   [3 :D] [5 :L]
+   [4 :R] [6 :U]
+   [5 :L] [3 :D]
+   [5 :D] [2 :D]
+   [6 :U] [4 :R]
+   [6 :R] [1 :R]
+   [6 :D] [2 :L]})
+
+(def input-rots
+  {[1 :U] [6 :L]
+   [1 :L] [4 :L]
+   [2 :U] [6 :D]
+   [2 :R] [5 :R]
+   [2 :D] [3 :R]
+   [3 :L] [4 :U]
+   [3 :R] [2 :D]
+   [4 :U] [3 :L]
+   [4 :L] [1 :L]
+   [5 :R] [2 :D]
+   [5 :D] [6 :R]
+   [6 :L] [1 :U]
+   [6 :D] [2 :U]
+   [6 :R] [5 :D]})
+
+(comment (face (:grid example) [8 0])
+         (face (:grid input) [50 0]))
+
+(def dirs
+  {[1 0] :R
+   [0 1] :D
+   [-1 0] :L
+   [0 -1] :U})
+
+(defn translate-rot [grid pos facing]
+  (let [pos' (v+ pos facing)
+        faces (if (< (count grid) 100) example-faces input-faces)
+        rotations (if (< (count grid) 100) example-rots input-rots)
+        [x y] pos]
+    (if (grid pos')
+      [pos' facing]
+      (let [side (get dirs facing)
+            face (face grid pos)
+            [[x0 x1] [y0 y1]] (nth faces face)
+            [face' side'] (get rotations [(inc face) side])
+            [[x0' x1'] [y0' y1']] (nth faces (dec face'))]
+        [(case [side side']
+           [:L :L] [x0' (+ y0' (- y y0))]
+           [:L :R] [x1' (+ y0' (- y y0))]
+           [:L :U] [(+ (- y1 y) x0') y0']
+           [:L :D] [(+ x0' (- y y0)) y1']
+           [:D :L] [x0' (+ y0' (- x1 x))]
+           [:D :R] [x1' (+ y0' (- x x0))]
+           [:D :U] [(+ x0' (- x x0)) y0']
+           [:D :D] [(+ x0' (- x x0)) y1']
+           [:U :L] [x0' (+ y0' (- x x0))]
+           [:U :R] [x1' (+ y0' (- x1 x))]
+           [:U :U] [(+ x0' (- x x0)) y0']
+           [:U :D] [(+ x0' (- x x0)) y1']
+           [:R :L] [x0' (+ y0' (- y y0))]
+           [:R :R] [x1' (+ y0' (- y y0))]
+           [:R :U] [(+ x0' (- y1 y)) y0']
+           [:R :D] [(+ x0' (- y y0)) y1']
+           )
+         (map (fn [x] (- x)) (get (set/map-invert dirs) side'))]))))
 
 (defn star2 [file]
-  file)
+  (let [input (parse file)
+        [[x y] facing] (last (follow input translate-rot))
+        row (inc y)
+        col (inc x)
+        face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
+    [row col facing face (+ (* 1000 row) (* 4 col) face)]))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
