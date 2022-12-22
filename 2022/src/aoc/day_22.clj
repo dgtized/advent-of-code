@@ -17,8 +17,12 @@
           [[i j] c])))
 
 (defn parse [file]
-  (let [[grid dirs] (aoc/split-empty-lines (slurp file))]
-    {:grid (parse-grid grid)
+  (let [[grid-str dirs] (aoc/split-empty-lines (slurp file))
+        grid (parse-grid grid-str)]
+    {:grid grid
+     :start (let [row (first (str/split-lines grid-str))]
+              (some (fn [c] (when (= (get grid c nil) \.) c))
+                    (map (fn [i] [i 0]) (range (count row)))))
      :path (->> dirs
                 (re-seq #"([RL]|\d+)")
                 (mapv (fn [[_ m]] (or (parse-long m) m))))}))
