@@ -44,7 +44,7 @@
         :when (= neighbor \#)]
     dir))
 
-(defn step [[grid checks]]
+(defn step [[grid checks _]]
   (let [active-elves
         (keep (fn [[loc v]]
                 (when (= v \#)
@@ -52,18 +52,24 @@
                     [loc (set neighbors)])))
               grid)
         proposals
-        (->> (for [[elf neighbors] active-elves]
-               [elf (when-let [dir (some (fn [check] (check neighbors)) checks)]
-                      (v+ elf dir))])
+        (->> (for [[elf neighbors] active-elves
+                   :let [proposed (when-let [dir (some (fn [check] (check neighbors)) checks)]
+                                    (v+ elf dir))]
+                   :when proposed]
+               [elf proposed])
              (group-by second)
              (remove (fn [[_ moves]] (> (count moves) 1)))
-             (mapcat second))]
-    [(reduce (fn [g [elf move]]
-               (assoc (dissoc g elf) move \#))
-             grid
-             proposals)
+             (mapcat second))
+        grid' (reduce (fn [g [elf move]]
+                        (assoc (dissoc g elf) move \#))
+                      grid
+                      proposals)]
+    ;; (if (< (count grid') (count grid))
+    ;;   (println proposals))
+    [grid'
      (let [[a b c d] checks]
-       [b c d a])]))
+       [b c d a])
+     (empty? proposals)]))
 
 (defn bounds [grid]
   [(apply min (map first (keys grid)))
@@ -86,7 +92,7 @@
                1))))
 
 (defn run-steps [grid n]
-  (let [grid' (->> [grid checks]
+  (let [grid' (->> [grid checks false]
                    (iterate step)
                    (drop n)
                    first
@@ -96,8 +102,8 @@
     ;;   (println line))
     (count-empty grid')))
 
-;; (show-grid (last (take 4 (iterate step [simple checks]))))
-;; (step example checks)
+;; (show-grid (last (take 4 (iterate step [simple checks false]))))
+;; (step [example checks false])
 
 ;; (run-steps example 10)
 
@@ -105,10 +111,23 @@
   (run-steps (parse file) 10))
 
 (defn star2 [file]
-  file)
+  (let [grid (parse file)]
+    (reduce
+     (fn [[g c] i]
+       ;; (println (count g'))
+       (let [[g' c' done] (step [g c false])]
+         (if done
+           (reduced (inc i))
+           [g' c'])))
+     [grid checks]
+     (range))))
+
+;; (time (star2 "input/day23.simple"))
+;; (time (star2 "input/day23.example"))
+;; (time (star2 "input/day23.input"))
 
 {::clerk/visibility {:result :show}}
-(aoc/answer-table
- [star1 star2]
- (aoc/input-files "day23")
- (fn [{:keys [result]}] result))
+#_(aoc/answer-table
+   [star1 star2]
+   (aoc/input-files "day23")
+   (fn [{:keys [result]}] result))
