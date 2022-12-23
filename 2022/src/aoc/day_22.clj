@@ -115,6 +115,11 @@
         face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
     [row col facing face (+ (* 1000 row) (* 4 col) face)]))
 
+(star1 "input/day22.example")
+;; [6 8 [1 0] 0 6032]
+(star1 "input/day22.input")
+;; [131 13 [1 0] 0 131052]
+
 ;;     11
 ;;     11
 ;; 223344
@@ -298,9 +303,11 @@
   (= (translate-rot (:grid example) [8 2] [-1 0]) [[6 4] [0 1]]))
 
 (star2 "input/day22.example")
+;; [5 7 [0 -1] 3 5031]
 (show-grid "input/day22.example")
 
 (star2 "input/day22.input")
+;; [4 144 [-1 0] 2 4578]
 (show-grid "input/day22.input")
 
 {::clerk/visibility {:result :show}}
