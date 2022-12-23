@@ -82,9 +82,9 @@
     (let [[pos' facing'] (translate grid pos facing)
           loc (get grid pos')]
       (cond (zero? n)
-            pos
+            [pos facing]
             (= loc \#)
-            pos
+            [pos facing]
             (= loc \.)
             (recur pos' facing' (dec n))
             :else
@@ -99,7 +99,7 @@
            (= "L" op)
            [pos (ccw-dir facing)]
            (number? op)
-           [(move translate grid pos facing op) facing]
+           (move translate grid pos facing op)
            :else
            (reduced [pos facing op])))
    [start [1 0]]
@@ -237,21 +237,22 @@
             [[x0 x1] [y0 y1]] (nth faces face)
             [face' side'] (get rotations [(inc face) side])
             [[x0' x1'] [y0' y1']] (nth faces (dec face'))]
+        ;; (println [x y] (inc face) (nth faces face) face' (nth faces (dec face')))
         [(case [side side']
-           [:L :L] [x0' (+ y0' (- y y0))]
+           [:L :L] [x0' (+ y0' (- y1 y))]
            [:L :R] [x1' (+ y0' (- y y0))]
-           [:L :U] [(+ (- y1 y) x0') y0']
-           [:L :D] [(+ x0' (- y y0)) y1']
+           [:L :U] [(+ x0' (- y y0)) y0']
+           [:L :D] [(+ x0' (- y1 1)) y1']
            [:D :L] [x0' (+ y0' (- x1 x))]
            [:D :R] [x1' (+ y0' (- x x0))]
            [:D :U] [(+ x0' (- x x0)) y0']
-           [:D :D] [(+ x0' (- x x0)) y1']
+           [:D :D] [(+ x0' (- x1 x)) y1']
            [:U :L] [x0' (+ y0' (- x x0))]
            [:U :R] [x1' (+ y0' (- x1 x))]
-           [:U :U] [(+ x0' (- x x0)) y0']
+           [:U :U] [(+ x0' (- x1 x)) y0']
            [:U :D] [(+ x0' (- x x0)) y1']
            [:R :L] [x0' (+ y0' (- y y0))]
-           [:R :R] [x1' (+ y0' (- y y0))]
+           [:R :R] [x1' (+ y0' (- y1 y))]
            [:R :U] [(+ x0' (- y1 y)) y0']
            [:R :D] [(+ x0' (- y y0)) y1'])
          (map (fn [x] (- x)) (get (set/map-invert dirs) side'))]))))
@@ -261,11 +262,50 @@
         [[x y] facing] (last (follow input translate-rot))
         row (inc y)
         col (inc x)
-        face (some (fn [[i dir]] (when (= facing dir) i))(map-indexed vector (keys cw-dir)))]
+        face (->> cw-dir
+                  keys
+                  (map-indexed vector)
+                  (some (fn [[i dir]] (when (= facing dir) i))))]
     [row col facing face (+ (* 1000 row) (* 4 col) face)]))
 
+(defn show-grid [file]
+  (let [input (parse file)
+        path (follow input translate-rot)
+        dir {[1 0] \> [0 1] \v [-1 0] \< [0 -1] \^}
+        grid (reduce (fn [g [p d]] (assoc g p (get dir d)))
+                     (:grid input) path)
+        max-x (apply max (map first (keys grid)))
+        max-y (apply max (map second (keys grid)))]
+    (into [(str "    "
+                (apply str
+                       (for [i (range 0 (inc max-x))]
+                         (mod i 10))))]
+          (for [j (range 0 (inc max-y))]
+            (format "%3d %s" j (apply str (map (fn [i] (get grid [i j] \space)) (range 0 (inc max-x)))))))))
+
+#_(map vector (follow example translate-rot) (:path example))
+#_(map vector (follow input translate-rot) (:path input))
+
+(comment
+  (= (translate-rot (:grid example) [11 5] [1 0]) [[14 8] [0 1]])
+  (= (translate-rot (:grid example) [11 6] [1 0]) [[13 8] [0 1]])
+  (= (translate-rot (:grid example) [11 1] [1 0]) [[15 10] [-1 0]])
+  (= (translate-rot (:grid example) [11 2] [1 0]) [[15 9] [-1 0]])
+  (= (translate-rot (:grid example) [8 0] [0 -1]) [[3 4] [0 1]])
+  (= (translate-rot (:grid example) [10 11] [0 1]) [[1 7] [0 -1]])
+  (= (translate-rot (:grid example) [6 4] [0 -1]) [[8 2] [1 0]])
+  (= (translate-rot (:grid example) [7 4] [0 -1]) [[8 3] [1 0]])
+  (= (translate-rot (:grid example) [8 3] [-1 0]) [[7 4] [0 1]])
+  (= (translate-rot (:grid example) [8 2] [-1 0]) [[6 4] [0 1]]))
+
+(star2 "input/day22.example")
+(show-grid "input/day22.example")
+
+(star2 "input/day22.input")
+(show-grid "input/day22.input")
+
 {::clerk/visibility {:result :show}}
-(aoc/answer-table
- [star1 star2]
- (aoc/input-files "day22")
- (fn [{:keys [result]}] result))
+#_(aoc/answer-table
+   [star1 star2]
+   (aoc/input-files "day22")
+   (fn [{:keys [result]}] result))
