@@ -91,9 +91,9 @@
                    (drop n)
                    first
                    first)]
-    (println "")
-    (doseq [line (show-grid [grid' nil])]
-      (println line))
+    ;; (println "")
+    ;; (doseq [line (show-grid [grid' nil])]
+    ;;   (println line))
     (count-empty grid')))
 
 ;; (show-grid (last (take 4 (iterate step [simple checks]))))
