@@ -170,7 +170,7 @@
    [[12 15] [8 11]]])
 
 (def input-faces
-  [[[50 99] [0 50]]
+  [[[50 99] [0 49]]
    [[100 149] [0 49]]
    [[50 99] [50 99]]
    [[0 49] [100 149]]
@@ -237,7 +237,6 @@
             [[x0 x1] [y0 y1]] (nth faces face)
             [face' side'] (get rotations [(inc face) side])
             [[x0' x1'] [y0' y1']] (nth faces (dec face'))]
-        ;; (println [x y] (inc face) (nth faces face) face' (nth faces (dec face')))
         [(case [side side']
            [:L :L] [x0' (+ y0' (- y1 y))]
            [:L :R] [x1' (+ y0' (- y y0))]
@@ -255,7 +254,7 @@
            [:R :R] [x1' (+ y0' (- y1 y))]
            [:R :U] [(+ x0' (- y1 y)) y0']
            [:R :D] [(+ x0' (- y y0)) y1'])
-         (map (fn [x] (- x)) (get (set/map-invert dirs) side'))]))))
+         (mapv (fn [x] (- x)) (get (set/map-invert dirs) side'))]))))
 
 (defn star2 [file]
   (let [input (parse file)
@@ -305,7 +304,7 @@
 (show-grid "input/day22.input")
 
 {::clerk/visibility {:result :show}}
-#_(aoc/answer-table
-   [star1 star2]
-   (aoc/input-files "day22")
-   (fn [{:keys [result]}] result))
+(aoc/answer-table
+ [star1 star2]
+ (aoc/input-files "day22")
+ (fn [{:keys [result]}] result))
