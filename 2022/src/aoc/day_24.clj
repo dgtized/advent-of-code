@@ -99,21 +99,24 @@
 
 ((successors example) [[1 0] 0])
 
-(defn search [{:keys [start end] :as state}]
-  (aoc/a*-search {:cost (fn [[loc t] [node t']] 1)
-                  :heuristic (fn [[loc t]] (manhattan loc end))
+(defn search [state start end]
+  (aoc/a*-search {:heuristic (fn [[loc t]] (manhattan loc end))
                   :goal? (fn [[loc t] _] (or (= loc end) (> t 1000)))}
                  (successors state)
-                 [start 0]
+                 start
                  end))
 
 ;; (search input) => 221
 
 (defn star1 [file]
-  file)
+  (let [{:keys [start end] :as state} (parse file)]
+    (second (last (search state [start 0] end)))))
 
 (defn star2 [file]
-  file)
+  (let [{:keys [start end] :as state} (parse file)
+        t (second (last (search state [start 0] end)))
+        t' (second (last (search state [end t] start)))]
+    (second (last (search state [start t'] end)))))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
