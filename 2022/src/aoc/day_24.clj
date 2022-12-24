@@ -14,7 +14,6 @@
 
 (def dmap {\> [1 0] \v [0 1] \< [-1 0] \^ [0 -1]})
 (def inverted-dmap (set/map-invert dmap))
-(def cardinal (vals dmap))
 
 (defn make-blizzard [max-x max-y loc dir]
   (let [[x y] loc]
@@ -77,7 +76,7 @@
   (for [y (range (inc max-y))]
     (apply str (map #(get g [% y]) (range (inc max-x))))))
 
-(show-grid ((simulate example) 4) 6 6)
+#_(show-grid ((simulate example) 4) 6 6)
 
 (defn successors [state]
   (let [sim (simulate state)
@@ -97,26 +96,25 @@
   (+ (Math/abs (- x1 x0))
      (Math/abs (- y1 y0))))
 
-((successors example) [[1 0] 0])
+#_((successors example) [[1 0] 0])
 
 (defn search [state start end]
-  (aoc/a*-search {:heuristic (fn [[loc t]] (manhattan loc end))
-                  :goal? (fn [[loc t] _] (or (= loc end) (> t 1000)))}
-                 (successors state)
-                 start
-                 end))
-
-;; (search input) => 221
+  (->> (aoc/a*-search {:heuristic (fn [[loc _]] (manhattan loc end))
+                       :goal? (fn [[loc _] _] (= loc end))}
+                      (successors state)
+                      start end)
+       last
+       second))
 
 (defn star1 [file]
   (let [{:keys [start end] :as state} (parse file)]
-    (second (last (search state [start 0] end)))))
+    (search state [start 0] end)))
 
 (defn star2 [file]
   (let [{:keys [start end] :as state} (parse file)
-        t (second (last (search state [start 0] end)))
-        t' (second (last (search state [end t] start)))]
-    (second (last (search state [start t'] end)))))
+        t-out (search state [start 0] end)
+        t-snacks (search state [end t-out] start)]
+    (search state [start t-snacks] end)))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
