@@ -37,13 +37,14 @@
         grid (into {}
                    (for [[j line] (enumerate lines)
                          [i c] (enumerate line)]
-                     [[i j] c]))]
+                     [[i j] c]))
+        max-y (apply max (map second (keys grid)))]
     {:grid grid
      :max-x (apply max (map first (keys grid)))
-     :max-y (apply max (map second (keys grid)))
+     :max-y max-y
      :start (some (fn [[i c]] (when (= c \.) [i 0]))
                   (enumerate (first lines)))
-     :end (some (fn [[i c]] (when (= c \.) [i 0]))
+     :end (some (fn [[i c]] (when (= c \.) [i max-y]))
                 (enumerate (last lines)))}))
 
 (comment
@@ -77,6 +78,36 @@
     (apply str (map #(get g [% y]) (range (inc max-x))))))
 
 (show-grid ((simulate example) 4) 6 6)
+
+(defn successors [state]
+  (let [sim (simulate state)
+        cache (atom {})]
+    (fn [[loc t]]
+      (let [t' (inc t)
+            grid (or (get @cache t' nil)
+                     (let [g (sim t')]
+                       (swap! cache assoc t' g)
+                       g))]
+        (keep (fn [dir] (let [loc' (v+ loc dir)]
+                         (when (= \. (get grid loc' nil))
+                           [loc' t'])))
+              [[0 0] [1 0] [0 1] [-1 0] [0 -1]])))))
+
+(defn manhattan [[x0 y0] [x1 y1]]
+  (+ (Math/abs (- x1 x0))
+     (Math/abs (- y1 y0))))
+
+((successors example) [[1 0] 0])
+
+(defn search [{:keys [start end] :as state}]
+  (aoc/a*-search {:cost (fn [[loc t] [node t']] 1)
+                  :heuristic (fn [[loc t]] (manhattan loc end))
+                  :goal? (fn [[loc t] _] (or (= loc end) (> t 1000)))}
+                 (successors state)
+                 [start 0]
+                 end))
+
+;; (search input) => 221
 
 (defn star1 [file]
   file)

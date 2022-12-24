@@ -107,14 +107,19 @@
 (defn a*-search
   ([successors source target]
    (a*-search {} successors source target))
-  ([{:keys [cost heuristic] :or {cost (constantly 1) heuristic (constantly 1)}} successors source target]
+  ([{:keys [cost heuristic goal?] :or
+     {cost (constantly 1)
+      heuristic (constantly 1)
+      goal? =}}
+    successors source target]
    (loop [visited {}
           queue (dpm/priority-map-keyfn first source [0 0 nil])]
      (when (seq queue)
        (let [[current [_ value prev]] (peek queue)
              visited' (assoc visited current prev)]
-         (if (= current target)
-           (reverse (backtrack target visited'))
+         ;; (println current)
+         (if (goal? current target)
+           (reverse (backtrack current visited'))
            (recur visited'
                   (reduce (fn [queue node]
                             (let [score (+ value (cost current node))]
