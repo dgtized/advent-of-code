@@ -99,10 +99,10 @@
 #_((successors example) [[1 0] 0])
 
 (defn search [state start end]
-  (->> (aoc/a*-search {:heuristic (fn [[loc _]] (manhattan loc end))
-                       :goal? (fn [[loc _] _] (= loc end))}
+  (->> (aoc/a*-search {:heuristic (fn [[loc _]] (manhattan loc end))}
                       (successors state)
-                      start end)
+                      start
+                      (fn [[loc _]] (= loc end)))
        last
        second))
 

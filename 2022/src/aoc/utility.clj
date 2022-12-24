@@ -105,27 +105,29 @@
                     (backtrack parent visited)))))
 
 (defn a*-search
-  ([successors source target]
-   (a*-search {} successors source target))
-  ([{:keys [cost heuristic goal?] :or
+  ([successors source goal]
+   (a*-search {} successors source goal))
+  ([{:keys [cost heuristic] :or
      {cost (constantly 1)
-      heuristic (constantly 1)
-      goal? =}}
-    successors source target]
-   (loop [visited {}
-          queue (dpm/priority-map-keyfn first source [0 0 nil])]
-     (when (seq queue)
-       (let [[current [_ value prev]] (peek queue)
-             visited' (assoc visited current prev)]
-         (if (goal? current target)
-           (reverse (backtrack current visited'))
-           (recur visited'
-                  (reduce (fn [queue node]
-                            (let [score (+ value (cost current node))]
-                              (if (and (not (contains? visited' node))
-                                       (or (not (contains? queue node))
-                                           (< score (get-in queue [node 1]))))
-                                (assoc queue node [(+ score (heuristic node)) score current])
-                                queue)))
-                          (pop queue)
-                          (successors current)))))))))
+      heuristic (constantly 1)}}
+    successors source goal]
+   (let [goal? (if (fn? goal)
+                 goal
+                 #(= % goal))]
+     (loop [visited {}
+            queue (dpm/priority-map-keyfn first source [0 0 nil])]
+       (when (seq queue)
+         (let [[current [_ value prev]] (peek queue)
+               visited' (assoc visited current prev)]
+           (if (goal? current)
+             (reverse (backtrack current visited'))
+             (recur visited'
+                    (reduce (fn [queue node]
+                              (let [score (+ value (cost current node))]
+                                (if (and (not (contains? visited' node))
+                                         (or (not (contains? queue node))
+                                             (< score (get-in queue [node 1]))))
+                                  (assoc queue node [(+ score (heuristic node)) score current])
+                                  queue)))
+                            (pop queue)
+                            (successors current))))))))))
