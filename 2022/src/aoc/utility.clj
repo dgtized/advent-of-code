@@ -117,7 +117,6 @@
      (when (seq queue)
        (let [[current [_ value prev]] (peek queue)
              visited' (assoc visited current prev)]
-         ;; (println current)
          (if (goal? current target)
            (reverse (backtrack current visited'))
            (recur visited'
