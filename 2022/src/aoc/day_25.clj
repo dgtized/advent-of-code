@@ -30,10 +30,9 @@
   (if (empty? digits)
     '(1)
       (let [d (inc (first digits))]
-        (cond (< d 3)
-              (cons d (rest digits))
-              (= d 3)
-              (cons -2 (carry (rest digits)))))))
+        (if (< d 3)
+          (cons d (rest digits))
+          (cons -2 (carry (rest digits)))))))
 
 (defn encode-slow [n]
   (apply str (map number->digit (reverse (first (drop n (iterate carry '(0))))))))
