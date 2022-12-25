@@ -61,13 +61,13 @@
 
 (defn convert [xs]
   (->> xs
-       (reduce (fn [acc d]
+       (reduce (fn [digits d]
                  (cond (= d 3)
-                       (cons -2 (carry acc))
+                       (cons -2 (carry digits))
                        (= d 4)
-                       (cons -1 (carry acc))
+                       (cons -1 (carry digits))
                        :else
-                       (cons d acc)))
+                       (cons d digits)))
                '())
        reverse))
 
