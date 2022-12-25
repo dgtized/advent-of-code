@@ -76,19 +76,27 @@
    (convert (reverse (encode-b5 2022))))
 
 (defn encode-a [n]
-  (apply str (map number->digit (convert (reverse (encode-b5 n))))))
+  (->> n
+       encode-b5
+       reverse
+       convert
+       (map number->digit)
+       (apply str)))
 
 (defn encode-b [n]
   (loop [n n digits '()]
-    (let [[q r] [(quot n 5) (mod n 5)]]
+    (let [q (quot n 5)
+          r (mod n 5)]
       (cond (= n 0)
             (apply str (map number->digit digits))
-            (<= r 2)
-            (recur q (cons r digits))
+            (= r 3)
+            (recur q (cons -2 (carry digits)))
+            (= r 4)
+            (recur q (cons -1 (carry digits)))
             :else
-            (recur q (cons (if (= r 3) -2 -1) (carry digits)))))))
+            (recur q (cons r digits))))))
 
-#_(map (juxt identity encode-a encode-b) (concat (range 30) [2022 12345]))
+#_(map (juxt identity encode-slow encode-a encode-b) (concat (range 30) [2022 12345]))
 #_(map (juxt identity decode (comp encode-a decode) (comp encode-b decode)) example)
 
 (defn star1 [file]
