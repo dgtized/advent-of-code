@@ -38,56 +38,60 @@
 (defn encode-slow [n]
   (apply str (map number->digit (reverse (first (drop n (iterate carry '(0))))))))
 
-(map (fn [n snafu] [n snafu (encode-slow n)]) (range) (take 30 (iterate carry '(0))))
 (encode-slow 2022)
 (encode-slow 4890)
-
-;; 0 (carry '(0))
-;; 1 (carry '(1))
-;; 2 (carry '(2))
-;; 3 (carry '(-2 1))
-;; 4 (carry '(-1 1))
-;; 5 (carry '(0 1))
-;; 6 (carry '(1 1))
-;; 7 (carry '(2 1))
-;; 8 (carry '(-2 2))
-;; 9 (carry '(-1 2))
-;; 10 (carry '(0 2))
-;; 11 (carry '(1 2))
-;; 12 (carry '(2 2))
-;; 13 (carry '(-2 -2 1))
-;; 14 (carry '(-1 -2 1))
-;; 15 (carry '(0 -2 1))
-;; 16 (carry '(1 -2 1))
-;; 17 (carry '(2 -2 1))
+(map (fn [n snafu] [n snafu (encode-slow n)]) (range) (take 30 (iterate carry '(0))))
 
 (defn encode-b5 [n]
-  (loop [n n digits []]
+  (loop [n n digits '()]
     (let [q (quot n 5)
           r (mod n 5)]
       (if (= n 0)
         digits
-        (recur q (conj digits r))))))
+        (recur q (cons r digits))))))
 
-;; (encode-b5 8)
-;; (encode-b5 9)
-;; (encode-b5 10)
+;; (encode-b5 8)  ;; 1 3 => 2 -2  => 2=
+;; (encode-b5 9)  ;; 1 4 => 2 -1  => 2-
+;; (encode-b5 10) ;; 2 0 => 2 0   => 20
+;; (encode-b5 2022) ;; 3 1 0 4 2 => 1 -2 1 1 -1 2 => 1=11-2
+;; (encode-b5 12345) ;; 3 4 3 3 4 0 => 1 -1 0 -1 -1 -1 0 =? 1-0---0
+
+;; 3 => 1 -2
+;; 4 => 1 -1 -1
+;; 3 => 1 -1 0 -1
+;; 3 => 1 -1 0 -1 -1
+;; 4 => 1 -1 0 -1 -1 -1
+;; 0 => 1 -1 0 -1 -1 -1 0
+
+(defn carry2 [xs]
+  (reduce (fn [acc d]
+            (cond (= d 3)
+                  (conj (vec (reverse (carry (reverse acc)))) -2)
+                  (= d 4)
+                  (conj (vec (reverse (carry (reverse acc)))) -1)
+                  :else
+                  (conj acc d)))
+          []
+          xs))
+
+(carry2 [3 1 0 4 2])
+
+#_(defn encode [n]
+    (println)
+    (loop [n n digits '()]
+      (let [[q r] [(quot n 5) (mod n 5)]]
+        (println [n q r] digits (carry digits))
+        (cond (= n 0)
+              [digits (apply str (map number->digit digits))]
+              (<= r 2)
+              (recur q (cons r digits))
+              :else
+              (let [step (cons (if (= r 3) -2 -1) (carry digits))]
+                (println [n q r digits (carry digits) :-> step])
+                (recur q step))))))
 
 (defn encode [n]
-  ;; (println)
-  (loop [n n digits '()]
-    (let [[q r] [(quot n 5) (mod n 5)]]
-      ;; (println [n q r] digits (carry digits))
-      (cond (= n 0)
-            [digits (apply str (map number->digit digits))]
-            (<= r 2)
-            (recur q (cons r digits))
-            (= r 3)
-            (recur q (cons -2 (carry digits)))
-            (= r 4)
-            (recur q (cons -1 (carry digits)))
-            :else
-            [n q r]))))
+  (apply str (map number->digit (carry2 (encode-b5 n)))))
 
 ;; (map (juxt identity encode) (range 30))
 
