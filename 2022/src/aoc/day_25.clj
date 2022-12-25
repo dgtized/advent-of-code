@@ -78,28 +78,16 @@
   (apply str (map number->digit (convert (reverse (encode-b5 n))))))
 
 #_(defn encode [n]
-    (println)
     (loop [n n digits '()]
       (let [[q r] [(quot n 5) (mod n 5)]]
-        (println [n q r] digits (carry digits))
         (cond (= n 0)
-              [digits (apply str (map number->digit digits))]
+              (apply str (map number->digit digits))
               (<= r 2)
               (recur q (cons r digits))
               :else
-              (let [step (cons (if (= r 3) -2 -1) (carry digits))]
-                (println [n q r digits (carry digits) :-> step])
-                (recur q step))))))
+              (recur q (cons (if (= r 3) -2 -1) (carry digits)))))))
 
-;; (map (juxt identity encode) (range 30))
-
-;; (encode 8)
-;; (encode 9)
-;; (encode 10)
-;; (encode 11)
-;; (encode 2022)
-;; (encode 12345)
-
+;; (map (juxt identity encode) (concat (range 30) [2022 12345]))
 ;; (map (juxt identity (comp encode decode)) example)
 
 (defn star1 [file]
