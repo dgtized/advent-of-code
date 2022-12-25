@@ -20,10 +20,10 @@
 
 (defn decode [s]
   (->> s
-       (mapv digit->number)
-       (map-indexed (fn [p digit]
-                      (let [place (long (Math/pow 5 (- (dec (count s)) p)))]
-                        (* place digit))))
+       (map-indexed
+        (fn [i digit]
+          (let [place (long (Math/pow 5 (- (dec (count s)) i)))]
+            (* place (digit->number digit)))))
        (reduce +)))
 
 (defn carry [digits]
@@ -37,9 +37,9 @@
 (defn encode-slow [n]
   (apply str (map number->digit (reverse (first (drop n (iterate carry '(0))))))))
 
-(encode-slow 2022)
-(encode-slow 4890)
-(map (fn [n snafu] [n snafu (encode-slow n)]) (range) (take 30 (iterate carry '(0))))
+#_(encode-slow 2022)
+#_(encode-slow 4890)
+#_(map (fn [n snafu] [n snafu (encode-slow n)]) (range) (take 30 (iterate carry '(0))))
 
 (defn encode-b5 [n]
   (when-not (zero? n)
