@@ -74,31 +74,28 @@
    (convert [3 1 0 4 2])
    (convert (reverse (encode-b5 2022))))
 
-(defn encode [n]
+(defn encode-a [n]
   (apply str (map number->digit (convert (reverse (encode-b5 n))))))
 
-#_(defn encode [n]
-    (loop [n n digits '()]
-      (let [[q r] [(quot n 5) (mod n 5)]]
-        (cond (= n 0)
-              (apply str (map number->digit digits))
-              (<= r 2)
-              (recur q (cons r digits))
-              :else
-              (recur q (cons (if (= r 3) -2 -1) (carry digits)))))))
+(defn encode-b [n]
+  (loop [n n digits '()]
+    (let [[q r] [(quot n 5) (mod n 5)]]
+      (cond (= n 0)
+            (apply str (map number->digit digits))
+            (<= r 2)
+            (recur q (cons r digits))
+            :else
+            (recur q (cons (if (= r 3) -2 -1) (carry digits)))))))
 
-;; (map (juxt identity encode) (concat (range 30) [2022 12345]))
-;; (map (juxt identity (comp encode decode)) example)
+#_(map (juxt identity encode-a encode-b) (concat (range 30) [2022 12345]))
+#_(map (juxt identity decode (comp encode-a decode) (comp encode-b decode)) example)
 
 (defn star1 [file]
   (let [n (apply + (map decode (parse file)))]
-    [n (encode n)]))
-
-(defn star2 [file]
-  file)
+    [n (encode-a n)]))
 
 {::clerk/visibility {:result :show}}
 (aoc/answer-table
- [star1 star2]
+ [star1]
  (aoc/input-files "day25")
  (fn [{:keys [result]}] result))
