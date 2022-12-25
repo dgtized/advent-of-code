@@ -60,15 +60,16 @@
 ;; 0 => 1 -1 0 -1 -1 -1 0
 
 (defn convert [xs]
-  (reduce (fn [acc d]
-            (cond (= d 3)
-                  (conj (vec (reverse (carry (reverse acc)))) -2)
-                  (= d 4)
-                  (conj (vec (reverse (carry (reverse acc)))) -1)
-                  :else
-                  (conj acc d)))
-          []
-          xs))
+  (->> xs
+       (reduce (fn [acc d]
+                 (cond (= d 3)
+                       (cons -2 (carry acc))
+                       (= d 4)
+                       (cons -1 (carry acc))
+                       :else
+                       (cons d acc)))
+               '())
+       reverse))
 
 (= [1 -2 1 1 -1 2]
    (convert [3 1 0 4 2])
