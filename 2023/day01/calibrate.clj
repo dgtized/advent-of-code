@@ -1,6 +1,5 @@
 (ns calibrate
   (:require
-   [clojure.edn :as edn]
    [clojure.string :as str]))
 
 (defn part1 []
@@ -8,8 +7,8 @@
        str/split-lines
        (map (fn [line] (keep (set (map (fn [d] (char (+ (byte \0) d))) (range 10))) (vec line))))
        (map (juxt first last))
-       (map (fn [x] (edn/read-string (apply str x))))
-       (reduce +)))
+       (map (fn [x] (parse-long (apply str x))))
+       (apply +)))
 
 (assert (= 55447 (part1)))
 
@@ -44,9 +43,8 @@ zoneight234
                     (take-while (fn [s] (> (count s) 0))
                                 (iterate (fn [s] (subs s 1)) line)))))
        (map (juxt first last))
-       (map (fn [x] (edn/read-string (apply str x))))
-       (reduce +)
-       ))
+       (map (fn [x] (parse-long (apply str x))))
+       (apply +)))
 
 (assert (= 281 (part2 example)))
 (assert (= 54706 (part2 (slurp "day01/input"))))
