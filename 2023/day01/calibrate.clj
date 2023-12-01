@@ -11,9 +11,7 @@
        (map (fn [x] (edn/read-string (apply str x))))
        (reduce +)))
 
-(comment
-  (part1) ;; => 55447
-  )
+(assert (= 55447 (part1)))
 
 (def example "two1nine
 eightwothree
@@ -50,7 +48,6 @@ zoneight234
        (reduce +)
        ))
 
-(comment
-  (part2 example) ;; => 281
-  (part2 (slurp "day01/input")) ;; => 54706
-  )
+(assert (= 281 (part2 example)))
+(assert (= 54706 (part2 (slurp "day01/input"))))
+
