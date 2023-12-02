@@ -24,3 +24,14 @@
 (comment (parse example))
 (assert (= 2283 (apply + (map :id (filter possible? (parse input))))))
 ;; (parse input)
+
+(defn min-game [{:keys [sets]}]
+  (reduce (fn [seen [kind value]]
+            (if (> value (get seen kind 0))
+              (assoc seen kind value)
+              seen))
+          {}
+          sets))
+
+(assert (= 2286 (apply + (map (fn [set] (apply * (vals set))) (map min-game (parse example))))))
+(assert (= 78669 (apply + (map (fn [set] (apply * (vals set))) (map min-game (parse input))))))
