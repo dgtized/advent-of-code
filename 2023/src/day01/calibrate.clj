@@ -1,16 +1,18 @@
-(ns calibrate
+(ns day01.calibrate
   (:require
    [clojure.string :as str]))
 
-(defn part1 []
-  (->> (slurp "day01/input")
+(def input (slurp "src/day01/input"))
+
+(defn part1 [input]
+  (->> input
        str/split-lines
        (map (fn [line] (keep (set (map (fn [d] (char (+ (byte \0) d))) (range 10))) (vec line))))
        (map (juxt first last))
        (map (fn [x] (parse-long (apply str x))))
        (apply +)))
 
-(assert (= 55447 (part1)))
+(assert (= 55447 (part1 input)))
 
 (def example "two1nine
 eightwothree
@@ -47,5 +49,5 @@ zoneight234
        (apply +)))
 
 (assert (= 281 (part2 example)))
-(assert (= 54706 (part2 (slurp "day01/input"))))
+(assert (= 54706 (part2 input)))
 
