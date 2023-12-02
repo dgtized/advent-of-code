@@ -33,5 +33,8 @@
           {}
           sets))
 
-(assert (= 2286 (apply + (map (fn [set] (apply * (vals set))) (map min-game (parse example))))))
-(assert (= 78669 (apply + (map (fn [set] (apply * (vals set))) (map min-game (parse input))))))
+(defn power-set [sets]
+  (apply + (map (fn [set] (apply * (vals set))) sets)))
+
+(assert (= 2286 (power-set (map min-game (parse example)))))
+(assert (= 78669 (power-set (map min-game (parse input)))))
