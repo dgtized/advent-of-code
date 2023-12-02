@@ -1,4 +1,4 @@
-(ns day02.day02
+(ns day02.cube-conundrum
   (:require [clojure.string :as str]))
 
 (def input (slurp "src/day02/input"))
