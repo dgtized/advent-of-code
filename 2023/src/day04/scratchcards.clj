@@ -1,4 +1,4 @@
-(ns day04.day04
+(ns day04.scratchcards
   (:require [clojure.string :as str]
             [clojure.set :as set]))
 
