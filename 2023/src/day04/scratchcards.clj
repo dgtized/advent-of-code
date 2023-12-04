@@ -26,16 +26,17 @@
   (apply + (map score (parse input))))
 
 (defn part2 [input]
-  (let [cardset (parse input)]
+  (let [scratchcards (parse input)
+        cards (zipmap (map :id scratchcards) (repeat 1))]
     (reduce
      (fn [cards {:keys [id] :as card}]
-       (let [m (matches card)
-             copies (get cards id 1)]
+       (let [copies (get cards id)]
          (reduce (fn [cards dup]
-                   (update cards (+ id dup) (fnil + 0) copies))
+                   (update cards (+ id dup) + copies))
                  cards
-                 (range 1 (inc m)))))
-     (zipmap (map :id cardset) (repeat 1)) cardset)))
+                 (range 1 (inc (matches card))))))
+     cards
+     scratchcards)))
 
 (assert (= 13 (part1 example)))
 (assert (= 21821 (part1 input)))
