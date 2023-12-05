@@ -36,6 +36,13 @@
        (apply min-key last)
        last))
 
+(defn thread-view1 [in]
+  (->> (let [{:keys [seeds remaps]} (parse in)]
+         (for [seed seeds]
+           (thread seed remaps)))))
+
+(thread-view1 input)
+
 (assert (= 35 (part1 example)))
 (assert (= 379811651 (part1 input)))
 
@@ -49,3 +56,49 @@
 
 (assert (= 46 (bruteforce-part2 example)))
 ;; (assert (= (part2 input)))
+
+;; [3,6] => [0,6]
+;; [0,6] => [3,6]
+(defn input-remap [x [out in len]]
+  (when (<= out x (+ out len))
+    (+ in (- x out))))
+
+;; (input-remap 1 [1 3 6])
+
+(defn range-intersect [[a a-len] [b b-len]]
+  (when-not (or (and (< a b) (< (+ a a-len) b))
+                (and (< b a) (< (+ b b-len) a)))
+    (let [low (max a b)]
+      [low (- (min (+ a a-len) (+ b b-len)) low)])))
+
+(assert (nil? (range-intersect [2 3] [7 8])))
+(assert (nil? (range-intersect [7 8] [2 3])))
+(assert (= [3 3] (range-intersect [3 3] [3 3])))
+(assert (= [4 2] (range-intersect [3 3] [4 4])))
+(assert (= [4 4] (range-intersect [4 4] [3 7])))
+
+(defn reverse-remap [[x x-len] [out in len]]
+  (when-let [[o l] (range-intersect [x x-len] [out len])]
+    (let [s (input-remap o [out in len])]
+      [s (- (input-remap (+ o l) [out in len]) s)])))
+
+(assert (= [10 5] (reverse-remap [0 10] [5 10 10])))
+(assert (= [10 10] (reverse-remap [5 10] [5 10 10])))
+(assert (= [15 5] (reverse-remap [10 10] [5 10 10])))
+
+(defn reverse-part2 [in]
+  (let [{:keys [remaps seeds]} (parse in)
+        reversed (mapv second (reverse remaps))]
+    {:seed-ranges (partition 2 2 seeds)
+     :remaps reversed
+     :traces
+     (reduce (fn [ranges maps]
+               (mapcat
+                (fn [r] (keep (fn [m] (reverse-remap r m)) maps))
+                ranges))
+             (mapv (fn [[o _ l]] [o l]) (first reversed))
+             reversed)}))
+
+(reverse-part2 example)
+(reverse-part2 input)
+
