@@ -97,6 +97,8 @@
       [0 5 15]
       [0 10 10]])
 
+(sort-by (juxt first second) [[5 2] [4 3] [2 8] [5 3] [4 4] [4 2]])
+
 (defn reverse-part2 [in]
   (let [{:keys [remaps seeds]} (parse in)
         reversed (mapv second (reverse remaps))]
@@ -113,3 +115,29 @@
 (reverse-part2 example)
 ;; (reverse-part2 input)
 
+(defn remap-range [[x x-len] [out in len]]
+  (when-let [[o l] (range-intersect [x x-len] [in len])]
+    (let [s (remap o [out in len])]
+      [s (- (remap (+ o l) [out in len]) s)])))
+
+(defn ordered [coll]
+  (dedupe (sort-by (juxt first second) coll)))
+
+(defn forward-part2 [in]
+  (let [{:keys [seeds remaps]} (parse in)]
+    {:seed-ranges (partition 2 2 seeds)
+     :remaps remaps
+     :traces
+     (->> (reduce (fn [ranges maps]
+                    (ordered
+                     (mapcat
+                      (fn [r] (if-let [s (seq (keep (fn [m] (remap-range r m)) maps))]
+                               s
+                               [r]))
+                      ranges)))
+                  (partition 2 2 seeds)
+                  (map second remaps))
+          ordered)}))
+
+(forward-part2 example)
+;; (:traces (forward-part2 input))
