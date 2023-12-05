@@ -66,15 +66,17 @@
 ;; (input-remap 1 [1 3 6])
 
 (defn range-intersect [[a a-len] [b b-len]]
-  (when-not (or (and (< a b) (< (+ a a-len) b))
-                (and (< b a) (< (+ b b-len) a)))
-    (let [low (max a b)]
-      [low (- (min (+ a a-len) (+ b b-len)) low)])))
+  (when-not (or (and (< a b) (<= (+ a a-len) b))
+                (and (< b a) (<= (+ b b-len) a)))
+    (if (< a b)
+      [b (- (min (+ a a-len) (+ b b-len)) b)]
+      [a (- (min (+ a a-len) (+ b b-len)) a)])))
 
 (assert (nil? (range-intersect [2 3] [7 8])))
 (assert (nil? (range-intersect [7 8] [2 3])))
 (assert (= [3 3] (range-intersect [3 3] [3 3])))
 (assert (= [4 2] (range-intersect [3 3] [4 4])))
+(assert (= [4 1] (range-intersect [2 3] [4 2])))
 (assert (= [4 4] (range-intersect [4 4] [3 7])))
 
 (defn reverse-remap [[x x-len] [out in len]]
@@ -82,9 +84,17 @@
     (let [s (input-remap o [out in len])]
       [s (- (input-remap (+ o l) [out in len]) s)])))
 
+(assert (= [10 10] (reverse-remap [0 10] [0 10 10])))
 (assert (= [10 5] (reverse-remap [0 10] [5 10 10])))
 (assert (= [10 10] (reverse-remap [5 10] [5 10 10])))
 (assert (= [15 5] (reverse-remap [10 10] [5 10 10])))
+
+(map (fn [r] (reverse-remap [10 10] r))
+     [[10 0 10]
+      [5 0 10]
+      [0 5 10]
+      [0 5 15]
+      [0 10 10]])
 
 (defn reverse-part2 [in]
   (let [{:keys [remaps seeds]} (parse in)
@@ -92,13 +102,13 @@
     {:seed-ranges (partition 2 2 seeds)
      :remaps reversed
      :traces
-     (reduce (fn [ranges maps]
-               (mapcat
-                (fn [r] (keep (fn [m] (reverse-remap r m)) maps))
-                ranges))
-             (mapv (fn [[o _ l]] [o l]) (first reversed))
-             reversed)}))
+     (reductions (fn [ranges maps]
+                   (mapcat
+                    (fn [r] (keep (fn [m] (reverse-remap r m)) maps))
+                    ranges))
+                 (mapv (fn [[o _ l]] [o l]) (first reversed))
+                 reversed)}))
 
 (reverse-part2 example)
-(reverse-part2 input)
+;; (reverse-part2 input)
 
