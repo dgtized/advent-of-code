@@ -88,6 +88,7 @@
 (assert (= [10 5] (reverse-remap [0 10] [5 10 10])))
 (assert (= [10 10] (reverse-remap [5 10] [5 10 10])))
 (assert (= [15 5] (reverse-remap [10 10] [5 10 10])))
+(reverse-remap [56 37] [1 0 69]) ;; [55 14]
 
 (map (fn [r] (reverse-remap [10 10] r))
      [[10 0 10]
