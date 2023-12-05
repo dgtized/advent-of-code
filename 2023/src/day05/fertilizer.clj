@@ -38,3 +38,14 @@
 
 (assert (= 35 (part1 example)))
 (assert (= 379811651 (part1 input)))
+
+(defn bruteforce-part2 [in]
+  (->> (let [{:keys [seeds remaps]} (parse in)]
+         (mapcat (fn [[start len]]
+                   (mapv #(thread % remaps) (range start (+ start len))))
+                 (partition 2 2 seeds)))
+       (apply min-key last)
+       last))
+
+(assert (= 46 (bruteforce-part2 example)))
+;; (assert (= (part2 input)))
