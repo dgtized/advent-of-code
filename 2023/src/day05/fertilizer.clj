@@ -115,10 +115,18 @@
 (reverse-part2 example)
 ;; (reverse-part2 input)
 
+;; a b p q -- disjoint
+;; a p b q -- overlap low
+;; a p q b -- inside
+;; p a b q -- inside
+;; p a q b -- overlap high
+;; p q a b -- disjoint
+
 (defn remap-range [[x x-len] [out in len]]
-  (when-let [[o l] (range-intersect [x x-len] [in len])]
+  (if-let [[o l] (range-intersect [x x-len] [in len])]
     (let [s (remap o [out in len])]
-      [s (- (remap (+ o l) [out in len]) s)])))
+      [[s (- (remap (+ o l) [out in len]) s)]])
+    [[x x-len]]))
 
 (defn ordered [coll]
   (dedupe (sort-by (juxt first second) coll)))
@@ -128,16 +136,13 @@
     {:seed-ranges (partition 2 2 seeds)
      :remaps remaps
      :traces
-     (->> (reduce (fn [ranges maps]
-                    (ordered
-                     (mapcat
-                      (fn [r] (if-let [s (seq (keep (fn [m] (remap-range r m)) maps))]
-                               s
-                               [r]))
-                      ranges)))
-                  (partition 2 2 seeds)
-                  (map second remaps))
-          ordered)}))
+     (reductions (fn [ranges maps]
+                   (ordered
+                    (mapcat
+                     (fn [r] (mapcat (fn [m] (remap-range r m)) maps))
+                     ranges)))
+                 (partition 2 2 seeds)
+                 (map second remaps))}))
 
-(forward-part2 example)
+(:traces (forward-part2 example))
 ;; (:traces (forward-part2 input))
