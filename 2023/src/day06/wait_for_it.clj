@@ -30,13 +30,14 @@
     (map (fn [piece] (parse-long (apply str piece))) pieces)))
 
 (defn search [check lower upper]
-  (loop [guess (quot (+ lower upper) 2) lower lower upper upper]
-    (let [mid (quot (+ upper lower) 2)]
-      (when (< lower guess upper)
-        (case (check guess)
-          0 guess
-          -1 (recur (quot (+ mid lower) 2) lower mid)
-          1 (recur (quot (+ upper mid) 2) mid upper))))))
+  (loop [mid (quot (+ lower upper) 2)
+         lower lower
+         upper upper]
+    (when (< lower mid upper)
+      (case (check mid)
+        0 mid
+        -1 (recur (quot (+ mid lower) 2) lower mid)
+        1 (recur (quot (+ upper mid) 2) mid upper)))))
 
 (defn part2 [[duration record]]
   (let [low (search (fn [h]
