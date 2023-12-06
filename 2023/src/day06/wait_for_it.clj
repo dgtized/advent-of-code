@@ -5,7 +5,9 @@
 (def example (slurp "src/day06/example"))
 
 (defn parse [in]
-  (let [xs (map parse-long (re-seq #"\d+" in))]
-    (mapv vec (split-at (/ (count xs) 2) xs))))
+  (let [xs (map parse-long (re-seq #"\d+" in))
+        [times dist] (split-at (/ (count xs) 2) xs)]
+    (map vector times dist)))
 
 (parse example)
+(parse input)
