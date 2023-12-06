@@ -128,6 +128,21 @@
       [[s (- (remap (+ o l) [out in len]) s)]])
     [[x x-len]]))
 
+(defn remap2 [[x x-len] [out in len]]
+  (let [rem-len (- len (- x in))
+        last-in (dec (+ in len))
+        last-x (dec (+ x x-len))]
+    (cond (or (< last-x in) (>= x (+ in len))) ;; disjoint
+          [[x x-len]]
+          (and (<= in x last-in) (<= in last-x last-in)) ;; contained
+          [[(+ out (- x in)) x-len]]
+          (and (< x in) (<= in last-x last-in)) ;; overlap low
+          [[x (- in x)]
+           [out (- x-len (- in x))]]
+          (and (<= in x last-in) (< last-in last-x)) ;; overlap high
+          [[(+ out (- x in)) rem-len]
+           [(+ x rem-len) (- x-len rem-len)]])))
+
 (defn ordered [coll]
   (dedupe (sort-by (juxt first second) coll)))
 
@@ -139,10 +154,14 @@
      (reductions (fn [ranges maps]
                    (ordered
                     (mapcat
-                     (fn [r] (mapcat (fn [m] (remap-range r m)) maps))
+                     (fn [r] (mapcat (fn [m]
+                                      (let [res (remap2 r m)]
+                                        (when (some (fn [[a _]] (= a 0)) res)
+                                          (println r m res))
+                                        res)) maps))
                      ranges)))
                  (partition 2 2 seeds)
                  (map second remaps))}))
 
-(:traces (forward-part2 example))
-;; (:traces (forward-part2 input))
+(last (:traces (forward-part2 example)))
+;; (last (:traces (forward-part2 input)))
