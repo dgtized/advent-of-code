@@ -129,19 +129,26 @@
     [[x x-len]]))
 
 (defn remap2 [[x x-len] [out in len]]
-  (let [rem-len (- len (- x in))
-        last-in (dec (+ in len))
-        last-x (dec (+ x x-len))]
-    (cond (or (< last-x in) (>= x (+ in len))) ;; disjoint
+  (let [[x0 x1] [x (+ x x-len)]
+        [i0 i1] [in (+ in len)]]
+    (cond (or (< x1 i0) (< i1 x0)) ;; disjoint
           [[x x-len]]
-          (and (<= in x last-in) (<= in last-x last-in)) ;; contained
-          [[(+ out (- x in)) x-len]]
-          (and (< x in) (<= in last-x last-in)) ;; overlap low
-          [[x (- in x)]
-           [out (- x-len (- in x))]]
-          (and (<= in x last-in) (< last-in last-x)) ;; overlap high
-          [[(+ out (- x in)) rem-len]
-           [(+ x rem-len) (- x-len rem-len)]])))
+
+          (< i0 x0 x1 i1) ;; contained
+          [[(+ out (- x0 i0)) x-len]]
+
+          (< x0 i0 i1 x1) ;; container
+          [[x0 (- i0 x0)]
+           [out len]
+           [i1 (- x1 i1)]]
+
+          (< x0 i0 x1 i1)  ;; overlap low
+          [[x0 (- i0 x0)]
+           [out (- x1 i0)]]
+
+          (< i0 x0 i1 x1)  ;; overlap high
+          [[(+ out (- x0 i0)) (- i1 x0)]
+           [i1 (- x1 i1)]])))
 
 (defn ordered [coll]
   (dedupe (sort-by (juxt first second) coll)))
@@ -151,17 +158,13 @@
     {:seed-ranges (partition 2 2 seeds)
      :remaps remaps
      :traces
-     (reductions (fn [ranges maps]
-                   (ordered
-                    (mapcat
-                     (fn [r] (mapcat (fn [m]
-                                      (let [res (remap2 r m)]
-                                        (when (some (fn [[a _]] (= a 0)) res)
-                                          (println r m res))
-                                        res)) maps))
-                     ranges)))
-                 (partition 2 2 seeds)
-                 (map second remaps))}))
+     (reduce (fn [ranges maps]
+               (ordered
+                (mapcat
+                 (fn [r] (mapcat #(remap2 r %) maps))
+                 ranges)))
+             (partition 2 2 seeds)
+             (map (partial sort-by first) (map second remaps)))}))
 
-(last (:traces (forward-part2 example)))
-;; (last (:traces (forward-part2 input)))
+(:traces (forward-part2 example))
+;; (:traces (forward-part2 input))
