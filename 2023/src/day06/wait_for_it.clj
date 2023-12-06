@@ -9,13 +9,12 @@
         [times dist] (split-at (/ (count xs) 2) xs)]
     (map vector times dist)))
 
-(defn attempt [duration hold]
-  (let [vel hold]
-    (* vel (- duration hold))))
+(defn trial [duration hold]
+  (* hold (- duration hold)))
 
 (defn cases [[time dist]]
   (for [hold (range time)
-        :let [d (attempt time hold)]
+        :let [d (trial time hold)]
         :when (> d dist)]
     [hold d]))
 
