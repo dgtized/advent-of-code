@@ -9,5 +9,18 @@
         [times dist] (split-at (/ (count xs) 2) xs)]
     (map vector times dist)))
 
-(parse example)
-(parse input)
+(defn attempt [duration hold]
+  (let [vel hold]
+    (* vel (- duration hold))))
+
+(defn cases [[time dist]]
+  (for [hold (range time)
+        :let [d (attempt time hold)]
+        :when (> d dist)]
+    [hold d]))
+
+(defn part1 [in]
+  (apply * (mapv (comp count cases) in)))
+
+(assert (= 288 (part1 (parse example))))
+(assert (= 4811940 (part1 (parse input))))
