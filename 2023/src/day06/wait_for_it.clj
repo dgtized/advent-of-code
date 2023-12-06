@@ -29,36 +29,33 @@
         pieces (split-at (/ (count xs) 2) xs)]
     (map (fn [piece] (parse-long (apply str piece))) pieces)))
 
-(defn search [check guess lower upper]
-  (let [mid (quot (+ upper lower) 2)]
-    (when (< lower guess upper)
-      (println guess)
-      (case (check guess)
-        :hit guess
-        :above (recur check (quot (+ mid lower) 2) lower mid)
-        :below (recur check (quot (+ upper mid) 2) mid upper)))))
+(defn search [check lower upper]
+  (loop [guess (quot (+ lower upper) 2) lower lower upper upper]
+    (let [mid (quot (+ upper lower) 2)]
+      (when (< lower guess upper)
+        (case (check guess)
+          0 guess
+          -1 (recur (quot (+ mid lower) 2) lower mid)
+          1 (recur (quot (+ upper mid) 2) mid upper))))))
 
 (defn part2 [[duration record]]
   (let [low (search (fn [h]
                       (let [r (trial duration h)]
                         (cond
-                          (and (> r record) (<= (trial duration (dec h)) record)) :hit
-                          (<= r record) :below
-                          (> r record) :above)))
-                    (quot duration 2) 0 duration)
+                          (and (> r record) (<= (trial duration (dec h)) record)) 0
+                          (<= r record) 1
+                          (> r record) -1)))
+                    0 duration)
         high (search (fn [h]
                        (let [r (trial duration h)]
                          (cond
-                           (and (> r record) (<= (trial duration (inc h)) record)) :hit
-                           (<= r record) :above
-                           (> r record) :below)))
-                     (quot duration 2) 0 duration)]
+                           (and (> r record) (<= (trial duration (inc h)) record)) 0
+                           (<= r record) -1
+                           (> r record) 1)))
+                     0 duration)]
     [low high (inc (- high low))]))
 
 (assert (= 71503 (last (part2 (parse2 example)))))
 (assert (= 30077773 (last (part2 (parse2 input)))))
 
-(search (fn [guess] (cond (< guess 4) :below
-                         (> guess 4) :above
-                         :else :hit))
-        11 2 13)
+(search (partial compare 4) 2 13)
