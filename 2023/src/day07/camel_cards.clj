@@ -61,7 +61,7 @@
 (assert (= 250254244 (score (part1 (parse input)))))
 
 (def joker-cards [\J \2 \3 \4 \5 \6 \7 \8 \9 \T \Q \K \A])
-(def joker-rank (into {} (map vector cards (range))))
+(def joker-rank (into {} (map vector joker-cards (range))))
 
 (defn jrank [hand]
   (let [fr (frequencies (seq hand))
@@ -93,4 +93,4 @@
 
 (assert (= 5905 (score (part2 (parse example)))))
 ;; not 250606082
-(assert (=  (score (part2 (parse input)))))
+(assert (= 250087440 (score (part2 (parse input)))))
