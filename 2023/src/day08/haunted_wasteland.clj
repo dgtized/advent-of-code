@@ -1,10 +1,10 @@
-(ns day08.day08)
+(ns day08.haunted-wasteland)
 
 (def input (slurp "src/day08/input"))
 (def example (slurp "src/day08/example"))
 
 (defn parse [in]
-  in)
+  )
 
 (defn part1 [in]
   in)
