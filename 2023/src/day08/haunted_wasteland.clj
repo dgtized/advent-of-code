@@ -4,14 +4,15 @@
 (def input (slurp "src/day08/input"))
 (def example (slurp "src/day08/example"))
 (def example2 (slurp "src/day08/example2"))
+(def example3 (slurp "src/day08/example3"))
 
 (defn parse [in]
   (let [lines (str/split-lines in)]
-    {:dirs (first lines)
+    {:dirs (vec (first lines))
      :maps
      (into {}
            (for [line (drop 2 lines)]
-             (let [[a b c] (re-seq #"[A-Z]+" line)]
+             (let [[a b c] (re-seq #"\w+" line)]
                [a {\L b \R c}])))}))
 
 (defn path [{:keys [dirs maps]}]
@@ -29,8 +30,37 @@
 (assert (= 6 (part1 (parse example2))))
 (assert (= 11309 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn part2 [{:keys [dirs maps]}]
+  (let [init (filter #(str/ends-with? % "A") (keys maps))]
+    (loop [positions init
+           loops (vec (repeat (count init) []))
+           steps 0]
+      (cond (every? (fn [pos] (str/ends-with? pos "Z")) positions)
+            steps
+            (every? (fn [l] (> (count l) 1)) loops)
+            loops
+            :else
+            (let [dir (nth dirs (mod steps (count dirs)))]
+              (recur (mapv (fn [pos] (get-in maps [pos dir])) positions)
+                     (reduce (fn [l [i pos]]
+                               (if (str/ends-with? pos "Z")
+                                 (update l i conj steps)
+                                 l))
+                             loops (map-indexed vector positions))
+                     (inc steps)))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+;; (filter #(str/ends-with? % "A") (keys (:maps (parse example3))))
+
+;; borrowed from https://rosettacode.org/wiki/Least_common_multiple#Clojure
+(defn gcd
+  [a b]
+  (if (zero? b)
+    a
+    (recur b (mod a b))))
+
+(defn lcm
+  [a b]
+  (/ (* a b) (gcd a b)))
+
+(assert (= 6 (part2 (parse example3))))
+(assert (= 13740108158591 (reduce lcm (map first (part2 (parse input))))))
