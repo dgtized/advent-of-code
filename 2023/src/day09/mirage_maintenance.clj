@@ -26,7 +26,10 @@
 (assert (= 1887980197 (part1 (parse input))))
 
 (defn part2 [in]
-  in)
+  (->> in
+       (map sequences)
+       (map (fn [hs] (reduce (fn [acc v] (- v acc)) 0 (reverse (map first hs)))))
+       (apply +)))
 
 (assert (= 2 (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 990 (part2 (parse input))))
