@@ -14,7 +14,7 @@
        (iterate (fn [s]
                   (for [[a b] (partition 2 1 s)]
                     (- b a))))
-       (take-while #(not (every? (fn [v] (zero? v)) %)))))
+       (take-while #(not-every? zero? %))))
 
 (defn part1 [in]
   (->> in
