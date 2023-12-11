@@ -40,17 +40,33 @@
   (+ (Math/abs (- x1 x0))
      (Math/abs (- y1 y0))))
 
+(defn all-pairs-distance [galaxies]
+  (apply + (for [[a b] (all-pairs galaxies)]
+             (manhattan a b))))
+
 (defn part1 [in]
   (let [grid (->grid (expand in))
         galaxies (keep (fn [[p v]] (when (= v \#) p)) grid)]
-    (apply + (for [[a b] (all-pairs galaxies)]
-               (manhattan a b)))))
+    (all-pairs-distance galaxies)))
 
 (assert (= 374 (part1 (parse example))))
 (assert (= 9605127 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn part2 [mult in]
+  (let [grid (->grid in)
+        exp-rows (keep (fn [[i r]] (when (every? #{\.} r)
+                                    i))
+                       (map-indexed vector in))
+        exp-cols (keep (fn [[i r]] (when (every? #{\.} r)
+                                    i))
+                       (map-indexed vector (transpose in)))
+        galaxies (keep (fn [[p v]] (when (= v \#) p)) grid)]
+    (for [[x y] galaxies
+          :let [cols (filter #(< % x) exp-cols)
+                rows (filter #(< % y) exp-rows)]]
+      [(+ x (* (dec mult) (count cols)))
+       (+ y (* (dec mult) (count rows)))])))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 1030 (all-pairs-distance (part2 10 (parse example)))))
+(assert (= 8410 (all-pairs-distance (part2 100 (parse example)))))
+(assert (= 458191688761 (all-pairs-distance (part2 1000000 (parse input)))))
