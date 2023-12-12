@@ -42,15 +42,14 @@
 (comment
   (filter (fn [s] (accept? s [3 2 1])) (generate "?###????????" [3,2,1])))
 
-(defn accepted-cases [in]
-  (for [[springs nums] in]
-    (reduce (fn [s e] (if (accept? e nums)
-                       (inc s)
-                       s))
-            0 (generate springs nums))))
+(defn accepted-cases [[springs nums]]
+  (reduce (fn [s e] (if (accept? e nums)
+                     (inc s)
+                     s))
+          0 (generate springs nums)))
 
 (defn part1 [in]
-  (apply + (accepted-cases in)))
+  (apply + (map accepted-cases in)))
 
 (assert (= 21 (part1 (parse example))))
 (time (assert (= 7191 (part1 (parse input)))))
@@ -70,18 +69,19 @@
               (= (last springs) \?))
          (str "?" springs "?")
          :else
-         (str "?" springs "?"))
+         (str "?" springs))
    nums])
 
-(comment (accepted-cases (map fake-unfold [[".??..??...?##." [1,1,3]]]))
-         (accepted-cases (map fake-unfold [["?###????????" [3,2,1]]])))
+(assert (= 8 (accepted-cases (fake-unfold [".??..??...?##." [1,1,3]]))))
+(assert (= 15 (accepted-cases (fake-unfold ["?###????????" [3,2,1]]))))
 
 (defn part2 [in]
   (apply +'
-         (map (fn [a b]
-                (last [a b (bigint (*' a (Math/pow b 4)))]))
-              (accepted-cases in)
-              (accepted-cases (map fake-unfold in)))))
+         (map (fn [ex]
+                (let [a (accepted-cases ex)
+                      b (accepted-cases (fake-unfold ex))]
+                  (last [a b (bigint (*' a (Math/pow b 4)))])))
+              in)))
 
 (assert (= 525152 (part2 (parse example))))
 ;; 2359496412103 is low
