@@ -8,15 +8,12 @@
 (defn parse [in]
   (map str/split-lines (str/split in #"\n\n")))
 
-(defn mirror-at [s k]
-  [(take k s) (drop k s)])
-
 (defn mirrored-at? [s k]
-  (let [[before after] (mirror-at s k)]
+  (let [[before after] (split-at k s)]
     (->> (if (> (count before) (count after))
            (map vector (reverse before) after)
            (map vector before (reverse after)))
-         (every? (fn [[a b]](= a b))))))
+         (every? (fn [[a b]] (= a b))))))
 
 (defn folds [s]
   (->> (range 1 (count s))
@@ -29,19 +26,11 @@
 (defn transpose [m]
   (map #(apply str %) (apply mapv vector m)))
 
-(mirror-at "#.#.#" 2)
 (mirrored-at? "#.#.#" 2)
-(mirror-at "#.##.#" 2)
 (mirrored-at? "#.##.#" 2)
 (folds "#.#.#")
 (folds "#.##.#")
-(mirror-at "#.##..##." 2)
 (folds "#.##..##.")
-
-(mirrors (first (parse example)))
-(mirrors (transpose (first (parse example))))
-(mirrors (second (parse example)))
-(mirrors (transpose (second (parse example))))
 
 (defn part1 [in]
   (for [grid in]
@@ -51,8 +40,9 @@
         (* 100 h)
         0))))
 
-(mirrors (first (parse input)))
-(mirrors (transpose (first (parse input))))
+((juxt identity mirrors
+       transpose (comp mirrors transpose))
+ (nth (parse example) 1))
 
 (assert (= 405 (part1 (parse example))))
 ;; not = 12715
