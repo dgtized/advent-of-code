@@ -64,7 +64,7 @@
 (defn fake-unfold [[springs nums]]
   [(cond (or (= (first springs) \#)
              (= (last springs) \#))
-         (str "." springs)
+         springs
          (and (= (first springs) \?)
               (= (last springs) \?))
          (str "?" springs "?")
@@ -75,6 +75,10 @@
 (assert (= 8 (accepted-cases (fake-unfold [".??..??...?##." [1,1,3]]))))
 (assert (= 15 (accepted-cases (fake-unfold ["?###????????" [3,2,1]]))))
 
+[(accepted-cases ["?" [1]])
+ (accepted-cases ["??" [1]])
+ (accepted-cases ["???" [1]])]
+
 (defn process [in]
   (map (fn [[syms nums]]
          (let [a (accepted-cases [syms nums])
@@ -82,7 +86,9 @@
                c (accepted-cases [(str "?" syms) nums])
                d (accepted-cases [(str syms "?") nums])
                e (accepted-cases [(str "?" syms "?") nums])]
-           [a b c d e (bigint (*' a (Math/pow b 4)))]))
+           [[syms nums]
+            a b c d e
+            (bigint (*' a (Math/pow b 4)))]))
        in))
 
 (defn part2 [in]
