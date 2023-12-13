@@ -11,9 +11,9 @@
 (defn mirrored-at? [s k]
   (let [[before after] (split-at k s)]
     (->> (if (> (count before) (count after))
-           (map vector (reverse before) after)
-           (map vector before (reverse after)))
-         (every? (fn [[a b]] (= a b))))))
+           (map = after (reverse before))
+           (map = (reverse before) after))
+         (every? true?))))
 
 (defn folds [s]
   (->> (range 1 (count s))
@@ -23,8 +23,12 @@
 (defn mirrors [example]
   (apply set/intersection (map folds example)))
 
-(defn transpose [m]
-  (map #(apply str %) (apply mapv vector m)))
+(defn rotate [m]
+  (reverse (apply mapv str m)))
+
+(rotate ["123"
+         "456"
+         "789"])
 
 (mirrored-at? "#.#.#" 2)
 (mirrored-at? "#.##.#" 2)
@@ -32,21 +36,26 @@
 (folds "#.##.#")
 (folds "#.##..##.")
 
-(defn part1 [in]
+(defn score [in]
   (for [grid in]
     (if-let [v (first (mirrors grid))]
       v
-      (if-let [h (first (mirrors (transpose grid)))]
+      (if-let [h (first (mirrors (rotate grid)))]
         (* 100 h)
         0))))
 
+(defn part1 [in]
+  (apply + (score in)))
+
+(map (comp folds) (nth (parse input) 1))
+(split-at 9 "..#.##.#..#.##...")
+
 ((juxt identity mirrors
-       transpose (comp mirrors transpose))
- (nth (parse example) 1))
+       rotate (comp mirrors rotate))
+ (nth (parse input) 2))
 
 (assert (= 405 (part1 (parse example))))
-;; not = 12715
-(assert (= (part1 (parse input))))
+(assert (= 42974 (part1 (parse input))))
 
 (defn part2 [in]
   in)
