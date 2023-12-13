@@ -36,16 +36,13 @@
 (folds "#.##.#")
 (folds "#.##..##.")
 
-(defn score [in]
-  (for [grid in]
-    (if-let [v (first (mirrors grid))]
-      v
-      (if-let [h (first (mirrors (rotate grid)))]
-        (* 100 h)
-        0))))
+(defn scores [grid]
+  (concat
+   (mirrors grid)
+   (map (partial * 100) (mirrors (rotate grid)))))
 
 (defn part1 [in]
-  (apply + (score in)))
+  (apply + (map (comp first scores) in)))
 
 (map (comp folds) (nth (parse input) 1))
 (split-at 9 "..#.##.#..#.##...")
@@ -57,8 +54,27 @@
 (assert (= 405 (part1 (parse example))))
 (assert (= 42974 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn perturbations [grid]
+  (let [flat (vec (mapcat vec grid))]
+    (for [i (range (count flat))]
+      (->> (update flat i {\# \. \. \#})
+           (partition (count (first grid)))
+           (mapv (partial apply str))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(perturbations ["#." ".#"])
+
+(defn alternate [grid]
+  (let [orig (set (scores grid))]
+    (some (fn [g] (let [s (set (scores g))
+                       d (set/difference s orig)]
+                   (when (seq d) (first d))))
+          (perturbations grid))))
+
+(alternate (nth (parse example) 0))
+(alternate (nth (parse example) 1))
+
+(defn part2 [in]
+  (apply + (map alternate in)))
+
+(assert (= 400 (part2 (parse example))))
+(assert (= 27587 (part2 (parse input))))
