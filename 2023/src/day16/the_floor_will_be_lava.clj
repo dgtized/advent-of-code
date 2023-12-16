@@ -46,8 +46,8 @@
              [(make-beam pos' [1 0]) (make-beam pos' [-1 0])]))
       [])))
 
-(defn part1 [grid]
-  (loop [beams [(make-beam [-1 0] [1 0])]
+(defn part1 [grid start]
+  (loop [beams [start]
          energized {}]
     (if (or (empty? beams))
       energized
@@ -62,11 +62,29 @@
                          e))
                      energized beams)))))
 
-(assert (= 46 (count (part1 (parse example)))))
-(assert (= 8901 (count (part1 (parse input)))))
+(def start-beam (make-beam [-1 0] [1 0]))
+(assert (= 46 (count (part1 (parse example) start-beam))))
+(time (assert (= 8901 (count (part1 (parse input) start-beam)))))
 
-(defn part2 [in]
-  in)
+(defn starts [grid]
+  (let [max-x (apply max (map first (keys grid)))
+        max-y (apply max (map second (keys grid)))]
+    (apply concat
+           (keep (fn [[x y]]
+                   (cond-> []
+                     (= x 0) (conj (make-beam [x y] [1 0]))
+                     (= x max-x) (conj (make-beam [x y] [-1 0]))
+                     (= y 0) (conj (make-beam [x y] [0 1]))
+                     (= y max-y) (conj (make-beam [x y] [0 -1]))))
+                 (keys grid)))))
 
-;; (assert (= (part2 (parse example))))
-;; (assert (= (part2 (parse input))))
+(starts (parse example))
+;; (count (starts (parse input))) 440
+
+(defn part2 [grid]
+  (apply max
+         (for [s (starts grid)]
+           (count (part1 grid s)))))
+
+(assert (= 51 (part2 (parse example))))
+(time (assert (= 9064 (part2 (parse input)))))
