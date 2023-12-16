@@ -20,9 +20,9 @@
 
 (defn mirror [face dir]
   (get (if (= face \\)
-         {[1 0] [0 -1]
+         {[1 0] [0 1]
           [0 1] [1 0]
-          [-1 0] [0 1]
+          [-1 0] [0 -1]
           [0 -1] [-1 0]}
          ;; \/
          {[1 0] [0 -1]
@@ -47,18 +47,20 @@
       [])))
 
 (defn part1 [grid]
-  (loop [beams [(make-beam [0 0] [1 0])]
-         energized #{}]
-    (if (empty? beams)
+  (loop [beams [(make-beam [-1 0] [1 0])]
+         energized #{}
+         steps 2000]
+    (if (or (empty? beams) (<= steps 0))
       energized
-      (recur (mapcat (partial beam-step grid) beams)
-             (set/union energized (set (map :pos beams)))))))
+      (recur (distinct (mapcat (partial beam-step grid) beams))
+             (set/union energized (set (filter grid (map :pos beams))))
+             (dec steps)))))
 
-(assert (= (part1 (parse example))))
-;; (assert (= (part1 (parse input))))
+(assert (= 46 (count (part1 (parse example)))))
+;; (assert (= 8901 (count (part1 (parse input)))))
 
 (defn part2 [in]
   in)
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+;; (assert (= (part2 (parse example))))
+;; (assert (= (part2 (parse input))))
