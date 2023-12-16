@@ -48,16 +48,22 @@
 
 (defn part1 [grid]
   (loop [beams [(make-beam [-1 0] [1 0])]
-         energized #{}
-         steps 2000]
-    (if (or (empty? beams) (<= steps 0))
+         energized {}]
+    (if (or (empty? beams))
       energized
-      (recur (distinct (mapcat (partial beam-step grid) beams))
-             (set/union energized (set (filter grid (map :pos beams))))
-             (dec steps)))))
+      (recur (->> beams
+                  (mapcat (partial beam-step grid))
+                  (remove (fn [{:keys [pos dir]}]
+                            (when-let [cell (get energized pos)]
+                              (contains? cell dir)))))
+             (reduce (fn [e {:keys [pos dir]}]
+                       (if (get grid pos)
+                         (update e pos (fnil conj #{}) dir)
+                         e))
+                     energized beams)))))
 
 (assert (= 46 (count (part1 (parse example)))))
-;; (assert (= 8901 (count (part1 (parse input)))))
+(assert (= 8901 (count (part1 (parse input)))))
 
 (defn part2 [in]
   in)
