@@ -82,7 +82,8 @@
   [(apply max (map first (keys grid)))
    (apply max (map second (keys grid)))])
 
-(defn part1 [grid]
+
+(defn solver [grid successors]
   (let [[x y] (exit grid)
         path (map first (a*-search
                          {:cost (fn [s _] (get grid (first s) 100))
@@ -90,30 +91,22 @@
                           :sources [[[0 0] [0 1] 0]
                                     [[0 0] [1 0] 0]]
                           :goal? (fn [s] (= (first s) [x y]))}))]
-    (let [pset (set path)]
-      (doseq [j (range (inc y))]
-        (println (apply str (for [i (range (inc x))]
-                              (if (contains? pset [i j]) (get grid [i j]) "."))))))
-    (println path)
+    (when (< (count grid) (* 15 15))
+      (let [pset (set path)]
+        (doseq [j (range (inc y))]
+          (println (apply str (for [i (range (inc x))]
+                                (if (contains? pset [i j]) (get grid [i j]) "."))))))
+      (println path))
     (- (path-cost grid path) (get grid [0 0]))))
+
+(defn part1 [grid]
+  (solver grid successors))
 
 (assert (= 102 (part1 (parse example))))
 (assert (= 843 (part1 (parse input))))
 
 (defn part2 [grid]
-  (let [[x y] (exit grid)
-        path (map first (a*-search
-                         {:cost (fn [s _] (get grid (first s) 100))
-                          :successors (fn [s] (successors-ultra grid s))
-                          :sources [[[0 0] [0 1] 0]
-                                    [[0 0] [1 0] 0]]
-                          :goal? (fn [s] (= (first s) [x y]))}))]
-    (let [pset (set path)]
-      (doseq [j (range (inc y))]
-        (println (apply str (for [i (range (inc x))]
-                              (if (contains? pset [i j]) (get grid [i j]) "."))))))
-    (println path)
-    (- (path-cost grid path) (get grid [0 0]))))
+  (solver grid successors-ultra))
 
 (assert (= 94 (part2 (parse example))))
 (assert (= 1017 (part2 (parse input))))
