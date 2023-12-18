@@ -21,26 +21,23 @@
 (defn v* [[x y] c] [(* x c) (* y c)])
 
 (defn outline [steps]
-  (let [[grid pos]
-        (reduce (fn [[grid pos] [dir dist color]]
-                  [(reduce (fn [g c] (assoc g (v+ pos (v* dir c)) color))
-                           grid (range 0 dist))
-                   (v+ pos (v* dir dist))])
-                [{} [0 0]]
-                steps)]
-    (println pos)
-    grid))
+  (reduce (fn [[grid pos] [dir dist color]]
+            [(reduce (fn [g c] (assoc g (v+ pos (v* dir c)) color))
+                     grid (range 0 dist))
+             (v+ pos (v* dir dist))])
+          [{} [0 0]]
+          steps))
 
 (defn dims [grid]
   (let [xs (map first (keys grid))
         ys (map second (keys grid))]
-    [[(dec (apply min xs)) (inc (apply max xs))]
-     [(dec (apply min ys)) (inc (apply max ys))]]))
+    [[(- (apply min xs) 1) (+ (apply max xs) 2)]
+     [(- (apply min ys) 1) (+ (apply max ys) 2)]]))
 
 (defn neighbors [[[x0 x1] [y0 y1]] pos]
   (for [d directions
         :let [[x y :as n] (v+ pos d)]
-        :when (and (< x0 x x1) (< y0 y y1))]
+        :when (and (<= x0 x x1) (<= y0 y y1))]
     n))
 
 (defn flood-outside [grid start]
@@ -63,8 +60,8 @@
                        grid)))))))
 
 (defn region [grid]
-  (let [[x y] (dims grid)]
-    (for [j (range 0 y)]
+  (let [[[x0 x1] [y0 y1]] (dims grid)]
+    (for [j (range (inc y0) (dec y1))]
       (apply str (mapv (fn [i] (let [v (get grid [i j])]
                                 (cond (= v "O")
                                       v
@@ -72,21 +69,19 @@
                                       "#"
                                       :else
                                       ".")))
-                       (range 0 x))))))
+                       (range (inc x0) (dec x1)))))))
 
 (defn part1 [in]
-  (let [grid (outline in)
-        field (flood-outside grid [-1 -1])
-        r (region grid)
+  (let [[grid _pos] (outline in)
+        [[x0 _] [y0 _]] (dims grid)
+        field (flood-outside grid [x0 y0])
+        r (region field)
         f (frequencies (apply str r))]
-    (println)
     (spit "src/day18/region" (str/join "\n" r))
-    (doseq [l r]
-      (println l))
     (+ (get f \#) (get f \.))))
 
-(assert (= (part1 (parse example))))
-(assert (= (part1 (parse input))))
+(assert (= 62 (part1 (parse example))))
+(assert (= 50603 (part1 (parse input))))
 
 (defn part2 [in]
   in)
