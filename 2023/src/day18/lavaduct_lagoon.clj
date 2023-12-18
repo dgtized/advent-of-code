@@ -110,8 +110,19 @@
 (assert (= 62 (p1 (parse example))))
 (assert (= 50603 (p1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn color-outline [in]
+  (let [colors (map last in)]
+    (for [c colors]
+      [(case (subs c 6)
+         "0" [1 0]
+         "1" [0 1]
+         "2" [-1 0]
+         "3" [0 -1])
+       (Long/valueOf (subs c 1 6) 16)])))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [in]
+  (let [pts (outline-pts (color-outline in))]
+    (+ (area pts) (inc (/ (perimeter pts) 2)))))
+
+(assert (= 952408144115 (part2 (parse example))))
+(assert (= 96556251590677 (part2 (parse input))))
