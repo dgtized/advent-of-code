@@ -21,52 +21,62 @@
                     (backtrack parent visited)))))
 
 (defn a*-search
-  ([successors source goal]
-   (a*-search {} successors source goal))
-  ([{:keys [cost heuristic] :or
-     {cost (constantly 1)
-      heuristic (constantly 1)}}
-    successors source goal]
-   (let [goal? (if (fn? goal)
-                 goal
-                 #(= % goal))]
-     (loop [visited {}
-            queue (dpm/priority-map-keyfn first source [0 0 nil])]
-       (when (seq queue)
-         (let [[current [_ value prev]] (peek queue)
-               visited' (assoc visited current prev)]
-           (if (goal? current)
-             (reverse (backtrack current visited'))
-             (recur visited'
-                    (reduce (fn [queue node]
-                              (let [score (+ value (cost current node))]
-                                (if (and (not (contains? visited' node))
-                                         (or (not (contains? queue node))
-                                             (< score (get-in queue [node 1]))))
-                                  (assoc queue node [(+ score (heuristic node)) score current])
-                                  queue)))
-                            (pop queue)
-                            (successors current visited'))))))))))
+  [{:keys [successors sources goal?
+           cost heuristic] :or
+    {cost (constantly 1)
+     heuristic (constantly 1)}}]
+  (loop [visited {}
+         queue (reduce (fn [pq s] (assoc pq s [0 0 nil]))
+                       (dpm/priority-map-keyfn first)
+                       sources)]
+    (when (seq queue)
+      (let [[current [_ value prev]] (peek queue)
+            visited' (assoc visited current prev)]
+        (if (goal? current)
+          (reverse (backtrack current visited'))
+          (recur visited'
+                 (reduce (fn [queue node]
+                           (let [score (+ value (cost current node))]
+                             (if (and (not (contains? visited' node))
+                                      (or (not (contains? queue node))
+                                          (< score (get-in queue [node 1]))))
+                               (assoc queue node [(+ score (heuristic node)) score current])
+                               queue)))
+                         (pop queue)
+                         (successors current))))))))
 
 (defn v+ [a b] (mapv + a b))
 (defn v- [a b] (mapv - a b))
 
-(map (fn [a b] (v- b a)) [[0 0] [1 0] [2 0]] [[1 0] [2 0] [3 0]])
+(defn rotate-right [[x y]] [y (- x)])
+(defn rotate-left [[x y]] [(- y) x])
 
-(defn successors [grid pos visited]
-  (let [path (reverse (take 4 (backtrack pos visited)))
-        dirs (map v- (rest path) (butlast path))
-        df (frequencies dirs)]
-    (keep (fn [dir]
-            (let [pos' (v+ pos dir)]
-              (when (and (get grid pos')
-                         (not= (last (butlast path)) pos')
-                         (< (get df dir 0) 3))
-                pos')))
-          [[1 0] [-1 0] [0 1] [0 -1]])))
+(defn successors [grid [pos dir n]]
+  (keep (fn [s]
+          (when (and s (get grid (first s)))
+            s))
+        [(let [d' (rotate-left dir)]
+           [(v+ pos d') d' 1])
+         (let [d' (rotate-right dir)]
+           [(v+ pos d') d' 1])
+         (when (< n 3)
+           [(v+ pos dir) dir (inc n)])]))
 
-(successors (parse example) [[0 0]] {})
-(successors (parse example) [[0 4]] {[0 1] [0 0] [0 2] [0 1] [0 3] [0 2] [0 4] [0 3]})
+(defn successors-ultra [grid [pos dir n]]
+  (keep (fn [s]
+          (when (and s (get grid (first s)))
+            s))
+        [(when (> n 3)
+           (let [d' (rotate-left dir)]
+             [(v+ pos d') d' 1]))
+         (when (> n 3)
+           (let [d' (rotate-right dir)]
+             [(v+ pos d') d' 1]))
+         (when (< n 10)
+           [(v+ pos dir) dir (inc n)])]))
+
+(successors (parse example) [[0 0] [1 0] 0])
+(successors (parse example) [[0 4] [1 0] 1])
 
 (defn exit [grid]
   [(apply max (map first (keys grid)))
@@ -74,20 +84,36 @@
 
 (defn part1 [grid]
   (let [[x y] (exit grid)
-        path (a*-search
-              {:cost grid}
-              (partial successors grid) [0 0] [x y])]
+        path (map first (a*-search
+                         {:cost (fn [s _] (get grid (first s) 100))
+                          :successors (fn [s] (successors grid s))
+                          :sources [[[0 0] [0 1] 0]
+                                    [[0 0] [1 0] 0]]
+                          :goal? (fn [s] (= (first s) [x y]))}))]
     (let [pset (set path)]
       (doseq [j (range (inc y))]
         (println (apply str (for [i (range (inc x))]
                               (if (contains? pset [i j]) (get grid [i j]) "."))))))
-    (path-cost grid path)))
+    (println path)
+    (- (path-cost grid path) (get grid [0 0]))))
 
-(assert (= (part1 (parse example))))
-;; (assert (= (part1 (parse input))))
+(assert (= 102 (part1 (parse example))))
+(assert (= 843 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn part2 [grid]
+  (let [[x y] (exit grid)
+        path (map first (a*-search
+                         {:cost (fn [s _] (get grid (first s) 100))
+                          :successors (fn [s] (successors-ultra grid s))
+                          :sources [[[0 0] [0 1] 0]
+                                    [[0 0] [1 0] 0]]
+                          :goal? (fn [s] (= (first s) [x y]))}))]
+    (let [pset (set path)]
+      (doseq [j (range (inc y))]
+        (println (apply str (for [i (range (inc x))]
+                              (if (contains? pset [i j]) (get grid [i j]) "."))))))
+    (println path)
+    (- (path-cost grid path) (get grid [0 0]))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 94 (part2 (parse example))))
+(assert (= 1017 (part2 (parse input))))
