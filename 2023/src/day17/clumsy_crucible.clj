@@ -61,12 +61,12 @@
             (let [pos' (v+ pos dir)]
               (when (and (get grid pos')
                          (not= (last (butlast path)) pos')
-                         (not= (get df dir 0) 3))
+                         (< (get df dir 0) 3))
                 pos')))
           [[1 0] [-1 0] [0 1] [0 -1]])))
 
-(successors (parse example) [0 0] {})
-(successors (parse example) [0 4] {[0 1] [0 0] [0 2] [0 1] [0 3] [0 2] [0 4] [0 3]})
+(successors (parse example) [[0 0]] {})
+(successors (parse example) [[0 4]] {[0 1] [0 0] [0 2] [0 1] [0 3] [0 2] [0 4] [0 3]})
 
 (defn exit [grid]
   [(apply max (map first (keys grid)))
@@ -74,7 +74,9 @@
 
 (defn part1 [grid]
   (let [[x y] (exit grid)
-        path (a*-search {:cost grid} (partial successors grid) [0 0] [x y])]
+        path (a*-search
+              {:cost grid}
+              (partial successors grid) [0 0] [x y])]
     (let [pset (set path)]
       (doseq [j (range (inc y))]
         (println (apply str (for [i (range (inc x))]
