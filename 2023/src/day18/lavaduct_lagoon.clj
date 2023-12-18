@@ -28,6 +28,12 @@
           [{} [0 0]]
           steps))
 
+(defn outline-pts [steps]
+  (reductions (fn [pos [dir dist]]
+                (v+ pos (v* dir dist)))
+              [0 0]
+              steps))
+
 (defn dims [grid]
   (let [xs (map first (keys grid))
         ys (map second (keys grid))]
@@ -80,8 +86,29 @@
     (spit "src/day18/region" (str/join "\n" r))
     (+ (get f \#) (get f \.))))
 
-(assert (= 62 (part1 (parse example))))
-(assert (= 50603 (part1 (parse input))))
+;; (assert (= 62 (part1 (parse example))))
+;; (assert (= 50603 (part1 (parse input))))
+
+(defn area [pts]
+  (/ (apply + (map (fn [[x0 y0] [x1 y1]]
+                     (* (+ x1 x0) (- y1 y0)))
+                   (butlast pts) (rest pts)))
+     2))
+
+(defn manhattan [[x0 y0] [x1 y1]]
+  (+ (Math/abs (- x1 x0)) (Math/abs (- y1 y0))))
+
+(defn perimeter [pts]
+  (apply +
+         (map (fn [a b] (manhattan a b))
+              (butlast pts) (rest pts))))
+
+(defn p1 [in]
+  (let [pts (outline-pts in)]
+    (+ (area pts) (inc (/ (perimeter pts) 2)))))
+
+(assert (= 62 (p1 (parse example))))
+(assert (= 50603 (p1 (parse input))))
 
 (defn part2 [in]
   in)
