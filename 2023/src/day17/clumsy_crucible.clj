@@ -12,6 +12,9 @@
               [i tile] (map-indexed vector line)]
           {[i j] (parse-long (str tile))})))
 
+(defn path-cost [grid path]
+  (apply + (map grid path)))
+
 (defn backtrack [current visited]
   (cons current
         (lazy-seq (when-let [parent (get visited current)]
@@ -69,14 +72,14 @@
   [(apply max (map first (keys grid)))
    (apply max (map second (keys grid)))])
 
-(defn part1 [in]
-  (let [[x y] (exit in)
-        path (a*-search {:cost in} (partial successors in) [0 0] [x y])]
+(defn part1 [grid]
+  (let [[x y] (exit grid)
+        path (a*-search {:cost grid} (partial successors grid) [0 0] [x y])]
     (let [pset (set path)]
       (doseq [j (range (inc y))]
         (println (apply str (for [i (range (inc x))]
-                              (if (contains? pset [i j]) (get in [i j]) "."))))))
-    (apply + (map in path))))
+                              (if (contains? pset [i j]) (get grid [i j]) "."))))))
+    (path-cost grid path)))
 
 (assert (= (part1 (parse example))))
 ;; (assert (= (part1 (parse input))))
