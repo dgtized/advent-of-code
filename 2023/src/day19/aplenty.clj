@@ -30,23 +30,33 @@
     {:rules (into {} (mapv parse-rule (str/split-lines rules)))
      :parts (mapv parse-part (str/split-lines parts))}))
 
-(defn run [rule-set queue part]
-  [queue part])
+(defn run [rule-set [path part]]
+  (if-let [rules (get rule-set (last path))]
+    (let [dest (if-let [dest (some (fn [{:keys [k f v d]}]
+                                     (when (and f ((f->cond f) (part k) v))
+                                       d)) rules)]
+                 dest
+                 (:d (last rules)))]
+      [(conj path dest) part])
+    [path part]))
 
 (defn workflow [rules part]
-  (take 10 (iterate (partial run rules) ["in" part])))
+  (->> [["in"] part]
+       (iterate (fn [s] (run rules s)))
+       (drop-while (fn [[p _]] (not (contains? #{"A" "R"} (last p)))))
+       ffirst))
 
 (defn part1 [{:keys [rules parts]}]
-  (for [part parts]
-    [part (workflow rules part)]))
+  (apply + (for [part parts
+                 :let [r (last (workflow rules part))]
+                 :when (= r "A")]
+             (apply + (vals part)))))
 
-(assert (= (part1 (parse example))))
-(assert (= (part1 (parse input))))
+(assert (= 19114 (part1 (parse example))))
+(assert (= 263678 (part1 (parse input))))
 
 (defn part2 [in]
   in)
 
 (assert (= (part2 (parse example))))
 (assert (= (part2 (parse input))))
-
-(parse example)
