@@ -55,40 +55,41 @@
 (assert (= 19114 (part1 (parse example))))
 (assert (= 263678 (part1 (parse input))))
 
-(defn limit [accepted {:keys [k f v d]}]
-  (if (= d "R")
-    (if (= f "<")
-      (update accepted k (fn [[l u]] [(max l v) u]))
-      (update accepted k (fn [[l u]] [l (min (inc v) u)])))
-    (if (= f "<")
-      (update accepted k (fn [[l u]] [l (min (inc v) u)]))
-      (update accepted k (fn [[l u]] [(max l v) u])))))
+(defn limit [accepted {:keys [k f v]}]
+  (if (= f "<")
+    [(update accepted k (fn [[l _]] [l v]))
+     (update accepted k (fn [[_ u]] [v u]))]
+    [(update accepted k (fn [[_ u]] [(inc v) u]))
+     (update accepted k (fn [[l _]] [l (inc v)]))]))
 
-(defn constrain [rule-set queue accepted]
-  (let [rules (get rule-set queue)]
-    (println "at" queue accepted)
-    (cond (= queue "A")
-          (let [s (apply * (map (fn [[l h]] (let [d (- h l)]
-                                             (if (< d 0) 0 d)))
-                                (vals accepted)))]
-            (println s)
-            s)
-          (= queue "R")
+(defn score [accepted]
+  (apply * (map (fn [[l h]] (- h l))
+                (vals accepted))))
+
+(defn constrain [rule-set flow accepted]
+  (let [rules (get rule-set flow)]
+    (println "at" flow accepted)
+    (cond (= flow "A")
+          (score accepted)
+          (= flow "R")
           0
           :else
           (do (println rules)
-              (apply +
-                     (map
-                      (fn [{:keys [f d] :as r}]
-                        (if f
-                          (constrain rule-set d (limit accepted r))
-                          (constrain rule-set d accepted)))
-                      rules))))))
+              (first
+               (reduce
+                (fn [[total accepted] {:keys [f d] :as r}]
+                  (if f
+                    (let [[acc rej] (limit accepted r)]
+                      [(+ total (constrain rule-set d acc)) rej])
+                    [(+ total (constrain rule-set d accepted)) accepted]))
+                [0 accepted]
+                rules))))))
 
 (defn part2 [{:keys [rules]}]
   (println)
   (constrain rules "in"
              {"x" [1 4001] "m" [1 4001]
               "a" [1 4001] "s" [1 4001]}))
+
 (assert (= 167409079868000 (part2 (parse example))))
-;; (assert (= (part2 (parse input))))
+(assert (= 125455345557345 (part2 (parse input))))
