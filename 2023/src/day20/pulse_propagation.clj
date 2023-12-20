@@ -94,8 +94,34 @@
 (assert (= 11687500 (part1 (parse example2))))
 (assert (= 841763884 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn gcd
+  [a b]
+  (if (zero? b)
+    a
+    (recur b (mod a b))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn lcm
+  [a b]
+  (/ (* a b) (gcd a b)))
+
+(defn part2 [in]
+  (let [init (compile-state in)
+        check-high #{"dh" "lm" "sg" "db"} ;; parents of rx -> jm
+        steps
+        (->> [init []]
+             (iterate (fn [[modules _]] (press modules)))
+             (take 10000))]
+    (->> steps
+         (map-indexed (fn [i [_ pulses]]
+                        [i (filter
+                            (fn [[_ t s]]
+                              (and (contains? check-high t) (not s)))
+                            pulses)]))
+         (keep (fn [v] (when (seq (second v))
+                        v)))
+         (map (fn [[i xs]] [i (second (first xs))]))
+         (take 4)
+         (map first)
+         (reduce lcm))))
+
+(assert (= 246006621493687 (part2 (parse input))))
