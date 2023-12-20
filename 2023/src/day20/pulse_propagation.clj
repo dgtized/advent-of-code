@@ -99,12 +99,10 @@
 
 (defn part2 [in]
   (let [init (compile-state in)
-        check-high #{"dh" "lm" "sg" "db"} ;; parents of rx -> jm
-        steps
-        (->> [init []]
-             (iterate (fn [[modules _]] (press modules)))
-             (take 10000))]
-    (->> steps
+         ;; parents of rx -> jm
+        check-high #{"dh" "lm" "sg" "db"}]
+    (->> [init []]
+         (iterate (fn [[modules _]] (press modules)))
          (map-indexed (fn [i [_ pulses]]
                         [i (filter
                             (fn [[_ t s]]
