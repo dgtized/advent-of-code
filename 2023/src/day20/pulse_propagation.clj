@@ -99,7 +99,7 @@
 
 (defn part2 [in]
   (let [init (compile-state in)
-         ;; parents of rx -> jm
+        ;; parents of rx -> jm
         check-high #{"dh" "lm" "sg" "db"}]
     (->> [init []]
          (iterate (fn [[modules _]] (press modules)))
@@ -108,9 +108,9 @@
                             (fn [[_ t s]]
                               (and (contains? check-high t) (not s)))
                             pulses)]))
-         (keep (fn [v] (when (seq (second v))
-                        v)))
-         (map (fn [[i xs]] [i (second (first xs))]))
+         (keep (fn [[i pulses]]
+                 (when (seq pulses)
+                   [i (second (first pulses))])))
          ;; until we have seen all of the check-high inputs
          (reductions conj [])
          (drop-while
