@@ -1,5 +1,6 @@
 (ns day08.haunted-wasteland
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [aoc.math :as am]))
 
 (def input (slurp "src/day08/input"))
 (def example (slurp "src/day08/example"))
@@ -51,16 +52,5 @@
 
 ;; (filter #(str/ends-with? % "A") (keys (:maps (parse example3))))
 
-;; borrowed from https://rosettacode.org/wiki/Least_common_multiple#Clojure
-(defn gcd
-  [a b]
-  (if (zero? b)
-    a
-    (recur b (mod a b))))
-
-(defn lcm
-  [a b]
-  (/ (* a b) (gcd a b)))
-
 (assert (= 6 (part2 (parse example3))))
-(assert (= 13740108158591 (reduce lcm (map first (part2 (parse input))))))
+(assert (= 13740108158591 (reduce am/lcm (map first (part2 (parse input))))))

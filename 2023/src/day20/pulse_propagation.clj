@@ -1,5 +1,6 @@
 (ns day20.pulse-propagation
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [aoc.math :as am]))
 
 (def input (slurp "src/day20/input"))
 (def example (slurp "src/day20/example"))
@@ -94,16 +95,6 @@
 (assert (= 11687500 (part1 (parse example2))))
 (assert (= 841763884 (part1 (parse input))))
 
-(defn gcd
-  [a b]
-  (if (zero? b)
-    a
-    (recur b (mod a b))))
-
-(defn lcm
-  [a b]
-  (/ (* a b) (gcd a b)))
-
 (defn part2 [in]
   (let [init (compile-state in)
         check-high #{"dh" "lm" "sg" "db"} ;; parents of rx -> jm
@@ -122,6 +113,6 @@
          (map (fn [[i xs]] [i (second (first xs))]))
          (take 4)
          (map first)
-         (reduce lcm))))
+         (reduce am/lcm))))
 
 (assert (= 246006621493687 (part2 (parse input))))
