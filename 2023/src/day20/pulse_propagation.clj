@@ -12,7 +12,7 @@
           targets (str/split dests #",\s*")]
       (if (contains? #{"%" "&"} type)
         {:module (subs module 1)
-         :type type
+         :type (if (= type "%")  :flip-flop :conjunction)
          :targets targets}
         {:module module
          :targets targets}))))
