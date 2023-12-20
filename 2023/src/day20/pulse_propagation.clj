@@ -56,14 +56,12 @@
     [to dest (not (every? true? (vals state)))]
     [to dest signal]))
 
-(defn press [[modules low high]]
+(defn press [modules]
   (loop [pulses []
          queue (conj clojure.lang.PersistentQueue/EMPTY ["button" "broadcaster" false])
          modules modules]
     (if (empty? queue)
-      [modules
-       (+ low (count (remove last pulses)))
-       (+ high (count (filter last pulses)))]
+      [modules pulses]
       (let [[from to signal :as pulse] (peek queue)
             {:keys [out type]} (get modules to)
             modules' (case type
@@ -82,7 +80,12 @@
                modules')))))
 
 (defn n-presses [in]
-  (nth (iterate press [(compile-state in) 0 0]) 1000))
+  (nth (iterate (fn [[modules low high]]
+                  (let [[modules' pulses] (press modules)]
+                    [modules'
+                     (+ low (count (remove last pulses)))
+                     (+ high (count (filter last pulses)))]))
+                [(compile-state in) 0 0]) 1000))
 
 (defn part1 [in]
   (apply * (rest (n-presses in))))
