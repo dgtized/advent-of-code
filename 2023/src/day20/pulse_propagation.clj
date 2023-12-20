@@ -1,6 +1,8 @@
 (ns day20.pulse-propagation
-  (:require [clojure.string :as str]
-            [aoc.math :as am]))
+  (:require
+   [aoc.math :as am]
+   [clojure.set :as set]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day20/input"))
 (def example (slurp "src/day20/example"))
@@ -111,7 +113,12 @@
          (keep (fn [v] (when (seq (second v))
                         v)))
          (map (fn [[i xs]] [i (second (first xs))]))
-         (take 4)
+         ;; until we have seen all of the check-high inputs
+         (reductions conj [])
+         (drop-while
+          (fn [seen]
+            (seq (set/difference check-high (set (map second seen))))))
+         first
          (map first)
          (reduce am/lcm))))
 
