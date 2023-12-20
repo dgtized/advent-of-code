@@ -17,29 +17,79 @@
         {:module module
          :out out}))))
 
+(zipmap (range 3) (repeatedly (fn [] 1)))
+
 (defn compile-state [in]
   (let [mods (conj (distinct (mapcat (fn [{:keys [module out]}] (conj out module))
                                      in))
-                   "button")]
-    (reduce
-     (fn [s {:keys [module type out]}]
-       (reduce (fn [s t]
-                 (update-in s [t :in] (fnil conj #{}) module))
-               (update s module merge
-                       {:module module
-                        :out out}
-                       (when type {:type type}))
-               out))
-     (into {} (for [mod mods]
-                [mod {}]))
-     (conj in {:module "button" :out ["broadcast"]}))))
+                   "button")
+        state
+        (reduce
+         (fn [s {:keys [module type out]}]
+           (reduce (fn [s t]
+                     (update-in s [t :in] (fnil conj #{}) module))
+                   (update s module merge
+                           {:module module
+                            :out out}
+                           (when type {:type type}))
+                   out))
+         (into {} (for [mod mods]
+                    [mod {}]))
+         (conj in {:module "button" :out ["broadcaster"]}))]
+    (reduce-kv
+     (fn [s m {:keys [type in]}]
+       (case type
+         :flip-flop
+         (assoc-in s [m :state] false)
+         :conjunction
+         (assoc-in s [m :state] (zipmap in (repeatedly (fn [] false))))
+         s))
+     state
+     state)))
+
+(defn propagate [to dest type state signal]
+  (case type
+    :flip-flop
+    (when-not signal
+      [to dest state])
+    :conjunction
+    [to dest (not (every? true? (vals state)))]
+    [to dest signal]))
+
+(defn press [[modules low high]]
+  (loop [pulses []
+         queue (conj clojure.lang.PersistentQueue/EMPTY ["button" "broadcaster" false])
+         modules modules]
+    (if (empty? queue)
+      [modules
+       (+ low (count (remove last pulses)))
+       (+ high (count (filter last pulses)))]
+      (let [[from to signal :as pulse] (peek queue)
+            {:keys [out type]} (get modules to)
+            modules' (case type
+                       :flip-flop
+                       (if signal
+                         modules
+                         (update-in modules [to :state] not))
+                       :conjunction
+                       (assoc-in modules [to :state from] signal)
+                       modules)
+            state (get-in modules' [to :state])]
+        (recur (conj pulses pulse)
+               (into (pop queue)
+                     (keep (fn [dest] (propagate to dest type state signal))
+                           out))
+               modules')))))
+
+(defn n-presses [in]
+  (nth (iterate press [(compile-state in) 0 0]) 1000))
 
 (defn part1 [in]
-  (compile-state in))
+  (apply * (rest (n-presses in))))
 
-(assert (= (part1 (parse example))))
-(assert (= (part1 (parse example2))))
-(assert (= (part1 (parse input))))
+(assert (= 32000000 (part1 (parse example))))
+(assert (= 11687500 (part1 (parse example2))))
+(assert (= 841763884 (part1 (parse input))))
 
 (defn part2 [in]
   in)
