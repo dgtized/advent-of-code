@@ -1,5 +1,6 @@
 (ns day21.step-counter
-  (:require [clojure.string :as str]))
+  (:require
+   [clojure.string :as str]))
 
 (def input (slurp "src/day21/input"))
 (def example (slurp "src/day21/example"))
@@ -49,11 +50,18 @@
          (take n)
          (map count))))
 
-(->> example
-     parse
-     (part2 101)
-     (partition 2 1)
-     (map (fn [[a b]] [b (- b a)]))
-     (map-indexed (fn [i v] [(inc i) v])))
+(defn explore [in n]
+  (->> in
+       (part2 n)
+       (partition 2 1)
+       (map (fn [[a b]] [b (- b a)]))
+       (map-indexed (fn [i v] [(inc i) v]))))
+
+(dims (parse example))
+(dims (parse input))
+
+;; (explore (parse example) 200)
+;; (explore (parse input))
+
 ;; (assert (= ))
 ;; (assert (= (part2 (parse input))))
