@@ -17,20 +17,21 @@
 (defn find-start [in]
   (some (fn [[k v]] (when (= v \S) k)) in))
 
-(defn neighbors [grid pos]
+(defn neighbors [lookup pos]
   (for [dir [[-1 0] [1 0] [0 1] [0 -1]]
         :let [n (v+ pos dir)]
-        :when (= \. (get grid n))]
+        :when (= \. (lookup n))]
     n))
 
-(defn steps [grid positions]
+(defn steps [lookup positions]
   (->> positions
-       (mapcat (fn [p] (neighbors grid p)))
+       (mapcat (fn [p] (neighbors lookup p)))
        distinct))
 
 (defn part1 [n grid]
-  (let [s (find-start grid)]
-    (nth (iterate (partial steps (assoc grid s \.)) [s]) n)))
+  (let [s (find-start grid)
+        g (assoc grid s \.)]
+    (nth (iterate (partial steps g) [s]) n)))
 
 (assert (= 16 (count (part1 6 (parse example)))))
 (assert (= 3605 (count (part1 64 (parse input)))))
