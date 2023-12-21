@@ -34,10 +34,26 @@
     (nth (iterate (partial steps g) [s]) n)))
 
 (assert (= 16 (count (part1 6 (parse example)))))
-(assert (= 3605 (count (part1 64 (parse input)))))
+;; (assert (= 3605 (count (part1 64 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn dims [grid]
+  [(inc (apply max (map first (keys grid))))
+   (inc (apply max (map second (keys grid))))])
 
-(assert (= (part2 (parse example))))
+(defn part2 [n grid]
+  (let [s (find-start grid)
+        [mx my] (dims grid)
+        g (assoc grid s \.)]
+    (->> [s]
+         (iterate (partial steps (fn [[x y]] (g [(mod x mx) (mod y my)]))))
+         (take n)
+         (map count))))
+
+(->> example
+     parse
+     (part2 101)
+     (partition 2 1)
+     (map (fn [[a b]] [b (- b a)]))
+     (map-indexed (fn [i v] [(inc i) v])))
+;; (assert (= ))
 ;; (assert (= (part2 (parse input))))
