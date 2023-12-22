@@ -60,7 +60,9 @@
 (dims (parse example))
 (dims (parse input))
 
-;; (explore (parse example) 200)
+(def exp-steps 26501365)
+
+;; (explore (parse example) 300)
 ;; (explore (parse input))
 
 ;; (assert (= ))
