@@ -29,7 +29,7 @@
      heuristic (constantly 1)}}]
   (loop [visited {}
          queue (reduce (fn [pq s] (assoc pq s [0 0 nil]))
-                       (dpm/priority-map-keyfn first)
+                       (dpm/priority-map-keyfn-by first >)
                        sources)]
     (when (seq queue)
       (let [[current [_ value prev]] (peek queue)
@@ -41,7 +41,7 @@
                            (let [score (+ value (cost current node))]
                              (if (and (not (contains? visited' node))
                                       (or (not (contains? queue node))
-                                          (< score (get-in queue [node 1]))))
+                                          (> score (get-in queue [node 1]))))
                                (assoc queue node [(+ score (heuristic node)) score current])
                                queue)))
                          (pop queue)
@@ -63,12 +63,23 @@
 
 (comment (successors (parse example) [1 0]))
 
-(defn part1 [grid]
-  (a*-search {:successors (partial successors grid)
-              :sources [[1 0]]
-              :goal? #(= (exit grid) %)}))
+(defn draw-grid [grid]
+  (let [[mx my] (map inc (exit grid))]
+    (doseq [j (range my)]
+      (println (apply str
+                      (for [i (range mx)]
+                        (get grid [i j])))))))
 
-(assert (= (count (part1 (parse example)))))
+(defn part1 [grid]
+  (let [path
+        (->> {:successors (partial successors grid)
+              :sources [[1 0]]
+              :goal? #(= (exit grid) %)}
+             a*-search)]
+    (draw-grid (reduce (fn [g p] (assoc g p \O)) grid path))
+    (count path)))
+
+(assert (= (part1 (parse example))))
 ;; (assert (= (part1 (parse input))))
 
 (defn part2 [in]
