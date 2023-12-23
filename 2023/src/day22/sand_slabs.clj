@@ -9,8 +9,8 @@
 
 (defn parse [in]
   (for [line (str/split-lines in)]
-    (let [[a b] (str/split line #"~")]
-      (map coord [a b]))))
+    (let [[a b] (map coord (str/split line #"~"))]
+      [(mapv min a b) (mapv max a b)])))
 
 (defn v+ [a b] (mapv + a b))
 (defn v- [a b] (mapv - a b))
