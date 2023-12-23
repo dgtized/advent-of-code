@@ -1,6 +1,6 @@
 (ns day23.a-long-walk
-  (:require [clojure.string :as str]
-            [clojure.data.priority-map :as dpm]))
+  (:require
+   [clojure.string :as str]))
 
 (def input (slurp "src/day23/input"))
 (def example (slurp "src/day23/example"))
@@ -13,39 +13,22 @@
 (defn parse [in]
   (->grid (str/split-lines in)))
 
+(defn dims [grid]
+  [(inc (apply max (map first (keys grid))))
+   (inc (apply max (map second (keys grid))))])
+
 (defn exit [grid]
-  [(dec (apply max (map first (keys grid))))
-   (apply max (map second (keys grid)))])
+  (let [[mx my] (dims grid)]
+    [(- mx 2) (- my 1)]))
 
-(defn backtrack [current visited]
-  (cons current
-        (lazy-seq (when-let [parent (get visited current)]
-                    (backtrack parent visited)))))
-
-(defn a*-search
-  [{:keys [successors sources goal?
-           cost heuristic] :or
-    {cost (constantly 1)
-     heuristic (constantly 1)}}]
-  (loop [visited {}
-         queue (reduce (fn [pq s] (assoc pq s [0 0 nil]))
-                       (dpm/priority-map-keyfn-by first >)
-                       sources)]
-    (when (seq queue)
-      (let [[current [_ value prev]] (peek queue)
-            visited' (assoc visited current prev)]
-        (if (goal? current)
-          (reverse (backtrack current visited'))
-          (recur visited'
-                 (reduce (fn [queue node]
-                           (let [score (+ value (cost current node))]
-                             (if (and (not (contains? visited' node))
-                                      (or (not (contains? queue node))
-                                          (> score (get-in queue [node 1]))))
-                               (assoc queue node [(+ score (heuristic node)) score current])
-                               queue)))
-                         (pop queue)
-                         (successors current))))))))
+(defn paths [successors path goal?]
+  (let [current (peek path)]
+    (if (goal? current)
+      [path]
+      (lazy-seq
+       (->> (successors current)
+            (remove (set path))
+            (mapcat (fn [node] (paths successors (conj path node) goal?))))))))
 
 (defn v+ [a b] (mapv + a b))
 
@@ -64,7 +47,7 @@
 (comment (successors (parse example) [1 0]))
 
 (defn draw-grid [grid]
-  (let [[mx my] (map inc (exit grid))]
+  (let [[mx my] (dims grid)]
     (doseq [j (range my)]
       (println (apply str
                       (for [i (range mx)]
@@ -72,14 +55,14 @@
 
 (defn part1 [grid]
   (let [path
-        (->> {:successors (partial successors grid)
-              :sources [[1 0]]
-              :goal? #(= (exit grid) %)}
-             a*-search)]
+        (->> #(= (exit grid) %)
+             (paths (partial successors grid) [[1 0]])
+             (apply max-key count)
+             rest)]
     (draw-grid (reduce (fn [g p] (assoc g p \O)) grid path))
     (count path)))
 
-(assert (= (part1 (parse example))))
+(assert (= 94 (part1 (parse example))))
 ;; (assert (= (part1 (parse input))))
 
 (defn part2 [in]
