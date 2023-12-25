@@ -37,10 +37,13 @@
 (defn part1 [in]
   [(count (nodes in))
    (count (edges in))
-   (count (connected-set (successors in) (first (nodes in))))])
+   (let [successor (successors in)]
+     [(count (connected-set successor (first (nodes in))))
+      (frequencies (map count (vals successor)))])])
 
 (assert (= (part1 (parse example))))
-;; 1475 nodes, 3312 edges
+;; 1475 nodes, 3312 edges, and between 4 and 9 edges
+;; edge distribution {5 362, 4 957, 8 9, 6 119, 9 2, 7 26}
 (assert (= (part1 (parse input))))
 
 (defn part2 [in]
