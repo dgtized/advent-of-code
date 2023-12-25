@@ -20,9 +20,24 @@
             (into pairs (map (partial vector node) conns)))
           #{} g))
 
+(defn successors [g]
+  (reduce (fn [sg [p q]]
+            (-> sg
+                (update p (fnil conj []) q)
+                (update q (fnil conj []) p)))
+          {} (edges g)))
+
+(defn connected-set [successors start]
+  (loop [queue (conj clojure.lang.PersistentQueue/EMPTY start) seen #{}]
+    (if-let [node (peek queue)]
+      (recur (into (pop queue) (remove seen (successors node)))
+             (conj seen node))
+      seen)))
+
 (defn part1 [in]
   [(count (nodes in))
-   (count (edges in))])
+   (count (edges in))
+   (count (connected-set (successors in) (first (nodes in))))])
 
 (assert (= (part1 (parse example))))
 ;; 1475 nodes, 3312 edges
