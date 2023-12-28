@@ -73,6 +73,10 @@
       {:graph graph
        :groups groups})))
 
+;; TODO:
+;; Karger-Stein compares the best case of two recursive karger-stein iterations
+;; see https://web.stanford.edu/class/archive/cs/cs161/cs161.1166/lectures/lecture15.pdf
+
 (defn part1 [graph]
   (let [rg (reflexive graph)]
     (some (fn [{:keys [graph groups]}]
