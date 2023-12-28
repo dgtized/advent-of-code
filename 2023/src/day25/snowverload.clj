@@ -8,7 +8,7 @@
   (into {}
         (for [line (str/split-lines in)
               :let [[src & deps] (re-seq #"\w+" line)]]
-          [src (vec deps)])))
+          [src (set deps)])))
 
 (defn nodes [g]
   (reduce (fn [nodes [node conns]]
@@ -38,7 +38,7 @@
   "Ensure graph edges are bidirectional"
   [graph]
   (reduce (fn [g [v w]]
-            (update g w (fnil conj []) v))
+            (update g w (fnil conj #{}) v))
           graph (edges graph)))
 
 (comment (reflexive {:a [:b] :c [:a]}))
@@ -52,7 +52,7 @@
                   (update g v conj edge)))
               G edges)
       (reduce (fn [g edge]
-                (let [gr (update g edge (partial remove #{w}))]
+                (let [gr (update g edge disj w)]
                   (if (= v edge)
                     gr
                     (update gr edge conj v))))
