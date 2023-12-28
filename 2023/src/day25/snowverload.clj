@@ -1,5 +1,6 @@
 (ns day25.snowverload
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.set :as set]))
 
 (def input (slurp "src/day25/input"))
 (def example (slurp "src/day25/example"))
@@ -8,7 +9,7 @@
   (into {}
         (for [line (str/split-lines in)
               :let [[src & deps] (re-seq #"\w+" line)]]
-          [src (set deps)])))
+          [(set [src]) (mapv (fn [x] (set [x])) deps)])))
 
 (defn nodes [g]
   (reduce (fn [nodes [node conns]]
@@ -38,7 +39,7 @@
   "Ensure graph edges are bidirectional"
   [graph]
   (reduce (fn [g [v w]]
-            (update g w (fnil conj #{}) v))
+            (update g w (fnil conj []) v))
           graph (edges graph)))
 
 (comment (reflexive {:a [:b] :c [:a]}))
@@ -52,7 +53,7 @@
                   (update g v conj edge)))
               G edges)
       (reduce (fn [g edge]
-                (let [gr (update g edge disj w)]
+                (let [gr (update g edge (partial remove #{w}))]
                   (if (= v edge)
                     gr
                     (update gr edge conj v))))
@@ -60,27 +61,26 @@
       (dissoc G w))))
 
 (defn karger-min-cut [graph]
-  (if (> (count graph) 2)
-    (let [v (rand-nth (keys graph))
-          w (rand-nth (vec (get graph v [])))]
-      (recur (contract graph v w)))
-    graph))
+  (loop [graph graph
+         groups (zipmap (keys graph) (map (partial into #{}) (keys graph)))]
+    (if (> (count graph) 2)
+      (let [v (rand-nth (keys graph))
+            w (rand-nth (vec (get graph v [])))]
+        (recur (contract graph v w)
+               (-> groups
+                   (update v set/union (get groups w))
+                   (dissoc w))))
+      {:graph graph
+       :groups groups})))
 
 (defn part1 [graph]
-  [(count (nodes graph))
-   (count (edges graph))
-   (let [successor (successors graph)]
-     [(count (connected-set successor (first (nodes graph))))
-      (frequencies (map count (vals successor)))])
-   (karger-min-cut (reflexive graph))])
+  (let [rg (reflexive graph)]
+    (some (fn [{:keys [graph groups]}]
+            (when (= (count (graph (ffirst graph))) 3)
+              (apply * (map count (vals groups)))))
+          (repeatedly #(karger-min-cut rg)))))
 
-(assert (= (part1 (parse example))))
+(assert (= 54 (part1 (parse example))))
 ;; 1475 nodes, 3312 edges, and between 4 and 9 edges
 ;; edge distribution {5 362, 4 957, 8 9, 6 119, 9 2, 7 26}
-(assert (= (part1 (parse input))))
-
-(defn part2 [in]
-  in)
-
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+;; (assert (= 543564 (part1 (parse input))))
