@@ -9,7 +9,7 @@
   (into {}
         (for [line (str/split-lines in)
               :let [[src & deps] (re-seq #"\w+" line)]]
-          [(set [src]) (mapv (fn [x] (set [x])) deps)])))
+          [src deps])))
 
 (defn nodes [g]
   (reduce (fn [nodes [node conns]]
@@ -53,6 +53,7 @@
                   (update g v conj edge)))
               G edges)
       (reduce (fn [g edge]
+                ;; FIXME: why does this stackoverflow sometimes?
                 (let [gr (update g edge (partial remove #{w}))]
                   (if (= v edge)
                     gr
@@ -62,7 +63,7 @@
 
 (defn karger-min-cut [graph]
   (loop [graph graph
-         groups (zipmap (keys graph) (map (partial into #{}) (keys graph)))]
+         groups (zipmap (keys graph) (mapv (fn [x] (set [x])) (keys graph)))]
     (if (> (count graph) 2)
       (let [v (rand-nth (keys graph))
             w (rand-nth (vec (get graph v [])))]
@@ -79,12 +80,16 @@
 
 (defn part1 [graph]
   (let [rg (reflexive graph)]
-    (some (fn [{:keys [graph groups]}]
-            (when (= (count (graph (ffirst graph))) 3)
-              (apply * (map count (vals groups)))))
-          (repeatedly #(karger-min-cut rg)))))
+    (loop [trials 20]
+      (if-let [v (or (some (fn [{:keys [graph groups]}]
+                             (when (= (count (graph (ffirst graph))) 3)
+                               (apply * (map count (vals groups)))))
+                           (pmap (fn [_] (karger-min-cut rg)) (range 4)))
+                     (zero? trials))]
+        v
+        (recur (dec trials))))))
 
 (assert (= 54 (part1 (parse example))))
 ;; 1475 nodes, 3312 edges, and between 4 and 9 edges
 ;; edge distribution {5 362, 4 957, 8 9, 6 119, 9 2, 7 26}
-;; (assert (= 543564 (part1 (parse input))))
+(assert (= 543564 (part1 (parse input))))
