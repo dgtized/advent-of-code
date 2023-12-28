@@ -61,6 +61,7 @@
               G edges)
       (dissoc G w))))
 
+;; https://en.wikipedia.org/wiki/Karger%27s_algorithm
 (defn karger-min-cut [graph]
   (loop [graph graph
          groups (zipmap (keys graph) (mapv (fn [x] (set [x])) (keys graph)))]
