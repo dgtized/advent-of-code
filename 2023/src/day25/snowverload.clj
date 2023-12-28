@@ -34,12 +34,45 @@
              (conj seen node))
       seen)))
 
-(defn part1 [in]
-  [(count (nodes in))
-   (count (edges in))
-   (let [successor (successors in)]
-     [(count (connected-set successor (first (nodes in))))
-      (frequencies (map count (vals successor)))])])
+(defn reflexive
+  "Ensure graph edges are bidirectional"
+  [graph]
+  (reduce (fn [g [v w]]
+            (update g w (fnil conj []) v))
+          graph (edges graph)))
+
+(comment (reflexive {:a [:b] :c [:a]}))
+
+(defn contract [graph v w]
+  (let [edges (graph w)]
+    (as-> graph G
+      (reduce (fn [g edge]
+                (if (= v edge)
+                  g
+                  (update g v conj edge)))
+              G edges)
+      (reduce (fn [g edge]
+                (let [gr (update g edge (partial remove #{w}))]
+                  (if (= v edge)
+                    gr
+                    (update gr edge conj v))))
+              G edges)
+      (dissoc G w))))
+
+(defn karger-min-cut [graph]
+  (if (> (count graph) 2)
+    (let [v (rand-nth (keys graph))
+          w (rand-nth (vec (get graph v [])))]
+      (recur (contract graph v w)))
+    graph))
+
+(defn part1 [graph]
+  [(count (nodes graph))
+   (count (edges graph))
+   (let [successor (successors graph)]
+     [(count (connected-set successor (first (nodes graph))))
+      (frequencies (map count (vals successor)))])
+   (karger-min-cut (reflexive graph))])
 
 (assert (= (part1 (parse example))))
 ;; 1475 nodes, 3312 edges, and between 4 and 9 edges
