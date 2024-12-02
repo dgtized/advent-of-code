@@ -28,7 +28,8 @@
       (recur (inc i)
              (conj acc (vec (concat (take i report) (drop (inc i) report))))))))
 
-(removals [1 2 3])
+(assert (= [[2 3] [1 3] [1 2] [1 2 3]]
+           (removals [1 2 3])))
 
 (defn safe-with-removal? [report]
   (some safe? (removals report)))
