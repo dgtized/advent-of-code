@@ -21,12 +21,13 @@
 (assert (= 2 (part1 (parse example))))
 (assert (= 369 (part1 (parse input))))
 
+(defn remove-element [xs i]
+  (vec (concat (take i xs) (drop (inc i) xs))))
+
 (defn removals [report]
-  (loop [i 0 acc []]
-    (if (= i (count report))
-      (conj acc report)
-      (recur (inc i)
-             (conj acc (vec (concat (take i report) (drop (inc i) report))))))))
+  (conj (mapv (partial remove-element report)
+              (range (count report)))
+        report))
 
 (assert (= [[2 3] [1 3] [1 2] [1 2 3]]
            (removals [1 2 3])))
