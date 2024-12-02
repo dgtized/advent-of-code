@@ -21,8 +21,20 @@
 (assert (= 2 (part1 (parse example))))
 (assert (= 369 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn removals [report]
+  (loop [i 0 acc []]
+    (if (= i (count report))
+      (conj acc report)
+      (recur (inc i)
+             (conj acc (vec (concat (take i report) (drop (inc i) report))))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(removals [1 2 3])
+
+(defn safe-with-removal? [report]
+  (some safe? (removals report)))
+
+(defn part2 [in]
+  (count (filter safe-with-removal? in)))
+
+(assert (= 4 (part2 (parse example))))
+(assert (= 428 (part2 (parse input))))
