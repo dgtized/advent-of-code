@@ -18,17 +18,17 @@
                       :when (not= 0 i j)]
                   [i j]))
 
-(defn vplus [v1 v2]
+(defn v+ [v1 v2]
   (map + v1 v2))
 
-(defn vtimes [[a b] val]
+(defn v* [[a b] val]
   [(* a val) (* b val)])
 
 (defn is-xmas? [grid cell dir]
-  (and (= (get grid (vplus cell (vtimes dir 0))) \X)
-       (= (get grid (vplus cell (vtimes dir 1))) \M)
-       (= (get grid (vplus cell (vtimes dir 2))) \A)
-       (= (get grid (vplus cell (vtimes dir 3))) \S)))
+  (and (= (get grid (v+ cell (v* dir 0))) \X)
+       (= (get grid (v+ cell (v* dir 1))) \M)
+       (= (get grid (v+ cell (v* dir 2))) \A)
+       (= (get grid (v+ cell (v* dir 3))) \S)))
 
 (defn part1 [grid]
   (count (for [[cell _] (find-starts grid \X)
@@ -39,13 +39,13 @@
 (assert (= 18 (part1 (parse->grid example))))
 (assert (= 2406 (part1 (parse->grid input))))
 
-(defn vminus [v1 v2]
+(defn v- [v1 v2]
   (map - v1 v2))
 
 (defn mas? [grid cell dir]
   (= #{\M \S}
-     (set [(get grid (vplus cell dir))
-           (get grid (vminus cell dir))])))
+     (set [(get grid (v+ cell dir))
+           (get grid (v- cell dir))])))
 
 (defn x-mas? [grid cell]
   (and (mas? grid cell [1 1])
