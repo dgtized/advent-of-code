@@ -1,4 +1,4 @@
-(ns day03.day03
+(ns day03.mull-it-over
   (:require [clojure.string :as str]))
 
 (def input (slurp "src/day03/input"))
