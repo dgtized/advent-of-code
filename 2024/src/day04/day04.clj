@@ -22,7 +22,7 @@
   (mapv + v1 v2))
 
 (defn v* [v n]
-  (mapv (partial * n) v))
+  (mapv #(* % n) v))
 
 (defn is-xmas? [grid cell dir]
   (and (= (get grid (v+ cell (v* dir 0))) \X)
