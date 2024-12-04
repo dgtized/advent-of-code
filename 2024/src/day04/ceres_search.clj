@@ -1,17 +1,16 @@
 (ns day04.ceres-search
   (:require
-   [aoc.vector :refer [v* v+ v-] :as v]
+   [aoc.grid :as ag]
+   [aoc.vector :as v :refer [v* v+ v-]]
    [clojure.string :as str]))
 
 (def input (slurp "src/day04/input"))
 (def example (slurp "src/day04/example"))
 
 (defn parse->grid [in]
-  (into {}
-        (let [lines (str/split-lines in)]
-          (mapcat (fn [j line]
-                    (map-indexed (fn [i c] [[i j] c]) line))
-                  (range (count lines)) lines))))
+  (->> in
+       str/split-lines
+       ag/lines->grid))
 
 (defn find-starts [grid start]
   (filter (fn [[_ value]] (= value start)) grid))
