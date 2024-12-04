@@ -1,4 +1,4 @@
-(ns day01
+(ns day01.historian-hysteria
   (:require [clojure.string :as str]))
 
 (def input (slurp "src/day01/input"))
