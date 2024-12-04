@@ -11,9 +11,8 @@
                     (map-indexed (fn [i c] [[i j] c]) line))
                   (range (count lines)) lines))))
 
-(defn find-xs [grid]
-  (let [starts (filter (fn [[_ value]] (= value \X)) grid)]
-    starts))
+(defn find-starts [grid start]
+  (filter (fn [[_ value]] (= value start)) grid))
 
 (def directions (for [i [-1 0 1] j [-1 0 1]
                       :when (not= 0 i j)]
@@ -32,7 +31,7 @@
        (= (get grid (vplus cell (vtimes dir 3))) \S)))
 
 (defn part1 [grid]
-  (count (for [[cell _] (find-xs grid)
+  (count (for [[cell _] (find-starts grid \X)
                dir directions
                :when (is-xmas? grid cell dir)]
            [cell dir])))
@@ -40,8 +39,23 @@
 (assert (= 18 (part1 (parse->grid example))))
 (assert (= 2406 (part1 (parse->grid input))))
 
-(defn part2 [in]
-  in)
+(defn vminus [v1 v2]
+  (map - v1 v2))
 
-(assert (= (part2 (parse->grid example))))
-(assert (= (part2 (parse->grid input))))
+(defn mas? [grid cell dir]
+  (and (= \M (get grid (vplus cell dir)))
+       (= \S (get grid (vminus cell dir)))))
+
+(defn x-mas? [grid cell]
+  (and (or (mas? grid cell [-1 -1])
+           (mas? grid cell [1 1]))
+       (or (mas? grid cell [-1 1])
+           (mas? grid cell [1 -1]))))
+
+(defn part2 [grid]
+  (count (for [[cell _] (find-starts grid \A)
+               :when (x-mas? grid cell)]
+           cell)))
+
+(assert (= 9 (part2 (parse->grid example))))
+(assert (= 1807 (part2 (parse->grid input))))
