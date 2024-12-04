@@ -43,14 +43,13 @@
   (map - v1 v2))
 
 (defn mas? [grid cell dir]
-  (and (= \M (get grid (vplus cell dir)))
-       (= \S (get grid (vminus cell dir)))))
+  (= #{\M \S}
+     (set [(get grid (vplus cell dir))
+           (get grid (vminus cell dir))])))
 
 (defn x-mas? [grid cell]
-  (and (or (mas? grid cell [-1 -1])
-           (mas? grid cell [1 1]))
-       (or (mas? grid cell [-1 1])
-           (mas? grid cell [1 -1]))))
+  (and (mas? grid cell [1 1])
+       (mas? grid cell [1 -1])))
 
 (defn part2 [grid]
   (count (for [[cell _] (find-starts grid \A)
