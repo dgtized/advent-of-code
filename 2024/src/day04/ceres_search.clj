@@ -1,4 +1,4 @@
-(ns day04.day04
+(ns day04.ceres-search
   (:require
    [aoc.vector :refer [v* v+ v-] :as v]
    [clojure.string :as str]))
