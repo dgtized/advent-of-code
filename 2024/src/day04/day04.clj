@@ -1,6 +1,6 @@
 (ns day04.day04
   (:require
-   [aoc.vector :refer [v* v+ v-]]
+   [aoc.vector :refer [v* v+ v-] :as v]
    [clojure.string :as str]))
 
 (def input (slurp "src/day04/input"))
@@ -16,10 +16,6 @@
 (defn find-starts [grid start]
   (filter (fn [[_ value]] (= value start)) grid))
 
-(def directions (for [i [-1 0 1] j [-1 0 1]
-                      :when (not= 0 i j)]
-                  [i j]))
-
 (defn is-xmas? [grid cell dir]
   (and (= (get grid (v+ cell (v* dir 0))) \X)
        (= (get grid (v+ cell (v* dir 1))) \M)
@@ -28,7 +24,7 @@
 
 (defn part1 [grid]
   (count (for [[cell _] (find-starts grid \X)
-               dir directions
+               dir v/directions
                :when (is-xmas? grid cell dir)]
            [cell dir])))
 
