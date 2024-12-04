@@ -19,10 +19,10 @@
                   [i j]))
 
 (defn v+ [v1 v2]
-  (map + v1 v2))
+  (mapv + v1 v2))
 
-(defn v* [[a b] val]
-  [(* a val) (* b val)])
+(defn v* [v n]
+  (mapv (partial * n) v))
 
 (defn is-xmas? [grid cell dir]
   (and (= (get grid (v+ cell (v* dir 0))) \X)
@@ -40,7 +40,7 @@
 (assert (= 2406 (part1 (parse->grid input))))
 
 (defn v- [v1 v2]
-  (map - v1 v2))
+  (mapv - v1 v2))
 
 (defn mas? [grid cell dir]
   (= #{\M \S}
