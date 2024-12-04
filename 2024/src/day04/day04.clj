@@ -1,5 +1,7 @@
 (ns day04.day04
-  (:require [clojure.string :as str]))
+  (:require
+   [aoc.vector :refer [v* v+ v-]]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day04/input"))
 (def example (slurp "src/day04/example"))
@@ -18,12 +20,6 @@
                       :when (not= 0 i j)]
                   [i j]))
 
-(defn v+ [v1 v2]
-  (mapv + v1 v2))
-
-(defn v* [v n]
-  (mapv #(* % n) v))
-
 (defn is-xmas? [grid cell dir]
   (and (= (get grid (v+ cell (v* dir 0))) \X)
        (= (get grid (v+ cell (v* dir 1))) \M)
@@ -38,9 +34,6 @@
 
 (assert (= 18 (part1 (parse->grid example))))
 (assert (= 2406 (part1 (parse->grid input))))
-
-(defn v- [v1 v2]
-  (mapv - v1 v2))
 
 (defn mas? [grid cell dir]
   (= #{\M \S}
