@@ -26,8 +26,23 @@
 (assert (= 143 (part1 (parse example))))
 (assert (= 5509 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn legalize [rules xs]
+  (sort (fn [a b]
+          (let [sa (get rules a #{})
+                sb (get rules b #{})]
+            (cond (contains? sa b)
+                  -1
+                  (contains? sb a)
+                  1
+                  :else 0)))
+        xs))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [{:keys [rules pages]}]
+  (->> pages
+       (remove #(legal? rules %))
+       (map #(legalize rules %))
+       (map middle)
+       (apply +)))
+
+(assert (= 123 (part2 (parse example))))
+(assert (= 4407 (part2 (parse input))))
