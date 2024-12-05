@@ -1,20 +1,31 @@
 #!/usr/bin/env bb
-
+;; adapted from https://github.com/borkdude/advent-of-babashka/blob/main/bb/new_day.clj
 (ns day
   (:require [babashka.fs :as fs]
             [babashka.cli :as cli]
             [babashka.curl :as curl]))
 
-(defn build-day [{:keys [year day]}]
+(defn fetch-input [{:keys [year day]}]
+  (if-let [session (System/getenv "AOC_SESSION")]
+    (let [url (format "https://adventofcode.com/%d/day/%d/input" year day)
+          day-input (format "%d/src/day%2d/input" year day)]
+      (if-not (fs/exists? day-input)
+        (do (println "fetching " url " -> " day-input)
+            (let [headers
+                  {"Cookie" (str "session=" session)
+                   "User-Agent" "github.com/dgtized/advent-of-code by dgtized@gmail.com"}
+                  body (:body (curl/get url {:headers headers}))]
+              (spit day-input body)))
+        (println day-input " already downloaded")))
+    (println "Set AOC_SESSION to download input")))
+
+(defn build-day [{:keys [year day] :as opts}]
   (println (format "setup %d - %02d" year day))
   (let [today (format "%4d/src/day%02d" year day)]
     (when-not (fs/directory? today)
       (println (format "building %s" today))
-      (fs/create-dirs today))
-
-    ;; TODO handle oauth to fetch input files
-    ;; (curl/get "https://adventofcode.com/2021/day/1/input")
-    ))
+      (fs/create-dirs today)
+      (fetch-input opts))))
 
 (defn advent-day? [day]
   (<= 1 day 25))
