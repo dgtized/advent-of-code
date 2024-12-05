@@ -4,7 +4,7 @@
   (:require [clojure.string :as str]
             [babashka.fs :as fs]
             [babashka.cli :as cli]
-            [babashka.curl :as curl]))
+            [babashka.http-client :as http]))
 
 (defn snake-case [s]
   (str/replace s #"\-" "_"))
@@ -33,7 +33,7 @@
         (let [headers
               {"Cookie" (str "session=" session)
                "User-Agent" "github.com/dgtized/advent-of-code by dgtized@gmail.com"}
-              body (:body (curl/get url {:headers headers}))]
+              body (:body (http/get url {:headers headers}))]
           (spit day-input body))
         (println day-input " already downloaded")))
     (println "Set AOC_SESSION to download input")))
