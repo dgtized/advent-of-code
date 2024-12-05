@@ -31,8 +31,9 @@
          (println
           (format "Missing required argument: %s\n" option))
          :validate
-         (println
-          (format "%s does not exist!\n" msg)))))})
+         (do (println
+              (format "%s does not exist!\n" msg))
+             (System/exit 1)))))})
 
 (defn help-args [spec]
   (println "Usage: bin/day.clj [opts]")
