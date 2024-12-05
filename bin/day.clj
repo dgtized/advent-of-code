@@ -7,8 +7,8 @@
 
 (defn fetch-input [{:keys [year day]}]
   (if-let [session (System/getenv "AOC_SESSION")]
-    (let [url (format "https://adventofcode.com/%d/day/%d/input" year day)
-          day-input (format "%d/src/day%2d/input" year day)]
+    (let [url (format "https://adventofcode.com/%4d/day/%d/input" year day)
+          day-input (format "%4d/src/day%02d/input" year day)]
       (if-not (fs/exists? day-input)
         (do (println "fetching " url " -> " day-input)
             (let [headers
