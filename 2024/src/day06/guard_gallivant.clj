@@ -23,6 +23,9 @@
          (clockwise [-1 0])
          (clockwise [0 -1]))
 
+(defn find-guard [grid]
+  (some (fn [[cell v]] (when (= v \^) cell)) grid))
+
 (defn step [[grid pos dir steps]]
   (let [pos' (v/v+ pos dir)]
     (case (get grid pos')
@@ -32,7 +35,7 @@
       nil [(assoc grid pos \X) pos' dir steps])))
 
 (defn walk [grid]
-  (let [start (some (fn [[cell v]] (when (= v \^) cell)) grid)]
+  (let [start (find-guard grid)]
     (some (fn [[grid pos _]] (when-not (get grid pos) grid))
           (iterate step [grid start [0 -1] #{}]))))
 
@@ -51,7 +54,7 @@
         (iterate step [grid start [0 -1] #{}])))
 
 (defn part2 [grid]
-  (let [start (some (fn [[cell v]] (when (= v \^) cell)) grid)]
+  (let [start (find-guard grid)]
     (count (filter #(= (first %) :loop)
                    (for [[cell v] grid
                          :when (= v \.)]
