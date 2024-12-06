@@ -56,10 +56,12 @@
 (defn part2 [grid]
   (let [start (find-guard grid)]
     (count (filter #(= (first %) :loop)
-                   (for [[cell v] grid
-                         :when (= v \.)]
-                     (loop? start (assoc grid cell \#)))))))
+                   (let [pathed-grid (walk grid)]
+                     (for [[cell v] pathed-grid
+                           :when (and (= v \X) (not= (get grid cell) \^))]
+                       (loop? start (assoc grid cell \#))))))))
 
 (assert (= 6 (part2 (parse example))))
-;; slow 125605.808097 msecs
+;; initial slow attempt: 125605.81 msecs
+;; only check positions on path: 28152.15 msecs
 (time (assert (= 1753 (part2 (parse input)))))
