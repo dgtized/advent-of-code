@@ -55,11 +55,11 @@
 
 (defn part2 [grid]
   (let [start (find-guard grid)]
-    (count (filter #(= (first %) :loop)
-                   (let [pathed-grid (walk grid)]
-                     (for [[cell v] pathed-grid
-                           :when (and (= v \X) (not= (get grid cell) \^))]
-                       (loop? start (assoc grid cell \#))))))))
+    (filter #(= (first %) :loop)
+            (let [pathed-grid (walk grid)]
+              (for [[cell v] pathed-grid
+                    :when (and (not= start cell) (= v \X))]
+                (loop? start (assoc grid cell \#)))))))
 
 (assert (= 6 (part2 (parse example))))
 ;; initial slow attempt: 125605.81 msecs
