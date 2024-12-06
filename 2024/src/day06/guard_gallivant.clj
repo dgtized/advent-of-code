@@ -33,8 +33,8 @@
 
 (defn walk [grid]
   (let [start (some (fn [[cell v]] (when (= v \^) cell)) grid)]
-    (ffirst (drop-while (fn [[grid pos _]] (not= :outside (get grid pos :outside)))
-                        (iterate step [grid start [0 -1]])))))
+    (some (fn [[grid pos _]] (when-not (get grid pos) grid))
+          (iterate step [grid start [0 -1]]))))
 
 (defn part1 [in]
   (count (filter #(= % \X) (vals (walk in)))))
