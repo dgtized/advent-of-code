@@ -21,11 +21,14 @@
          (tree [1 2 3])
          (tree [81 40 27]))
 
-(defn evaluate [[expected & values]]
-  (some #{expected} (tree values)))
+(defn evaluate [eval-tree [expected & values]]
+  (some #{expected} (eval-tree values)))
+
+(defn sum-tree [eval-tree equations]
+  (reduce + (keep (fn [expr] (evaluate eval-tree expr)) equations)))
 
 (defn part1 [equations]
-  (reduce + (keep (fn [expr] (evaluate expr)) equations)))
+  (sum-tree tree equations))
 
 ;; (frequencies (map count (map rest (parse input))))
 
@@ -41,11 +44,8 @@
              (rest expr))
       results)))
 
-(defn evaluate2 [[expected & values]]
-  (some #{expected} (tree2 values)))
-
 (defn part2 [equations]
-  (reduce + (keep (fn [expr] (evaluate2 expr)) equations)))
+  (sum-tree tree2 equations))
 
 (assert (= 11387 (part2 (parse example))))
 ;; slow 5565.96ms
