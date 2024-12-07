@@ -35,8 +35,8 @@
 (assert (= 3749 (part1 (parse example))))
 (assert (= 1985268524462 (part1 (parse input))))
 
-(defn tree2 [values]
-  (loop [results [(first values)] expr (rest values)]
+(defn tree-concat [[val & values]]
+  (loop [results [val] expr values]
     (if-let [v (first expr)]
       (recur (concat (map (partial * v) results)
                      (map (partial + v) results)
@@ -45,7 +45,7 @@
       results)))
 
 (defn part2 [equations]
-  (sum-tree tree2 equations))
+  (sum-tree tree-concat equations))
 
 (assert (= 11387 (part2 (parse example))))
 ;; slow 5565.96ms
