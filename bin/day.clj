@@ -44,6 +44,7 @@
       (do (println (format "building %d - %02d" year day))
           (fs/create-dirs today)
           (fetch-input opts)
+          (spit (format "%s/example" today) "")
           (generate (format "%d/template.clj" year)
                     (merge {:problem (format "day%02d" day)} opts)))
       (println today "already exists"))))
