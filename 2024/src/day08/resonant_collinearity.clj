@@ -32,15 +32,15 @@
 
 (comment (frequencies (parse example)))
 
-(defn part1 [grid]
+(defn result [antinodes grid]
   (->> grid
        frequencies
        (mapcat (fn [[_ cells]] (antinodes grid cells)))
        distinct
        count))
 
-(assert (= 14 (part1 (parse example))))
-(assert (= 269 (part1 (parse input))))
+(assert (= 14 (result antinodes (parse example))))
+(assert (= 269 (result antinodes (parse input))))
 
 (defn antinodes-overlap [grid cells]
   (->> cells
@@ -58,12 +58,5 @@
            distinct
            count)))
 
-(defn part2 [grid]
-  (->> grid
-       frequencies
-       (mapcat (fn [[_ cells]] (antinodes-overlap grid cells)))
-       distinct
-       count))
-
-(assert (= 34 (part2 (parse example))))
-(assert (= 949 (part2 (parse input))))
+(assert (= 34 (result antinodes-overlap (parse example))))
+(assert (= 949 (result antinodes-overlap (parse input))))
