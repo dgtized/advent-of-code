@@ -51,10 +51,12 @@
                     (take-while grid (iterate (fn [x] (v/v- x delta)) a))
                     (take-while grid (iterate (fn [x] (v/v+ x delta)) b))))))))
 
-(comment
-  (let [grid (reduce (fn [g [cell v]] (assoc g cell (if (= v \#) \. v))){} (parse (slurp "src/day08/example2")))
-        freqs (get (frequencies grid) \T)]
-    (antinodes-overlap grid freqs)))
+(assert
+ (= 9 (->> (let [grid (reduce (fn [g [cell v]] (assoc g cell (if (= v \#) \. v))){} (parse (slurp "src/day08/example2")))
+                 freqs (get (frequencies grid) \T)]
+             (antinodes-overlap grid freqs))
+           distinct
+           count)))
 
 (defn part2 [grid]
   (->> grid
