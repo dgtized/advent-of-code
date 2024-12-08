@@ -22,7 +22,7 @@
           {}
           (remove (fn [[_ f]] (= f \.)) grid)))
 
-(defn antinodes [grid cells]
+(defn antinodes [cells]
   (mapcat (fn [[a b]]
             (let [delta (v/v- b a)]
               [(v/v- a delta) (v/v+ b delta)]
@@ -34,7 +34,7 @@
 (defn part1 [grid]
   (->> grid
        frequencies
-       (mapcat (fn [[freq cells]] (antinodes grid cells)))
+       (mapcat (fn [[_ cells]] (antinodes cells)))
        (filter grid)
        distinct
        count))
@@ -42,8 +42,26 @@
 (assert (= 14 (part1 (parse example))))
 (assert (= 269 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn antinodes-overlap [grid cells]
+  (->> cells
+       all-pairs
+       (mapcat (fn [[a b]]
+                 (let [delta (v/v- b a)]
+                   (concat
+                    (take-while grid (iterate (fn [x] (v/v- x delta)) a))
+                    (take-while grid (iterate (fn [x] (v/v+ x delta)) b))))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(comment
+  (let [grid (reduce (fn [g [cell v]] (assoc g cell (if (= v \#) \. v))){} (parse (slurp "src/day08/example2")))
+        freqs (get (frequencies grid) \T)]
+    (antinodes-overlap grid freqs)))
+
+(defn part2 [grid]
+  (->> grid
+       frequencies
+       (mapcat (fn [[_ cells]] (antinodes-overlap grid cells)))
+       distinct
+       count))
+
+(assert (= 34 (part2 (parse example))))
+(assert (= 949 (part2 (parse input))))
