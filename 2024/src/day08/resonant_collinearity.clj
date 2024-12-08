@@ -22,20 +22,20 @@
           {}
           (remove (fn [[_ f]] (= f \.)) grid)))
 
-(defn antinodes [cells]
-  (mapcat (fn [[a b]]
-            (let [delta (v/v- b a)]
-              [(v/v- a delta) (v/v+ b delta)]
-              ))
-          (all-pairs cells)))
+(defn antinodes [grid cells]
+  (->> cells
+       all-pairs
+       (mapcat (fn [[a b]]
+                 (let [delta (v/v- b a)]
+                   [(v/v- a delta) (v/v+ b delta)])))
+       (filter grid)))
 
 (comment (frequencies (parse example)))
 
 (defn part1 [grid]
   (->> grid
        frequencies
-       (mapcat (fn [[_ cells]] (antinodes cells)))
-       (filter grid)
+       (mapcat (fn [[_ cells]] (antinodes grid cells)))
        distinct
        count))
 
