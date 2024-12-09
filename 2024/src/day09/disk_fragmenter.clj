@@ -59,12 +59,56 @@
 
 (assert (= 1928 (part1 (parse example))))
 ;; slow 6146.933911 msecs / 9s with gap drop
-(time (assert (= 6607511583593 (part1 (parse input)))))
+;; (time (assert (= 6607511583593 (part1 (parse input)))))
 
 (comment (expand (parse input)))
 
-(defn part2 [in]
-  in)
+(defn find-file [file-id chunks]
+  (some (fn [[idx chunk]]
+          (when (= (:id chunk) file-id) [chunk idx]))
+        (map-indexed vector chunks)))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn without-file [file chunks]
+  (replace {file {:gap (:len file)}} chunks))
+
+(defn gap-index [size chunks]
+  (loop [idx 0]
+    (when (< idx (count chunks))
+      (let [gap (get (nth chunks idx) :gap 0)]
+        (if (>= gap size)
+          idx
+          (recur (inc idx)))))))
+
+(defn collapse [gap chunks]
+  (let [[gaps removed] (split-with :gap chunks)]
+    (if (and (zero? gap) (empty? gaps))
+      removed
+      (into [{:gap (+ gap (apply + (map :gap gaps)))}]
+            removed))))
+
+(defn defrag-fit [chunks]
+  (let [max-id (apply max (map :id (filter :id chunks)))]
+    (loop [file-id max-id chunks chunks]
+      (if (neg? file-id)
+        chunks
+        (let [[file fidx] (find-file file-id chunks)
+              idx (gap-index (:len file) chunks)]
+          (if (and idx (< idx fidx))
+            (let [gap (nth chunks idx)
+                  [before after] (split-at idx chunks)]
+              (recur (dec file-id)
+                     (concat before
+                             [file]
+                             (collapse (max (- (:gap gap) (:len file)) 0)
+                                       (without-file file (rest after))))))
+            (recur (dec file-id)
+                   chunks)))))))
+
+(comment (defrag-fit (expand (parse example))))
+
+(defn part2 [in]
+  (checksum (defrag-fit (expand in))))
+
+(assert (= 2858 (part2 (parse example))))
+(println (time (part2 (parse input))))
+;; (assert (= ))
