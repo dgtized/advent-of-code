@@ -9,8 +9,8 @@
 
 (defn expand [layout]
   (remove (fn [{:keys [gap]}]  (= gap 0))
-          (mapcat (fn [[idx [len gap]]]
-                    (concat [{:idx idx :len len}]
+          (mapcat (fn [[id [len gap]]]
+                    (concat [{:id id :len len}]
                             (when gap [{:gap gap}])))
                   (map-indexed vector (partition-all 2 2 layout)))))
 
@@ -26,36 +26,33 @@
               (let [gap (get chunk :gap 0)
                     lc (nth chunks (dec (count chunks)))
                     n (if (:gap lc) 2 1)
-                    {lidx :idx llen :len} (if (= n 1) lc (nth chunks (- (count chunks) 2)))]
+                    {lid :id llen :len} (if (= n 1) lc (nth chunks (- (count chunks) 2)))]
                 (recur (concat
                         (when (> gap llen)
                           [{:gap (- gap llen)}])
                         (vec (rest (drop-last n chunks)))
                         (when (< gap llen)
-                          [{:idx lidx
+                          [{:id lid
                             :len (- llen gap)}]))
-                       (conj fs {:idx lidx :len (min gap llen)})))))
+                       (conj fs {:id lid :len (min gap llen)})))))
       fs)))
 
 (defn checksum [fs]
   (loop [fs fs i 0 sum 0]
     (if (seq fs)
-      (let [{:keys [idx len]} (first fs)]
-        (recur (rest fs)
-               (+ i len)
-               (+ sum (apply + (map (partial * idx) (range i (+ i len)))))))
+      (let [chunk (first fs)]
+        (if-let [gap (:gap chunk)]
+          (recur (rest fs)
+                 (+ i gap)
+                 sum)
+          (let [{:keys [id len]} (first fs)]
+            (recur (rest fs)
+                   (+ i len)
+                   (+ sum (apply + (map (partial * id) (range i (+ i len)))))))))
       sum)))
 
 (comment (defrag (expand (parse "12345")))
          (defrag (expand (parse example))))
-#_(defn defrag [layout]
-    (loop [idx 0
-           layout layout
-           file-idx 0
-           last-file-idx (int (/ (dec (count layout)) 2))
-           checksum 0]
-      (let [[len gap] (take 2 layout)]
-        (recur (+ checksum (calc-checksum idx file-idx len))))))
 
 (defn part1 [in]
   (checksum (defrag (expand in))))
