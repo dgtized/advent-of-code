@@ -86,6 +86,8 @@
       (into [{:gap (+ gap (apply + (map :gap gaps)))}]
             removed))))
 
+(comment (collapse 1 [{:gap 1} {:gap 2} {:id 5 :len 2}]))
+
 (defn defrag-fit [chunks]
   (let [max-id (apply max (map :id (filter :id chunks)))]
     (loop [file-id max-id chunks chunks]
@@ -97,10 +99,10 @@
             (let [gap (nth chunks idx)
                   [before after] (split-at idx chunks)]
               (recur (dec file-id)
-                     (concat before
-                             [file]
-                             (collapse (max (- (:gap gap) (:len file)) 0)
-                                       (without-file file (rest after))))))
+                     (vec (concat before
+                                  [file]
+                                  (collapse (max (- (:gap gap) (:len file)) 0)
+                                            (without-file file (rest after)))))))
             (recur (dec file-id)
                    chunks)))))))
 
@@ -110,5 +112,5 @@
   (checksum (defrag-fit (expand in))))
 
 (assert (= 2858 (part2 (parse example))))
-(println (time (part2 (parse input))))
-;; (assert (= ))
+;; slow 27635.252687ms
+(assert (= 6636608781232 (time (part2 (parse input)))))
