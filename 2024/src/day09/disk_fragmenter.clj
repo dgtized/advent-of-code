@@ -8,27 +8,33 @@
   (map (comp parse-long str) (str/trimr in)))
 
 (defn expand [layout]
-  (for [[idx [len gap]] (map-indexed vector (partition-all 2 2 layout))]
-    {:idx idx :len len :gap (if gap gap 0)}))
+  (remove (fn [{:keys [gap]}]  (= gap 0))
+          (mapcat (fn [[idx [len gap]]]
+                    (concat [{:idx idx :len len}]
+                            (when gap [{:gap gap}])))
+                  (map-indexed vector (partition-all 2 2 layout)))))
 
 (defn defrag [chunks]
   (loop [chunks (vec chunks) fs []]
     (if (seq chunks)
-      (let [{:keys [idx len gap]} (first chunks)]
-        (if (or (zero? gap) (empty? (rest chunks)))
-          (recur (rest chunks)
-                 (conj fs {:idx idx :len len}))
-          (let [{lidx :idx llen :len} (last chunks)]
-            (recur (concat
-                    [{:idx lidx
-                      :len (min llen gap)
-                      :gap (if (< gap llen) 0 (- gap llen))}]
-                    (rest (drop-last 1 chunks))
-                    (when (< gap llen)
-                      [{:idx lidx
-                        :len (- llen gap)
-                        :gap 0}]))
-                   (conj fs {:idx idx :len len})))))
+      (let [chunk (first chunks)]
+        (cond (pos? (get chunk :len 0))
+              (recur (rest chunks) (conj fs chunk))
+              (or (zero? (:gap chunk)) (empty? (rest chunks)))
+              (recur (rest chunks) fs)
+              :else
+              (let [gap (get chunk :gap 0)
+                    lc (nth chunks (dec (count chunks)))
+                    n (if (:gap lc) 2 1)
+                    {lidx :idx llen :len} (if (= n 1) lc (nth chunks (- (count chunks) 2)))]
+                (recur (concat
+                        (when (> gap llen)
+                          [{:gap (- gap llen)}])
+                        (vec (rest (drop-last n chunks)))
+                        (when (< gap llen)
+                          [{:idx lidx
+                            :len (- llen gap)}]))
+                       (conj fs {:idx lidx :len (min gap llen)})))))
       fs)))
 
 (defn checksum [fs]
@@ -55,8 +61,8 @@
   (checksum (defrag (expand in))))
 
 (assert (= 1928 (part1 (parse example))))
-;; slow 6146.933911 msecs
-#_(time (assert (= 6607511583593 (part1 (parse input)))))
+;; slow 6146.933911 msecs / 9s with gap drop
+(time (assert (= 6607511583593 (part1 (parse input)))))
 
 (comment (expand (parse input)))
 
