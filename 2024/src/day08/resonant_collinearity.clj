@@ -1,12 +1,8 @@
 (ns day08.resonant-collinearity
   (:require [clojure.string :as str]
             [aoc.grid :as ag]
-            [aoc.vector :as v]))
-
-(defn all-pairs [coll]
-  (when-let [s (next coll)]
-    (lazy-cat (for [y s] [(first coll) y])
-              (all-pairs s))))
+            [aoc.vector :as v]
+            [aoc.combinatorics :as ac]))
 
 (def input (slurp "src/day08/input"))
 (def example (slurp "src/day08/example"))
@@ -33,7 +29,7 @@
   (->> grid
        frequencies
        (mapcat (fn [[_ cells]]
-                 (mapcat (antinodes grid) (all-pairs cells))))
+                 (mapcat (antinodes grid) (ac/all-pairs cells))))
        distinct
        count))
 
@@ -50,7 +46,7 @@
 (assert
  (= 9 (->> (let [grid (reduce (fn [g [cell v]] (assoc g cell (if (= v \#) \. v))){} (parse (slurp "src/day08/example2")))
                  freqs (get (frequencies grid) \T)]
-             (mapcat (antinodes-all grid) (all-pairs freqs)))
+             (mapcat (antinodes-all grid) (ac/all-pairs freqs)))
            distinct
            count)))
 
