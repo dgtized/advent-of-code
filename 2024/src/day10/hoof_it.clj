@@ -56,8 +56,8 @@
 (assert (= 36 (part1 (parse example2))))
 (assert (= 548 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn part2 [grid]
+  (apply + (map #(count (search grid (first %))) (find-pos 0 grid))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 81 (part2 (parse example2))))
+(assert (= 1252 (part2 (parse input))))
