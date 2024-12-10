@@ -59,7 +59,7 @@
 
 (assert (= 1928 (part1 (parse example))))
 ;; slow 6146.933911 msecs / 9s with gap drop
-;; (time (assert (= 6607511583593 (part1 (parse input)))))
+(assert (= 6607511583593 (time (part1 (parse input)))))
 
 (comment (expand (parse input)))
 
