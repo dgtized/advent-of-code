@@ -33,7 +33,7 @@
   (loop [paths [[start]]]
     (cond (every? (fn [path] (and (= 9 (get grid (last path)))
                                  (= 10 (count path)))) paths)
-          (set (map last paths))
+          paths
           :else
           (recur (mapcat
                   (fn [path]
@@ -42,12 +42,15 @@
                         (conj path neighbor))))
                   paths)))))
 
+(defn score-trail [grid start]
+  (set (map last (search grid start))))
+
 (comment (search (parse example) [0 0])
          (let [grid (parse example2)]
-           (map #(search grid %) (map first (find-pos 0 grid)))))
+           (map #(score-trail grid %) (map first (find-pos 0 grid)))))
 
 (defn part1 [grid]
-  (apply + (map #(count (search grid %)) (map first (find-pos 0 grid)))))
+  (apply + (map #(count (score-trail grid %)) (map first (find-pos 0 grid)))))
 
 (assert (= 1 (part1 (parse example))))
 (assert (= 36 (part1 (parse example2))))
