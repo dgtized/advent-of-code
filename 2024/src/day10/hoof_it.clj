@@ -31,15 +31,13 @@
 
 (defn search [grid start]
   (loop [paths [[start]]]
-    (cond (every? (fn [path] (and (= 9 (get grid (last path)))
-                                 (= 10 (count path)))) paths)
+    (cond (every? (fn [path] (= 9 (get grid (last path)))) paths)
           paths
           :else
           (recur (mapcat
                   (fn [path]
-                    (let [node (last path)]
-                      (for [neighbor (successors grid node)]
-                        (conj path neighbor))))
+                    (for [neighbor (successors grid (last path))]
+                      (conj path neighbor)))
                   paths)))))
 
 (defn score-trail [grid start]
