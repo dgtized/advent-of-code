@@ -24,6 +24,9 @@
         :when (and height (= (inc (get grid pos)) height))]
     neighbor))
 
+(defn goal? [grid path]
+  (= 9 (get grid (last path))))
+
 (comment (find-pos 9 (parse example)))
 (comment (find-pos 0 (parse example2))
          (count (find-pos 0 (parse input)))
@@ -31,7 +34,7 @@
 
 (defn search [grid start]
   (loop [paths [[start]]]
-    (cond (every? (fn [path] (= 9 (get grid (last path)))) paths)
+    (cond (every? (partial goal? grid) paths)
           paths
           :else
           (recur (mapcat
