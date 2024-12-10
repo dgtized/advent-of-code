@@ -49,15 +49,21 @@
          (let [grid (parse example2)]
            (map #(score-trail grid %) (map first (find-pos 0 grid)))))
 
+(defn score [method grid]
+  (->> grid
+       (find-pos 0)
+       (map #(count (method grid (first %))))
+       (apply +)))
+
 (defn part1 [grid]
-  (apply + (map #(count (score-trail grid %)) (map first (find-pos 0 grid)))))
+  (score score-trail grid))
 
 (assert (= 1 (part1 (parse example))))
 (assert (= 36 (part1 (parse example2))))
 (assert (= 548 (part1 (parse input))))
 
 (defn part2 [grid]
-  (apply + (map #(count (search grid (first %))) (find-pos 0 grid))))
+  (score search grid))
 
 (assert (= 81 (part2 (parse example2))))
 (assert (= 1252 (part2 (parse input))))
