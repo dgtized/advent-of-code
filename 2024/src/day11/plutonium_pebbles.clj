@@ -37,10 +37,39 @@
   (count (nth (iterate step in) 25)))
 
 (assert (= 55312 (part1 (parse example))))
-(assert (= 216042 (part1 (parse input))))
+(assert (= 216042 (time (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn expand-count [stone]
+  (let [s (str stone)
+        n (count s)]
+    (cond (zero? stone)
+          0
+          (even? n)
+          1
+          :else
+          2)))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn investigate [stones]
+  (let [density (reduce (fn [acc v] (update acc v inc))
+                        [0 0 0]
+                        (map expand-count stones))]
+    {:n (count stones)
+     :density density
+     :next (+ (count stones) (nth density 1))}))
+
+;; (map investigate (take 30 (iterate step (parse input))))
+
+
+(defn memo-step [stones]
+  (reduce (fn [acc [stone n]]
+            (let [expansions (expand stone)]
+              (merge-with + acc
+                          (update-vals (frequencies expansions) (partial * n)))))
+          {}
+          stones))
+
+(defn part2 [in blinks]
+  (apply + (vals (nth (iterate memo-step (frequencies in)) blinks))))
+
+(assert (= 216042 (time (part2 (parse input) 25))))
+(assert (= 255758646442399 (time (part2 (parse input) 75))))
