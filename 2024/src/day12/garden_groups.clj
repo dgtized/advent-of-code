@@ -68,7 +68,11 @@
 ;;   (let [side-cells (remove (fn [cell] (every? region (successors cell))) region)]
 ;;     (segment (select-keys grid side-cells))))
 
-(defn contiguous [field coll]
+(defn contiguous
+  "Find contiguous positions where elements increment by 1 in `field`.
+
+  Ie [[1 1] [2 1] [3 1]] is contigous because x is incrementing."
+  [field coll]
   (lazy-seq
    (when-let [s (seq coll)]
      (let [run (->> s
@@ -84,20 +88,22 @@
 
 (defn sides [region]
   (apply +
-         (for [[dir cont-f disc-f] [[[0 -1] second first]
-                                    [[1 0] first second]
-                                    [[0 1] second first]
-                                    [[-1 0] first second]]
-               :let [sides (->> region
-                                (remove (fn [cell] (contains? region (v/v+ cell dir))))
-                                (sort-by (juxt cont-f disc-f))
-                                (partition-by cont-f)
-                                (mapcat (fn [group]
-                                          (contiguous disc-f group))))]]
-           #_{:dir dir
-              ;; :side sides
-              :sides (count sides)}
-           (count sides))))
+         (for [[dir cont-f axis-f]
+               [[[0 -1] first second]
+                [[1 0] second first]
+                [[0 1] first second]
+                [[-1 0] second first]]]
+           (->> region
+                ;; focus on cells that have a neighbor in a cardinal direction
+                ;; that are outside the region.
+                (remove (fn [cell] (contains? region (v/v+ cell dir))))
+                ;; group along axis and then look for contigous segments
+                (sort-by (juxt axis-f cont-f))
+                ;; group segments with the same axis field
+                (partition-by axis-f)
+                ;; chunk up contigous segments on a given axis
+                (mapcat (fn [group] (contiguous cont-f group)))
+                count))))
 
 (let [grid (parse example_e)]
   (map (fn [region] (sides region)) (segment grid)))
