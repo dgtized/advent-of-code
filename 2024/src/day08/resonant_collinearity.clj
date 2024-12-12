@@ -12,7 +12,7 @@
        str/split-lines
        ag/lines->grid))
 
-(defn frequencies [grid]
+(defn frequency-nodes [grid]
   (reduce (fn [groups [cell freq]]
             (update groups freq (fnil conj []) cell))
           {}
@@ -23,11 +23,11 @@
     (let [delta (v/v- b a)]
       (filter grid [(v/v- a delta) (v/v+ b delta)]))))
 
-(comment (frequencies (parse example)))
+(comment (frequency-nodes (parse example)))
 
 (defn result [antinodes grid]
   (->> grid
-       frequencies
+       frequency-nodes
        (mapcat (fn [[_ cells]]
                  (mapcat (antinodes grid) (ac/all-pairs cells))))
        distinct
@@ -45,7 +45,7 @@
 
 (assert
  (= 9 (->> (let [grid (reduce (fn [g [cell v]] (assoc g cell (if (= v \#) \. v))){} (parse (slurp "src/day08/example2")))
-                 freqs (get (frequencies grid) \T)]
+                 freqs (get (frequency-nodes grid) \T)]
              (mapcat (antinodes-all grid) (ac/all-pairs freqs)))
            distinct
            count)))
