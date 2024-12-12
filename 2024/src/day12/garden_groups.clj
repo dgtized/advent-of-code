@@ -7,6 +7,7 @@
 (def example (slurp "src/day12/example"))
 (def example2 (slurp "src/day12/example2"))
 (def example3 (slurp "src/day12/example3"))
+(def example_e (slurp "src/day12/example_e"))
 
 (defn parse [in]
   (->> in
@@ -63,8 +64,47 @@
 (assert (= 1930 (part1 (parse example))))
 (assert (= 1431316 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+;; (defn sides [grid region]
+;;   (let [side-cells (remove (fn [cell] (every? region (successors cell))) region)]
+;;     (segment (select-keys grid side-cells))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn contiguous [field coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (let [run (->> s
+                    first
+                    field
+                    (iterate inc)
+                    (map vector s)
+                    (take-while (fn [[el v]] (= (field el) v)))
+                    (mapv first))]
+       (cons run (contiguous field (lazy-seq (drop (count run) s))))))))
+
+(comment (contiguous first [[0 1] [1 1] [2 1] [4 1] [5 1] [8 1]]))
+
+(defn sides [region]
+  (apply +
+         (for [[dir cont-f disc-f] [[[0 -1] second first]
+                                    [[1 0] first second]
+                                    [[0 1] second first]
+                                    [[-1 0] first second]]
+               :let [sides (->> region
+                                (remove (fn [cell] (contains? region (v/v+ cell dir))))
+                                (sort-by (juxt cont-f disc-f))
+                                (partition-by cont-f)
+                                (mapcat (fn [group]
+                                          (contiguous disc-f group))))]]
+           #_{:dir dir
+              ;; :side sides
+              :sides (count sides)}
+           (count sides))))
+
+(let [grid (parse example_e)]
+  (map (fn [region] (sides region)) (segment grid)))
+
+(defn part2 [in]
+  (apply + (map (fn [region] (* (count region) (sides region)))
+                (segment in))))
+
+(assert (= 1206 (part2 (parse example))))
+(assert (= 821428 (part2 (parse input))))
