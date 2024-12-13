@@ -1,7 +1,7 @@
 (ns day13.claw-contraption
-  (:require [clojure.string :as str]
-            [aoc.vector :as v]
-            [clojure.math :as math]))
+  (:require
+   [aoc.vector :as v]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day13/input"))
 (def example (slurp "src/day13/example"))
@@ -18,9 +18,9 @@
           :ma (apply min [(quot gx ax) (quot gy ay)])
           :b [(quot gx bx) (quot gy by)]}))
 
-(defn search [limit {:keys [a b goal max]}]
+(defn search [{:keys [a b goal max]}]
   (keep identity
-        (for [push-a (range 0 (if limit limit (:ma max)))]
+        (for [push-a (range 0 (inc (:ma max)))]
           (let [goal' (v/v- goal (v/v* a push-a))
                 bx (/ (first goal') (first b))
                 by (/ (second goal') (second b))]
@@ -31,13 +31,10 @@
 
 (defn solve [game]
   (let [game' (calc-max game)
-        solutions (search 100 game')
-        solve-max (search nil game')]
+        solutions (search game')]
     (assoc game'
            :solutions solutions
-           :solve-max solve-max
-           :min-cost (if (seq solutions) (:cost (apply min-key :cost solutions)) 0)
-           :max-cost (if (seq solve-max) (:cost (apply min-key :cost solve-max)) 0))))
+           :min-cost (if (seq solutions) (:cost (apply min-key :cost solutions)) 0))))
 
 (defn part1 [in]
   (map solve in))
