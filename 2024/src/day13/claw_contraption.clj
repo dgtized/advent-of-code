@@ -29,21 +29,35 @@
 
 (defn search [{:keys [max] :as game}]
   (keep identity
-        (for [push-a (range 0 (inc (:ma max)))]
+        (for [push-a (range 0 (min 100 (inc (:ma max))))]
           (solve-b game push-a))))
+
+(defn cramer-search [{:keys [a b goal]}]
+  (let [[ax ay] a
+        [bx by] b
+        [gx gy] goal
+        det (- (* ax by) (* ay bx))]
+    (when (not (zero? det))
+      (let [sa (/ (- (* gx by) (* gy bx)) det)
+            sb (/ (- (* gy ay) (* gx ax)) det)]
+        (some (fn [x] (when (integer? x) x)) [sa sb])))))
 
 (defn solve [game]
   (let [game' (calc-max game)
-        solutions (search game')]
+        cramer (cramer-search game')
+        solutions '()]
     (assoc game'
            :solutions solutions
-           :min-cost (if (seq solutions) (:cost (apply min-key :cost solutions)) 0))))
+           :cramer-search cramer
+           ;; :min-cost (if (seq solutions) (:cost (apply min-key :cost solutions)) 0)
+           :min-cost (if cramer (:cost (solve-b game' cramer)) 0)
+           )))
 
 (defn part1 [in]
   (map solve in))
 
 (defn score [games]
-  (int (apply + (map :min-cost games))))
+  (apply + (filter some? (map :min-cost games))))
 
 (assert (= 480 (score (part1 (parse example)))))
 (assert (= 31589 (score (part1 (parse input)))))
@@ -58,5 +72,5 @@
        (map (fn [game] (update game :goal v/v+ [10000000000000 10000000000000])))
        (map solve)))
 
-(assert (= (part2 (parse example))))
-;; (assert (= (part2 (parse input))))
+(assert (= 875318608908 (score (part2 (parse example)))))
+(assert (= 98080815200063 (score (part2 (parse input)))))
