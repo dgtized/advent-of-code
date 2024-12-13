@@ -18,16 +18,19 @@
           :ma (apply min [(quot gx ax) (quot gy ay)])
           :b [(quot gx bx) (quot gy by)]}))
 
-(defn search [{:keys [a b goal max]}]
+(defn solve-b [{:keys [a b goal]} push-a]
+  (let [goal' (v/v- goal (v/v* a push-a))
+        bx (/ (first goal') (first b))
+        by (/ (second goal') (second b))]
+    (when (= bx by)
+      {:a push-a
+       :b bx
+       :cost (+ (* push-a 3) bx)})))
+
+(defn search [{:keys [max] :as game}]
   (keep identity
         (for [push-a (range 0 (inc (:ma max)))]
-          (let [goal' (v/v- goal (v/v* a push-a))
-                bx (/ (first goal') (first b))
-                by (/ (second goal') (second b))]
-            (when (= bx by)
-              {:a push-a
-               :b bx
-               :cost (+ (* push-a 3) bx)})))))
+          (solve-b game push-a))))
 
 (defn solve [game]
   (let [game' (calc-max game)
@@ -45,8 +48,9 @@
 (assert (= 480 (score (part1 (parse example)))))
 (assert (= 31589 (score (part1 (parse input)))))
 
-(comment (filter (fn [{:keys [min-cost max-cost] {:keys [ma]} :max}]
-                   (not= min-cost max-cost))
+(comment (filter (fn [{:keys [min-cost] {:keys [ma]} :max}]
+                   (or (zero? min-cost)
+                       (> ma 100)))
                  (part1 (parse input))))
 
 (defn part2 [in]
