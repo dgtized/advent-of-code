@@ -35,16 +35,28 @@
 (assert (= 12 (part1 (parse example) [11 7])))
 (assert (= 231019008 (part1 (parse input) [101 103])))
 
+(defn make-grid [robots]
+  (reduce (fn [grid [pos _]]
+            (update grid pos (fnil inc 0)))
+          {} robots))
+
 (defn display [robots [mx my]]
-  (let [grid (reduce (fn [grid [pos _]]
-                       (update grid pos (fnil inc 0)))
-                     {} robots)]
+  (let [grid (make-grid robots)]
     (for [y (range my)]
       (apply str (for [x (range mx)]
                    (get grid [x y] 0))))))
 
-(defn part2 [robots size steps]
-  (display (step size robots steps) size))
+(defn part2 [robots size]
+  (let [[step robots']
+        (some
+         (fn [[step robots]]
+           (let [grid (make-grid robots)]
+             (when (and (> step 1169) (= [1] (distinct (vals grid))))
+               [step robots])))
+         (iterate (fn [[steps robots]]
+                    [(inc steps) (mapv (partial move (partial bounds size)) robots)])
+                  [0 robots]))]
+    [step (display robots' size)]))
 
-(assert (= (part2 (parse example) [11 7] 10)))
-(assert (= (part2 (parse input) [101 103] 100)))
+;; (assert (= (part2 (parse example) [11 7])))
+(assert (= 8280 (first (part2 (parse input) [101 103]))))
