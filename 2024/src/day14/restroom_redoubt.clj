@@ -35,8 +35,16 @@
 (assert (= 12 (part1 (parse example) [11 7])))
 (assert (= 231019008 (part1 (parse input) [101 103])))
 
-(defn part2 [in]
-  in)
+(defn display [robots [mx my]]
+  (let [grid (reduce (fn [grid [pos _]]
+                       (update grid pos (fnil inc 0)))
+                     {} robots)]
+    (for [y (range my)]
+      (apply str (for [x (range mx)]
+                   (get grid [x y] 0))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [robots size steps]
+  (display (step size robots steps) size))
+
+(assert (= (part2 (parse example) [11 7] 10)))
+(assert (= (part2 (parse input) [101 103] 100)))
