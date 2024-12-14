@@ -1,0 +1,42 @@
+(ns day14.restroom-redoubt
+  (:require [clojure.string :as str]
+            [aoc.vector :as v]))
+
+(def input (slurp "src/day14/input"))
+(def example (slurp "src/day14/example"))
+
+(defn parse [in]
+  (->> in
+       str/split-lines
+       (map (fn [line] (map vec (partition 2 (map parse-long (re-seq #"-?\d+" line))))))))
+
+(defn bounds [[x-max y-max] [x y]]
+  [(mod x x-max) (mod y y-max)])
+
+(defn move [bounds [pos vel]]
+  [(bounds (v/v+ pos vel)) vel])
+
+(defn step [size robots n]
+  (nth (iterate (fn [robots] (mapv (partial move (partial bounds size)) robots))
+                robots)
+       n))
+
+(defn quadrants [[mx my] robots]
+  (for [[[x0 y0] [x1 y1]]
+        [[[0 0] [(dec (int (/ mx 2))) (dec (int (/ my 2)))]]
+         [[(inc (int (/ mx 2))) 0] [mx (dec (int (/ my 2)))]]
+         [[0 (inc (int (/ my 2)))] [(dec (int (/ mx 2))) my]]
+         [[(inc (int (/ mx 2))) (inc (int (/ my 2)))] [mx my]]]]
+    (filter (fn [[[x y] _]] (and (<= x0 x x1) (<= y0 y y1))) robots)))
+
+(defn part1 [robots size]
+  (apply * (map count (quadrants size (step size robots 100)))))
+
+(assert (= 12 (part1 (parse example) [11 7])))
+(assert (= 231019008 (part1 (parse input) [101 103])))
+
+(defn part2 [in]
+  in)
+
+(assert (= (part2 (parse example))))
+(assert (= (part2 (parse input))))
