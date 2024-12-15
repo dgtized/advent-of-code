@@ -50,8 +50,11 @@
   (let [[step robots']
         (some
          (fn [[step robots]]
+           #_(when (zero? (mod step 1000)) (println step))
            (let [grid (make-grid robots)]
-             (when (and (> step 1169) (= [1] (distinct (vals grid))))
+             (when (or (and (> step 1) (= [1] (distinct (vals grid)))
+                            (re-find #"11111111" (apply str (display robots size))))
+                       (> step 10000))
                [step robots])))
          (iterate (fn [[steps robots]]
                     [(inc steps) (mapv (partial move (partial bounds size)) robots)])
