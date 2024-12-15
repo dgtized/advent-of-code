@@ -57,7 +57,7 @@
           0 grid))
 
 (defn part1 [{:keys [grid pos moves]}]
-  (let [[grid' pos']
+  (let [[grid' _]
         (reduce (fn [[grid pos] move]
                   (into [] (rest (push grid pos move)))) [grid pos] moves)]
     grid'))
@@ -65,8 +65,62 @@
 (assert (= 10092 (gps-score (part1 (parse example)))))
 (assert (= 1552879 (gps-score (part1 (parse input)))))
 
+(defn parse2 [in]
+  (-> in
+      parse
+      (update :grid
+              (fn [grid]
+                (into {}
+                      (mapcat (fn [[[x y] v]]
+                                (let [[vl vr] (case v
+                                                \. [\. \.]
+                                                \# [\# \#]
+                                                \O [\[ \]]
+                                                \@ [\@ \.])]
+                                  [[[(* 2 x) y] vl]
+                                   [[(+ (* 2 x) 1) y] vr]]))
+                              grid))))
+      (update :pos (fn [[x y]] [(* 2 x) y]))))
+
+(defn push2 [grid pos move]
+  (if (pos? (abs (first move)))
+    (let [piece (get grid pos)
+          pos' (v/v+ pos move)
+          ahead (get grid pos')]
+      (case ahead
+        \. [true (assoc grid
+                        pos \.
+                        pos' piece)
+            pos']
+        \# [false grid pos]
+        \[ (let [[ok grid' _] (push2 grid pos' move)]
+             (if ok
+               (into [true] (rest (push2 grid' pos move)))
+               [false grid pos]))
+        \] (let [[ok grid' _] (push2 grid pos' move)]
+             (if ok
+               (into [true] (rest (push2 grid' pos move)))
+               [false grid pos]))))
+    (let [piece (get grid pos)
+          pos' (v/v+ pos move)
+          ahead (get grid pos')]
+      (case ahead
+        \. [true (assoc grid
+                        pos \.
+                        pos' piece)
+            pos']
+        \# [false grid pos]
+        \[ (let [[ok grid' _] (push2 grid pos' move)]
+             (if ok
+               (into [true] (rest (push2 grid' pos move)))
+               [false grid pos]))
+        \] (let [[ok grid' _] (push2 grid pos' move)]
+             (if ok
+               (into [true] (rest (push2 grid' pos move)))
+               [false grid pos]))))))
+
 (defn part2 [in]
   in)
 
-(assert (= (part2 (parse example))))
+(assert (= (part2 (parse2 example))))
 (assert (= (part2 (parse input))))
