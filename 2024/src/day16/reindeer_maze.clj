@@ -72,6 +72,8 @@
 (assert (= 7036 (path-cost (search-path (parse example)))))
 (assert (= 106512 (path-cost (search-path (parse input)))))
 
+;; calculate the best path, and then for each position in that path, remove it,
+;; and accept any new path with the same cost as the best path.
 (defn all-best-paths [grid]
   (let [best-path (search-path grid)
         best-cost (path-cost best-path)
@@ -85,5 +87,6 @@
 
 (assert (= 44 (count (all-best-paths (parse example)))))
 (assert (= 64 (count (all-best-paths (parse example2)))))
+;; slow, takes ~350ms per node in the path, so 350ms*619 nodes = 216s
 (println (count (all-best-paths (parse input))))
 ;; (assert (= 563 (count (all-best-paths (parse input)))))
