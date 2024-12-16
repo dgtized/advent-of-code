@@ -67,9 +67,8 @@
 (assert (= 10092 (gps-score (run push (parse example)))))
 (assert (= 1552879 (gps-score (run push (parse input)))))
 
-(defn parse2 [in]
+(defn widen [in]
   (-> in
-      parse
       (update :grid
               (fn [grid]
                 (into {}
@@ -169,10 +168,10 @@
 (comment
   (doseq [step (range 13)]
     (println step)
-    (mapv println (display (run push2 (update (parse2 example2) :moves (partial take step))))))
-  (display (run push2 (parse2 example2)))
-  (display (run push2 (parse2 example))))
+    (mapv println (display (run push2 (update (widen (parse example2)) :moves (partial take step))))))
+  (display (run push2 (widen (parse example2))))
+  (display (run push2 (widen (parse example)))))
 
-(assert (= 9021 (gps-score2 (run push2 (parse2 example)))))
-(assert (= 618 (gps-score2 (run push2 (parse2 example2)))))
-(assert (= 1561175 (gps-score2 (run push2 (parse2 input)))))
+(assert (= 9021 (gps-score2 (run push2 (widen (parse example))))))
+(assert (= 618 (gps-score2 (run push2 (widen (parse example2))))))
+(assert (= 1561175 (gps-score2 (run push2 (widen (parse input))))))
