@@ -5,6 +5,7 @@
 
 (def input (slurp "src/day15/input"))
 (def example (slurp "src/day15/example"))
+(def example2 (slurp "src/day15/example2"))
 
 (defn moves->vec [moves]
   (->> moves
@@ -56,14 +57,15 @@
               acc))
           0 grid))
 
-(defn part1 [{:keys [grid pos moves]}]
+(defn run [push {:keys [grid pos moves]}]
   (let [[grid' _]
         (reduce (fn [[grid pos] move]
-                  (into [] (rest (push grid pos move)))) [grid pos] moves)]
+                  (into [] (rest (push grid pos move))))
+                [grid pos] moves)]
     grid'))
 
-(assert (= 10092 (gps-score (part1 (parse example)))))
-(assert (= 1552879 (gps-score (part1 (parse input)))))
+(assert (= 10092 (gps-score (run push (parse example)))))
+(assert (= 1552879 (gps-score (run push (parse input)))))
 
 (defn parse2 [in]
   (-> in
@@ -81,6 +83,44 @@
                                    [[(+ (* 2 x) 1) y] vr]]))
                               grid))))
       (update :pos (fn [[x y]] [(* 2 x) y]))))
+
+(defn push-pair [grid p1 p2 move]
+  (let [piece1 (get grid p1)
+        piece2 (get grid p2)
+        p1' (v/v+ p1 move)
+        p2' (v/v+ p2 move)
+        ahead1 (get grid p1')
+        ahead2 (get grid p2')]
+    (case [ahead1 ahead2]
+      [\. \.]
+      [true (assoc grid
+                   p1 \. p2 \.
+                   p1' piece1
+                   p2' piece2)]
+      [\] \.]
+      (let [[ok grid'] (push-pair grid (v/v+ p1' [-1 0]) p1' move)]
+        (if ok
+          [true (second (push-pair grid' p1 p2 move))]
+          [false grid]))
+      [\. \[]
+      (let [[ok grid'] (push-pair grid p2' (v/v+ p2' [1 0]) move)]
+        (if ok
+          [true (second (push-pair grid' p1 p2 move))]
+          [false grid]))
+      [\] \[]
+      (let [[ok-l grid-l] (push-pair grid (v/v+ p1' [-1 0]) p1' move)]
+        (if ok-l
+          (let [[ok-r grid-r] (push-pair grid-l p2' (v/v+ p2' [1 0]) move)]
+            (if ok-r
+              [true (second (push-pair grid-r p1 p2 move))]
+              [false grid]))
+          [false grid]))
+      [\[ \]]
+      (let [[ok grid'] (push-pair grid p1' p2' move)]
+        (if ok
+          [true (second (push-pair grid' p1 p2 move))]
+          [false grid]))
+      [false grid])))
 
 (defn push2 [grid pos move]
   (if (pos? (abs (first move)))
@@ -110,17 +150,29 @@
                         pos' piece)
             pos']
         \# [false grid pos]
-        \[ (let [[ok grid' _] (push2 grid pos' move)]
+        \[ (let [[ok grid' _] (push-pair grid pos' (v/v+ pos' [1 0]) move)]
              (if ok
                (into [true] (rest (push2 grid' pos move)))
                [false grid pos]))
-        \] (let [[ok grid' _] (push2 grid pos' move)]
+        \] (let [[ok grid' _] (push-pair grid (v/v+ pos' [-1 0]) pos' move)]
              (if ok
                (into [true] (rest (push2 grid' pos move)))
                [false grid pos]))))))
 
-(defn part2 [in]
-  in)
+(defn gps-score2 [grid]
+  (reduce (fn [acc [[x y] v]]
+            (if (= v \[)
+              (+ acc (* 100 y) x)
+              acc))
+          0 grid))
 
-(assert (= (part2 (parse2 example))))
-(assert (= (part2 (parse input))))
+(comment
+  (doseq [step (range 13)]
+    (println step)
+    (mapv println (display (run push2 (update (parse2 example2) :moves (partial take step))))))
+  (display (run push2 (parse2 example2)))
+  (display (run push2 (parse2 example))))
+
+(assert (= 9021 (gps-score2 (run push2 (parse2 example)))))
+(assert (= 618 (gps-score2 (run push2 (parse2 example2)))))
+(assert (= 1561175 (gps-score2 (run push2 (parse2 input)))))
