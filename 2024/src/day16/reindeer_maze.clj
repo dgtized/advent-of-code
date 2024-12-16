@@ -3,10 +3,12 @@
    [clojure.data.priority-map :as dpm]
    [aoc.grid :as ag]
    [clojure.string :as str]
-   [aoc.vector :as v]))
+   [aoc.vector :as v]
+   [clojure.set :as set]))
 
 (def input (slurp "src/day16/input"))
 (def example (slurp "src/day16/example"))
+(def example2 (slurp "src/day16/example2"))
 
 (defn backtrack [current visited]
   (cons current
@@ -60,17 +62,28 @@
 (defn path-cost [states]
   (apply + (map last states)))
 
-(defn part1 [grid]
-  (a*-search {:successors (fn [s] (successors grid s))
-              :cost (fn [[_ _ cost] _] cost)
-              :sources [[(find-start grid) [1 0] 0]]
-              :goal? (fn [s] (= (get grid (first s)) \E))} ))
+(defn search-path [grid]
+  (time
+   (a*-search {:successors (fn [s] (successors grid s))
+               :cost (fn [[_ _ cost] _] cost)
+               :sources [[(find-start grid) [1 0] 0]]
+               :goal? (fn [s] (= (get grid (first s)) \E))} )))
 
-(assert (= 7036 (path-cost (part1 (parse example)))))
-(assert (= 106512 (path-cost (part1 (parse input)))))
+(assert (= 7036 (path-cost (search-path (parse example)))))
+(assert (= 106512 (path-cost (search-path (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn all-best-paths [grid]
+  (let [best-path (search-path grid)
+        best-cost (path-cost best-path)
+        path-set (set (map first best-path))]
+    (reduce set/union
+            path-set
+            (for [pos path-set
+                  :let [path (search-path (assoc grid pos \#))]
+                  :when (= (path-cost path) best-cost)]
+              (set (map first path))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 44 (count (all-best-paths (parse example)))))
+(assert (= 64 (count (all-best-paths (parse example2)))))
+(println (count (all-best-paths (parse input))))
+;; (assert (= 563 (count (all-best-paths (parse input)))))
