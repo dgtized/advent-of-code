@@ -61,7 +61,7 @@
                     :when (and (not= start cell) (= v \X))]
                 (loop? start (assoc grid cell \#)))))))
 
-(assert (= 6 (part2 (parse example))))
+(assert (= 6 (count (part2 (parse example)))))
 ;; initial slow attempt: 125605.81 msecs
 ;; only check positions on path: 28152.15 msecs
-(time (assert (= 1753 (part2 (parse input)))))
+(time (assert (= 1753 (count (part2 (parse input))))))
