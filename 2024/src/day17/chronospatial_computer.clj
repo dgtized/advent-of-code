@@ -180,7 +180,37 @@
 (biginteger (math/pow 8 16))
 
 ;; [2 4 1 1 7 5 1 5 4 3 5 5 0 3 3 0]
-(assert (= (part2 (parse input) (biginteger (+ (math/pow 8 15) (math/pow 8 10))) 512 1)))
+(assert (= (part2 (parse input) (biginteger (+ (* 4 (math/pow 8 15))
+                                               (* 6 (math/pow 8 14))
+                                               (* 0 (math/pow 8 13))
+                                               (* 0 (math/pow 8 12)))) 1 0)))
+
+(defn match-remaining [digit program out]
+  (every? (fn [p] (= (nth program p) (nth out p)))
+          (range digit 16)))
+
+(let [{:keys [program] :as state} (parse input)]
+  (loop [total 0 accepted [] digit 15]
+    (if (= digit -1)
+      [total accepted (quine? state total)]
+      (let [place (some (fn [v]
+                          (let [r (quine? state (biginteger (+ total (* v (math/pow 8 digit)))))
+                                out (nth r 3)]
+                            (when (and (< digit (count out))
+                                       (match-remaining digit program out))
+                              v)))
+                        (range 8))]
+        (println [place accepted (quine? state total)])
+        (if place
+          (recur (biginteger (+ total (* place (math/pow 8 digit))))
+                 (cons place accepted)
+                 (dec digit))
+          (for [x (range -65 65)]
+            (quine? state (biginteger (+ total x)))))))))
+
+#_(for [digit (reverse (range 14 16))
+        v (range 0 8)]
+    [digit v (part2 (parse input) (biginteger (* v (math/pow 8 digit))) 1 0)])
 
 
 ;; (quine? (parse input) 24117513)
