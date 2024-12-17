@@ -2,9 +2,9 @@
 
 https://adventofcode.com/
 
-My goal for each year is to maximize the number of languages I use for
-solutions. It's a nice exercise to keep myself fluent in various language
-paradigms and refresh my memory on the various APIs.
+My goal for 2019-2021 was to maximize the number of languages I used for
+solutions. It's an interesting exercise to keep myself fluent in various
+language paradigms and refresh my memory on the various APIs.
 
 ## 2019
 
@@ -34,3 +34,19 @@ Note that Clojure solutions for 7 and 18,19 use
 [`core.logic`](https://github.com/clojure/core.logic), and
 [`instaparse`](https://cljdoc.org/d/instaparse/instaparse/1.4.10/doc/readme)
 respectively.
+
+## 2021
+
+```
+Perl (1), Ruby (2), C (3), Racket (4,6,7.2,9), Clojure (1,2,3,5,8,10-25), C++ (7.1)
+```
+
+I solved a couple of early problems in 2021 with Clojure and another language, but started focusing more on Clojure solutions this year.
+
+## 2022
+
+Experimented with solving each problem using Clojure and [`Clerk`](https://github.com/nextjournal/clerk) to visualize the solution.
+
+## 2023
+
+Focused on Clojure, though I think I did a couple using Babashka (a Clojure dialect)
