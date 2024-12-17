@@ -189,10 +189,14 @@
   (every? (fn [p] (= (nth program p) (nth out p)))
           (range digit 16)))
 
-(let [{:keys [program] :as state} (parse input)]
+(defn search [{:keys [program] :as state}]
   (loop [total 0 accepted [] digit 15]
-    (if (= digit -1)
-      [total accepted (quine? state total)]
+    (if (= digit 2)
+      (some (fn [x]
+              (let [r (quine? state (biginteger (+ total x)))]
+                (when (first r)
+                  r)))
+            (range -513 513))
       (let [place (some (fn [v]
                           (let [r (quine? state (biginteger (+ total (* v (math/pow 8 digit)))))
                                 out (nth r 3)]
@@ -201,12 +205,11 @@
                               v)))
                         (range 8))]
         (println [place accepted (quine? state total)])
-        (if place
-          (recur (biginteger (+ total (* place (math/pow 8 digit))))
-                 (cons place accepted)
-                 (dec digit))
-          (for [x (range -65 65)]
-            (quine? state (biginteger (+ total x)))))))))
+        (recur (biginteger (+ total (* place (math/pow 8 digit))))
+               (cons place accepted)
+               (dec digit))))))
+
+(assert (= 164278899142333 (second (search (parse input)))))
 
 #_(for [digit (reverse (range 14 16))
         v (range 0 8)]
