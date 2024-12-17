@@ -13,7 +13,7 @@
        ag/lines->grid))
 
 (defn find-starts [grid start]
-  (filter (fn [[_ value]] (= value start)) grid))
+  (ag/keep-values grid start))
 
 (defn is-xmas? [grid cell dir]
   (and (= (get grid (v+ cell (v* dir 0))) \X)
@@ -22,7 +22,7 @@
        (= (get grid (v+ cell (v* dir 3))) \S)))
 
 (defn part1 [grid]
-  (count (for [[cell _] (find-starts grid \X)
+  (count (for [cell (find-starts grid \X)
                dir v/directions
                :when (is-xmas? grid cell dir)]
            [cell dir])))
@@ -40,7 +40,7 @@
        (mas? grid cell [1 -1])))
 
 (defn part2 [grid]
-  (count (for [[cell _] (find-starts grid \A)
+  (count (for [cell (find-starts grid \A)
                :when (x-mas? grid cell)]
            cell)))
 

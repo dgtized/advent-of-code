@@ -9,3 +9,6 @@
 
 (defn some-value [grid value]
   (some (fn [[pos v]] (when (= value v) pos)) grid))
+
+(defn keep-values [grid value]
+  (keep (fn [[pos v]] (when (= value v) pos)) grid))

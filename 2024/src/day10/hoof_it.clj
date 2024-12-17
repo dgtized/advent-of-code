@@ -14,7 +14,7 @@
        ag/lines->grid))
 
 (defn find-pos [height grid]
-  (keep (fn [[pos val]] (when (= height val) pos)) grid))
+  (ag/keep-values grid height))
 
 (defn successors [grid pos]
   (for [dir v/cardinal
