@@ -18,3 +18,6 @@
 
 (defn v* [v n]
   (mapv #(* % n) v))
+
+(defn rotate-right [[x y]] [y (- x)])
+(defn rotate-left [[x y]] [(- y) x])

@@ -10,15 +10,12 @@
 (def example (slurp "src/day16/example"))
 (def example2 (slurp "src/day16/example2"))
 
-(defn rotate-right [[x y]] [y (- x)])
-(defn rotate-left [[x y]] [(- y) x])
-
 (defn successors [grid [pos dir _cost]]
   (keep (fn [s]
           (when (contains? #{\. \S \E} (get grid (first s)))
             s))
-        [[pos (rotate-left dir) 1000]
-         [pos (rotate-right dir) 1000]
+        [[pos (v/rotate-left dir) 1000]
+         [pos (v/rotate-right dir) 1000]
          [(v/v+ pos dir) dir 1]]))
 
 (defn find-start [grid]
