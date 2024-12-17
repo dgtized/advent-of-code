@@ -14,8 +14,7 @@
        ag/lines->grid))
 
 (defn find-pos [height grid]
-  (->> grid
-       (filter (fn [[cell val]] (when (= height val) cell)))))
+  (keep (fn [[pos val]] (when (= height val) pos)) grid))
 
 (defn successors [grid pos]
   (for [dir v/cardinal
@@ -48,12 +47,12 @@
 
 (comment (search (parse example) [0 0])
          (let [grid (parse example2)]
-           (map #(score-trail grid %) (map first (find-pos 0 grid)))))
+           (map #(score-trail grid %) (find-pos 0 grid))))
 
 (defn score [method grid]
   (->> grid
        (find-pos 0)
-       (map #(count (method grid (first %))))
+       (map #(count (method grid %)))
        (apply +)))
 
 (defn part1 [grid]
