@@ -18,9 +18,6 @@
          [pos (v/rotate-right dir) 1000]
          [(v/v+ pos dir) dir 1]]))
 
-(defn find-start [grid]
-  (some (fn [[pos v]] (when (= v \S) pos)) grid))
-
 (defn parse [in]
   (->> in
        str/split-lines
@@ -33,7 +30,7 @@
   (time
    (graph/a*-search {:successors (fn [s] (successors grid s))
                      :cost (fn [[_ _ cost] _] cost)
-                     :sources [[(find-start grid) [1 0] 0]]
+                     :sources [[(ag/some-value grid \S) [1 0] 0]]
                      :goal? (fn [s] (= (get grid (first s)) \E))} )))
 
 (assert (= 7036 (path-cost (search-path (parse example)))))

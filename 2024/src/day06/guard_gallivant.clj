@@ -24,7 +24,7 @@
          (clockwise [0 -1]))
 
 (defn find-guard [grid]
-  (some (fn [[cell v]] (when (= v \^) cell)) grid))
+  (ag/some-value grid \^))
 
 (defn step [[grid pos dir steps]]
   (let [pos' (v/v+ pos dir)]
