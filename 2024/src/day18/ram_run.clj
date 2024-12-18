@@ -30,15 +30,22 @@
 (comment (successors #{[1 1]} [6 6] [0 0]))
 
 (defn part1 [coords bounds]
-  (graph/a*-search {:successors (fn [pos] (successors (set coords) bounds pos))
-                    :sources [[0 0]]
-                    :goal? (fn [p] (= p bounds))}))
+  (let [grid (set coords)]
+    (graph/a*-search {:successors (fn [pos] (successors grid bounds pos))
+                      :sources [[0 0]]
+                      :goal? (fn [p] (= p bounds))})))
 
 (assert (= 22 (dec (count (part1 (take 12 (parse example)) [6 6])))))
 (assert (= 438 (dec (count (part1 (take 1024 (parse input)) [70 70])))))
 
-(defn part2 [in]
-  in)
+(defn part2 [coords bounds start]
+  (loop [i start]
+    (println i)
+    (if (and (< i (count coords))
+             (nil? (time (part1 (take i coords) bounds))))
+      (do (println (nth coords (dec i)))
+          (nth coords (dec i)))
+      (recur (inc i)))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= [6 1] (part2 (parse example) [6 6] 12)))
+(assert (= [26 22] (part2 (parse input) [70 70] 1024)))
