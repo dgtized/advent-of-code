@@ -1,8 +1,7 @@
 (ns day18.ram-run
-  (:require [clojure.string :as str]
-            [aoc.vector :as v]
-            [aoc.grid :as ag]
-            [aoc.graph :as graph]))
+  (:require
+   [aoc.graph :as graph]
+   [aoc.vector :as v]))
 
 (def input (slurp "src/day18/input"))
 (def example (slurp "src/day18/example"))
