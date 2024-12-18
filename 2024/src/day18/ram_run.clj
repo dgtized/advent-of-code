@@ -21,10 +21,11 @@
 (comment (successors #{[1 1]} [6 6] [0 0]))
 
 (defn part1 [coords bounds steps]
-  (let [grid (set (take steps coords))]
-    (graph/a*-search {:successors (fn [pos] (successors grid bounds pos))
-                      :sources [[0 0]]
-                      :goal? (fn [p] (= p bounds))})))
+  (graph/a*-search
+   {:successors (let [grid (set (take steps coords))]
+                  (fn [pos] (successors grid bounds pos)))
+    :sources [[0 0]]
+    :goal? (fn [p] (= p bounds))}))
 
 (assert (= 22 (dec (count (part1 (parse example) [6 6] 12)))))
 (assert (= 438 (dec (count (part1 (parse input) [70 70] 1024)))))
