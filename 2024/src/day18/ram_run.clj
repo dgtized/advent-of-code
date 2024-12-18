@@ -10,14 +10,6 @@
 (defn parse [in]
   (map vec (partition 2 (map parse-long (re-seq #"\d+" in)))))
 
-(defn display [coords [mx my]]
-  (let [grid (set coords)]
-    (for [y (range (inc my))]
-      (apply str (for [x (range (inc mx))]
-                   (if (contains? grid [x y]) \# \.))))))
-
-(comment (map println (display (take 12 (parse example)) [6 6])))
-
 (defn successors [coords [mx my] pos]
   (for [dir v/cardinal
         :let [pos' (v/v+ pos dir)
@@ -45,3 +37,12 @@
 
 (assert (= [6 1] (part2 (parse example) [6 6])))
 (assert (= [26 22] (part2 (parse input) [70 70])))
+
+;; debug helper
+(defn display [coords [mx my]]
+  (let [grid (set coords)]
+    (for [y (range (inc my))]
+      (apply str (for [x (range (inc mx))]
+                   (if (contains? grid [x y]) \# \.))))))
+
+(comment (map println (display (take 12 (parse example)) [6 6])))
