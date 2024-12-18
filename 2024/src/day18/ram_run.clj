@@ -18,7 +18,7 @@
                    (<= 0 y my))]
     pos'))
 
-(comment (successors #{[1 1]} [6 6] [0 0]))
+(assert (= [[1 0] [0 1]] (successors #{[1 1]} [6 6] [0 0])))
 
 (defn part1 [coords bounds steps]
   (graph/a*-search
