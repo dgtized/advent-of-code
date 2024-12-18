@@ -39,10 +39,9 @@
 (assert (= 438 (dec (count (part1 (take 1024 (parse input)) [70 70])))))
 
 (defn part2 [coords bounds]
-  (time (loop [i (count coords)]
-          (if (and (> i 0) (nil? (part1 (take i coords) bounds)))
-            (recur (dec i))
-            (nth coords i)))))
+  (time (some (fn [i] (when (part1 (take i coords) bounds)
+                       (nth coords i)))
+              (reverse (range (count coords))))))
 
 (assert (= [6 1] (part2 (parse example) [6 6])))
 (assert (= [26 22] (part2 (parse input) [70 70])))
