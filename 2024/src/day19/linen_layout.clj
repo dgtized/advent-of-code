@@ -41,12 +41,23 @@
                             expansions)))
                   m))))
 
+(defn expansions [towels pattern]
+  (if (empty? pattern)
+    1
+    (if-let [m (seq (subset towels pattern))]
+      (apply + (map (fn [[_ remaining]]
+                      (expansions towels remaining))
+                    m))
+      0)))
+
 (assert (= [["a" "b"] ["ab"]] (expand ["a" "ab" "b"] "ab")))
 (assert (= [["a" "ab"]] (expand ["a" "ab"] "aab")))
+(assert (= 2 (expansions ["a" "ab" "b"] "ab")))
+(assert (= 1 (expansions ["a" "ab"] "aab")))
 
 (defn part2 [{:keys [towels patterns]}]
-  (apply + (map count (map (fn [pattern] (println pattern)
-                             (expand towels pattern)) patterns))))
+  (apply + (map (fn [pattern] (println pattern)
+                  (expansions towels pattern)) patterns)))
 
 (assert (= 16 (part2 (parse example))))
 ;; (println (part2 (parse input)))
