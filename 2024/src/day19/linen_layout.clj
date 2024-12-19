@@ -60,8 +60,8 @@
 (assert (= 1 (expansions (atom {}) ["a" "ab"] "aab")))
 
 (defn part2 [{:keys [towels patterns]}]
-  (apply + (map (fn [pattern] (println pattern)
-                  (expansions (atom {}) towels pattern)) patterns)))
+  (apply + (map (fn [pattern] (expansions (atom {}) towels pattern))
+                patterns)))
 
 (assert (= 16 (part2 (parse example))))
 (assert (= 752461716635602 (part2 (parse input))))
