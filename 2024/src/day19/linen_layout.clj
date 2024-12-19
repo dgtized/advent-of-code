@@ -41,24 +41,27 @@
                             expansions)))
                   m))))
 
-(defn expansions [towels pattern]
-  (if (empty? pattern)
-    1
-    (if-let [m (seq (subset towels pattern))]
-      (apply + (map (fn [[_ remaining]]
-                      (expansions towels remaining))
-                    m))
-      0)))
+(defn expansions [cache towels pattern]
+  (if-let [r (get @cache pattern)]
+    r
+    (let [r (if (empty? pattern)
+              1
+              (if-let [m (seq (subset towels pattern))]
+                (apply + (map (fn [[_ remaining]]
+                                (expansions cache towels remaining))
+                              m))
+                0))]
+      (swap! cache assoc pattern r)
+      r)))
 
 (assert (= [["a" "b"] ["ab"]] (expand ["a" "ab" "b"] "ab")))
 (assert (= [["a" "ab"]] (expand ["a" "ab"] "aab")))
-(assert (= 2 (expansions ["a" "ab" "b"] "ab")))
-(assert (= 1 (expansions ["a" "ab"] "aab")))
+(assert (= 2 (expansions (atom {}) ["a" "ab" "b"] "ab")))
+(assert (= 1 (expansions (atom {}) ["a" "ab"] "aab")))
 
 (defn part2 [{:keys [towels patterns]}]
   (apply + (map (fn [pattern] (println pattern)
-                  (expansions towels pattern)) patterns)))
+                  (expansions (atom {}) towels pattern)) patterns)))
 
 (assert (= 16 (part2 (parse example))))
-;; (println (part2 (parse input)))
-;; (assert (= (part2 (parse input))))
+(assert (= 752461716635602 (part2 (parse input))))
