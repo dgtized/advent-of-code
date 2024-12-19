@@ -21,8 +21,33 @@
 (assert (= 6 (part1 (parse example))))
 (assert (= 265 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn subset [towels pattern]
+  (keep (fn [towel]
+          (when (str/starts-with? pattern towel)
+            [towel (str/replace-first pattern towel "")]))
+        towels))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(let [{:keys [towels patterns]} (parse example)]
+  (map (partial subset towels) patterns))
+
+(defn expand [towels pattern]
+  (cond (empty? pattern)
+        [[]]
+        :else
+        (when-let [m (seq (subset towels pattern))]
+          (mapcat (fn [[token remaining]]
+                    (when-let [expansions (seq (expand towels remaining))]
+                      (keep (fn [p] (when p (cons token p)))
+                            expansions)))
+                  m))))
+
+(assert (= [["a" "b"] ["ab"]] (expand ["a" "ab" "b"] "ab")))
+(assert (= [["a" "ab"]] (expand ["a" "ab"] "aab")))
+
+(defn part2 [{:keys [towels patterns]}]
+  (apply + (map count (map (fn [pattern] (println pattern)
+                             (expand towels pattern)) patterns))))
+
+(assert (= 16 (part2 (parse example))))
+;; (println (part2 (parse input)))
+;; (assert (= (part2 (parse input))))
