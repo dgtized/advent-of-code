@@ -43,31 +43,12 @@
 (assert (= (+ 14 14 2 4 2 3 1 1 1 1 1) (count (cheats (parse example) 1))))
 (assert (= 1351 (count (cheats (parse input) 100))))
 
-(defn cheat-successors [[mx my] grid goal pos]
-  (for [dir v/cardinal
-        :let [p (v/v+ pos dir)
-              [x y] p]
-        :when (and (< 0 x mx)
-                   (< 0 y my)
-                   (or (= \# (get grid p))
-                       (= p goal)))]
-    p))
-
-(defn cheat-search [region grid pos goal]
-  (graph/a*-search
-   {:successors (partial cheat-successors region grid goal)
-    :sources [pos]
-    :goal? #(= pos goal)}))
-
 (defn manhattan [[x0 y0] [x1 y1]]
   (+ (abs (- x1 x0))
      (abs (- y1 y0))))
 
 (defn part2 [grid limit]
-  (let [ks (keys grid)
-        mx (apply max (map first ks))
-        my (apply max (map second ks))
-        path (search grid)
+  (let [path (search grid)
         path-idx (into {} (map vector path (range (count path))))]
     (for [[p1 p2] (ac/all-pairs path)
           :let [cut-cost (manhattan p1 p2)
