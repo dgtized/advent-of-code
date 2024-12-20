@@ -59,6 +59,8 @@
                      (>= savings limit))]
       savings)))
 
+(assert (= {50 32 52 31 54 29 56 39 58 25 60 23 62 20 64 19 66 12 68 14 70 12 72 22 74 4 76 3}
+           (frequencies (part2 (parse example) 50))))
 ;; (+ 32 31 29 39 25 23 20 19 12 14 12 22 4 3) => 285
-(assert (= (sort-by first (frequencies (part2 (parse example) 50)))))
+(assert (= 285 (count (part2 (parse example) 50))))
 (assert (= 966130 (count (part2 (parse input) 100))))
