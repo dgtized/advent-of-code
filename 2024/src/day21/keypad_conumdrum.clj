@@ -33,9 +33,6 @@
     [-1 0] \<
     [1 0] \>))
 
-(defn find-start [grid]
-  (ag/some-value grid \A))
-
 (defn bfs-paths [{:keys [successors source goal]}]
   (loop [paths [[source]] visited #{source}]
     (if (contains? visited goal)
@@ -53,9 +50,10 @@
                  :when (get grid loc)]
              loc)))
 
-(defn find-paths [grid start value]
-  (let [goal (ag/some-value grid value)]
-    {:key-pos goal
+(defn find-paths [grid src dst]
+  (let [start (ag/some-value grid src)
+        goal (ag/some-value grid dst)]
+    {:key-pos dst
      :directions
      (into []
            (for [p (bfs-paths {:successors (successors grid)
@@ -65,8 +63,8 @@
                                :path []})]
              (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 p))))))}))
 
-(comment (find-paths keypad (find-start keypad) \0)
-         (find-paths keypad (find-start keypad) \1))
+(comment (find-paths keypad \A \0)
+         (find-paths keypad \A \1))
 
 (defn collapse-subpaths [path]
   (loop [segments path accepted []]
@@ -93,7 +91,7 @@
       (mapv #(apply str %) paths))))
 
 (defn paths [grid code]
-  (loop [code (seq code) pos (find-start grid) path []]
+  (loop [code (seq code) pos \A path []]
     (if (seq code)
       (let [{:keys [key-pos directions]} (find-paths grid pos (first code))]
         (recur (rest code) key-pos (conj path directions ["A"])))
