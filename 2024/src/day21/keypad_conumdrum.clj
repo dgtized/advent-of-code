@@ -33,6 +33,9 @@
     [-1 0] \<
     [1 0] \>))
 
+(defn translate-path [pts]
+  (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 pts)))))
+
 (defn bfs-paths [{:keys [successors source goal]}]
   (loop [paths [[source]] visited #{source}]
     (if (contains? visited goal)
@@ -55,13 +58,14 @@
         goal (ag/some-value grid dst)]
     {:key-pos dst
      :directions
-     (into []
-           (for [p (bfs-paths {:successors (successors grid)
-                               :source start
-                               :goal goal
-                               :visited {}
-                               :path []})]
-             (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 p))))))}))
+     (->> {:successors (successors grid)
+           :source start
+           :goal goal
+           :visited {}
+           :path []}
+          bfs-paths
+          (map translate-path)
+          (into []))}))
 
 (comment (find-paths keypad \A \0)
          (find-paths keypad \A \1))
