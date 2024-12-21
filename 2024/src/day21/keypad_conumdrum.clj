@@ -16,7 +16,7 @@
  0A"
       str/split-lines
       ag/lines->grid
-      (dissoc [0 4])))
+      (dissoc [0 3])))
 
 (def dirpad
   (-> " ^A
@@ -111,10 +111,12 @@
       (expand-paths (collapse-subpaths path)))))
 
 (defn dir-paths [grid codes]
-  (mapcat (fn [code] (paths grid code)) codes)
-  #_(let [all-paths (sort-by count )
-          len (count (first all-paths))]
-      (take-while (fn [p] (= (count p) len)) all-paths)))
+  (let [all-paths (sort-by count (mapcat (fn [code] (paths grid code)) codes))
+        len (+ 4 (count (first all-paths)))]
+    (filter (fn [p] (<= (count p) len)) all-paths)))
+
+(defn best-path [paths]
+  (count (first paths)))
 
 ;;          <A^A>^^AvvvA
 (assert (= ["<A^A^^>AvvvA"
@@ -144,14 +146,19 @@
 (defn part1 [codes]
   (let [best-paths
         (for [code codes]
-          (let [code-path (apply min-key count (translate-paths code))]
+          (let [code-path (apply min-key count (time (translate-paths code)))]
             {:code code :c (parse-long (re-find #"^\d+" code))
              :path code-path :n (count code-path)}))]
     {:paths best-paths
      :score (apply + (for [{:keys [c n]} best-paths] (* c n)))}))
 
-;; (assert (= 126384 (part1 (parse example))))
-;; (assert (= (part1 (parse input))))
+(assert (= 126384 (:score (part1 (parse example)))))
+;; "Elapsed time: 18063.124295 msecs"
+;; "Elapsed time: 19644.934528 msecs"
+;; "Elapsed time: 4028.190723 msecs"
+;; "Elapsed time: 16630.604651 msecs"
+;; "Elapsed time: 12901.001107 msecs"
+;; (assert (= 184718 (:score (part1 (parse input)))))
 
 (defn part2 [in]
   in)
