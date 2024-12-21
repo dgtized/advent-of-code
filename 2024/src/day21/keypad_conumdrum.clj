@@ -98,24 +98,24 @@
       (let [next-pos (first code)
             directions (find-paths grid pos next-pos)]
         (recur (rest code) next-pos (conj path (map (fn [d] (str d "A")) directions))))
-      (expand-paths (collapse-subpaths path)))))
+      path)))
 
 (defn dir-paths [codes]
-  (let [all-paths (mapcat (fn [code] (paths dirpad code)) codes)
+  (let [all-paths (mapcat (fn [code] (expand-paths (collapse-subpaths (paths dirpad code)))) codes)
         len (count (apply min-key count all-paths))]
     (filter (fn [p] (= (count p) len)) all-paths)))
 
 (assert (= ["<A^A^^>AvvvA"
             "<A^A^>^AvvvA"
             "<A^A>^^AvvvA"]
-           (paths keypad "029A")))
-(assert (contains? (set (dir-paths (paths keypad "029A")))
+           (expand-paths (collapse-subpaths (paths keypad "029A")))))
+(assert (contains? (set (dir-paths (expand-paths (collapse-subpaths  (paths keypad "029A")))))
                    "v<<A>>^A<A>AvA<^AA>A<vAAA>^A"))
-(assert (contains? (set (dir-paths (dir-paths (paths keypad "029A"))))
+(assert (contains? (set (dir-paths (dir-paths (expand-paths (collapse-subpaths (paths keypad "029A"))))))
                    "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"))
 
 (defn translate-paths [code]
-  (dir-paths (dir-paths (paths keypad code))))
+  (dir-paths (dir-paths (expand-paths (collapse-subpaths (paths keypad code))))))
 
 (assert (contains? (set (translate-paths "980A"))
                    "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A"))
