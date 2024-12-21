@@ -68,17 +68,6 @@
 (comment (find-paths keypad (find-start keypad) \0)
          (find-paths keypad (find-start keypad) \1))
 
-(defn find-next [grid start value]
-  (let [path (graph/a*-search
-              {:successors (successors grid)
-               :sources [start]
-               :goal? (fn [pos] (= (get grid pos) value))})]
-    {:key-pos (last path)
-     :path path
-     :directions (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 path))))}))
-
-(comment (find-next keypad (find-start keypad) \0))
-
 (defn collapse-subpaths [path]
   (loop [segments path accepted []]
     (if (seq segments)
@@ -115,10 +104,6 @@
         len (+ 4 (count (first all-paths)))]
     (filter (fn [p] (<= (count p) len)) all-paths)))
 
-(defn best-path [paths]
-  (count (first paths)))
-
-;;          <A^A>^^AvvvA
 (assert (= ["<A^A^^>AvvvA"
             "<A^A^>^AvvvA"
             "<A^A>^^AvvvA"]
