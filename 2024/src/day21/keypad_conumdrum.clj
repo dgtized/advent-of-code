@@ -56,16 +56,14 @@
 (defn find-paths [grid src dst]
   (let [start (ag/some-value grid src)
         goal (ag/some-value grid dst)]
-    {:key-pos dst
-     :directions
-     (->> {:successors (successors grid)
-           :source start
-           :goal goal
-           :visited {}
-           :path []}
-          bfs-paths
-          (map translate-path)
-          (into []))}))
+    (->> {:successors (successors grid)
+          :source start
+          :goal goal
+          :visited {}
+          :path []}
+         bfs-paths
+         (map translate-path)
+         (into []))))
 
 (comment (find-paths keypad \A \0)
          (find-paths keypad \A \1))
@@ -97,8 +95,9 @@
 (defn paths [grid code]
   (loop [code (seq code) pos \A path []]
     (if (seq code)
-      (let [{:keys [key-pos directions]} (find-paths grid pos (first code))]
-        (recur (rest code) key-pos (conj path directions ["A"])))
+      (let [next-pos (first code)
+            directions (find-paths grid pos next-pos)]
+        (recur (rest code) next-pos (conj path directions ["A"])))
       (expand-paths (collapse-subpaths path)))))
 
 (defn dir-paths [grid codes]
