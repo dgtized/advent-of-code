@@ -101,9 +101,9 @@
       (expand-paths (collapse-subpaths path)))))
 
 (defn dir-paths [grid codes]
-  (let [all-paths (sort-by count (mapcat (fn [code] (paths grid code)) codes))
-        len (count (first all-paths))]
-    (filter (fn [p] (<= (count p) len)) all-paths)))
+  (let [all-paths (mapcat (fn [code] (paths grid code)) codes)
+        len (count (apply min-key count all-paths))]
+    (filter (fn [p] (= (count p) len)) all-paths)))
 
 (assert (= ["<A^A^^>AvvvA"
             "<A^A^>^AvvvA"
