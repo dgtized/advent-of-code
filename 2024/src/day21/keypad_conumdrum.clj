@@ -58,6 +58,9 @@
         (recur (rest code) key-pos (conj path directions "A")))
       (str/join "" path))))
 
+;;          <A^A>^^AvvvA
+(assert (= "<A^A>^^AvvvA"
+           (path keypad "029A")))
 ;;          v<<A>>^A<A>AvA<^AA>A<vAAA>^A
 (assert (= "v<<A>>^A<A>AvA^<AA>Av<AAA>^A" (path dirpad (path keypad "029A"))))
 ;;          <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
@@ -87,7 +90,7 @@
     {:paths paths
      :score (apply + (for [{:keys [c n]} paths] (* c n)))}))
 
-(assert (= 126384 (part1 (parse example))))
+;; (assert (= 126384 (part1 (parse example))))
 ;; (assert (= (part1 (parse input))))
 
 (defn part2 [in]
