@@ -97,7 +97,7 @@
     (if (seq code)
       (let [next-pos (first code)
             directions (find-paths grid pos next-pos)]
-        (recur (rest code) next-pos (conj path directions ["A"])))
+        (recur (rest code) next-pos (conj path (map (fn [d] (str d "A")) directions))))
       (expand-paths (collapse-subpaths path)))))
 
 (defn dir-paths [grid codes]
