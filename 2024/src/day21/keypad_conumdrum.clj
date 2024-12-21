@@ -1,15 +1,16 @@
 (ns day21.keypad-conumdrum
-  (:require [clojure.string :as str]
-            [aoc.grid :as ag]
-            [aoc.graph :as graph]
-            [aoc.vector :as v]))
+  (:require
+   [aoc.graph :as graph]
+   [aoc.grid :as ag]
+   [aoc.vector :as v]
+   [clojure.set :as set]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day21/input"))
 (def example (slurp "src/day21/example"))
 
 (def keypad
-  (-> "
-789
+  (-> "789
 456
 123
  0A"
@@ -18,8 +19,7 @@
       (dissoc [0 4])))
 
 (def dirpad
-  (-> "
- ^A
+  (-> " ^A
 <v>
 "
       str/split-lines
@@ -33,62 +33,122 @@
     [-1 0] \<
     [1 0] \>))
 
+(defn find-start [grid]
+  (ag/some-value grid \A))
+
+(defn bfs-paths [{:keys [successors source goal]}]
+  (loop [paths [[source]] visited #{source}]
+    (if (contains? visited goal)
+      (filter #(= (last %) goal) paths)
+      (let [frontier (mapcat (fn [path]
+                               (for [n (successors (last path))]
+                                 (when-not (contains? visited n)
+                                   (conj path n))))
+                             paths)]
+        (recur frontier (set/union visited (set (map last frontier))))))))
+
+(defn successors [grid]
+  (fn [pos] (for [dir v/cardinal
+                 :let [loc (v/v+ pos dir)]
+                 :when (get grid loc)]
+             loc)))
+
+(defn find-paths [grid start value]
+  (let [goal (ag/some-value grid value)]
+    {:key-pos goal
+     :directions
+     (into []
+           (for [p (bfs-paths {:successors (successors grid)
+                               :source start
+                               :goal goal
+                               :visited {}
+                               :path []})]
+             (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 p))))))}))
+
+(comment (find-paths keypad (find-start keypad) \0)
+         (find-paths keypad (find-start keypad) \1))
+
 (defn find-next [grid start value]
   (let [path (graph/a*-search
-              {:successors (fn [pos]
-                             (for [dir v/cardinal
-                                   :let [loc (v/v+ pos dir)]
-                                   :when (get grid loc)]
-                               loc))
+              {:successors (successors grid)
                :sources [start]
                :goal? (fn [pos] (= (get grid pos) value))})]
     {:key-pos (last path)
      :path path
      :directions (apply str (map translate (mapv (fn [[p q]] (v/v- q p)) (partition 2 1 path))))}))
 
-(defn find-start [grid]
-  (ag/some-value grid \A))
-
 (comment (find-next keypad (find-start keypad) \0))
 
-(defn path [grid code]
+(defn collapse-subpaths [path]
+  (loop [segments path accepted []]
+    (if (seq segments)
+      (if (= (count (first segments)) 1)
+        (let [chunk (take-while (fn [segment] (= (count segment) 1)) segments)]
+          (recur (drop (count chunk) segments)
+                 (conj accepted (apply str (apply concat chunk)))))
+        (recur (rest segments)
+               (conj accepted (first segments))))
+      accepted)))
+
+(defn expand-paths [segments]
+  (loop [segments segments paths [[]]]
+    (if (seq segments)
+      (let [choices (first segments)]
+        (if (string? choices)
+          (recur (rest segments)
+                 (map (fn [path] (conj path choices)) paths))
+          (recur (rest segments)
+                 (mapcat (fn [path]
+                           (for [choice choices] (into path choice)))
+                         paths))))
+      (mapv #(apply str %) paths))))
+
+(defn paths [grid code]
   (loop [code (seq code) pos (find-start grid) path []]
     (if (seq code)
-      (let [{:keys [key-pos directions]} (find-next grid pos (first code))]
-        (recur (rest code) key-pos (conj path directions "A")))
-      (str/join "" path))))
+      (let [{:keys [key-pos directions]} (find-paths grid pos (first code))]
+        (recur (rest code) key-pos (conj path directions ["A"])))
+      (expand-paths (collapse-subpaths path)))))
+
+(defn dir-paths [grid codes]
+  (mapcat (fn [code] (paths grid code)) codes)
+  #_(let [all-paths (sort-by count )
+          len (count (first all-paths))]
+      (take-while (fn [p] (= (count p) len)) all-paths)))
 
 ;;          <A^A>^^AvvvA
-(assert (= "<A^A>^^AvvvA"
-           (path keypad "029A")))
-;;          v<<A>>^A<A>AvA<^AA>A<vAAA>^A
-(assert (= "v<<A>>^A<A>AvA^<AA>Av<AAA>^A" (path dirpad (path keypad "029A"))))
-;;          <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-(assert (= "v<A<AA>>^AvAA^<A>Av<<A>>^AvA^Av<A>^A<Av<A>>^AAvA^Av<A<A>>^AAAvA^<A>A"
-           (path dirpad (path dirpad (path keypad "029A")))))
+(assert (= ["<A^A^^>AvvvA"
+            "<A^A^>^AvvvA"
+            "<A^A>^^AvvvA"]
+           (paths keypad "029A")))
+(assert (contains? (set (dir-paths dirpad (paths keypad "029A")))
+                   "v<<A>>^A<A>AvA<^AA>A<vAAA>^A"))
+(assert (contains? (set (dir-paths dirpad (dir-paths dirpad (paths keypad "029A"))))
+                   "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"))
 
-(defn translate-path [code]
-  (path dirpad (path dirpad (path keypad code))))
+(defn translate-paths [code]
+  (dir-paths dirpad (dir-paths dirpad (paths keypad code))))
 
-;;          <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-(assert (= "v<<A>>^Av<A<A>>^AAvA^<A>AvA^Av<A>^A<A>Av<A>^A<A>Av<A<A>>^AAvA^<A>A"
-           (translate-path "456A")))
-
-;;          <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-(assert (= "v<<A>>^AvA^Av<<A>>^AAv<A<A>>^AAvAA^<A>Av<A>^AA<A>Av<A<A>>^AAAvA^<A>A"
-           (translate-path "379A")))
+(assert (contains? (set (translate-paths "980A"))
+                   "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A"))
+(assert (contains? (set (translate-paths "456A"))
+                   "<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A"))
+(assert (contains? (set (translate-paths "179A"))
+                   "<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
+(assert (contains? (set (translate-paths "379A"))
+                   "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
 
 (defn parse [in]
   (str/split-lines in))
 
 (defn part1 [codes]
-  (let [paths
+  (let [best-paths
         (for [code codes]
-          (let [code-path (translate-path code)]
+          (let [code-path (apply min-key count (translate-paths code))]
             {:code code :c (parse-long (re-find #"^\d+" code))
              :path code-path :n (count code-path)}))]
-    {:paths paths
-     :score (apply + (for [{:keys [c n]} paths] (* c n)))}))
+    {:paths best-paths
+     :score (apply + (for [{:keys [c n]} best-paths] (* c n)))}))
 
 ;; (assert (= 126384 (part1 (parse example))))
 ;; (assert (= (part1 (parse input))))
