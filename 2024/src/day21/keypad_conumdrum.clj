@@ -102,7 +102,7 @@
 
 (defn dir-paths [grid codes]
   (let [all-paths (sort-by count (mapcat (fn [code] (paths grid code)) codes))
-        len (+ 4 (count (first all-paths)))]
+        len (count (first all-paths))]
     (filter (fn [p] (<= (count p) len)) all-paths)))
 
 (assert (= ["<A^A^^>AvvvA"
@@ -139,11 +139,11 @@
      :score (apply + (for [{:keys [c n]} best-paths] (* c n)))}))
 
 (assert (= 126384 (:score (part1 (parse example)))))
-;; "Elapsed time: 18063.124295 msecs"
-;; "Elapsed time: 19644.934528 msecs"
-;; "Elapsed time: 4028.190723 msecs"
-;; "Elapsed time: 16630.604651 msecs"
-;; "Elapsed time: 12901.001107 msecs"
+;; "Elapsed time: 14325.547546 msecs"
+;; "Elapsed time: 3510.867153 msecs"
+;; "Elapsed time: 4144.721302 msecs"
+;; "Elapsed time: 2846.716222 msecs"
+;; "Elapsed time: 467.9332 msecs"
 ;; (assert (= 184718 (:score (part1 (parse input)))))
 
 (defn part2 [in]
