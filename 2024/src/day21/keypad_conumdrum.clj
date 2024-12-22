@@ -1,6 +1,6 @@
 (ns day21.keypad-conumdrum
   (:require
-   [aoc.graph :as graph]
+   [aoc.combinatorics :as ac]
    [aoc.grid :as ag]
    [aoc.vector :as v]
    [clojure.set :as set]
@@ -161,3 +161,28 @@
 
 (assert (= (part2 (parse example))))
 (assert (= (part2 (parse input))))
+
+
+(into {} (for [[a b] (ac/all-pairs (vals keypad))]
+           [[a b] (find-paths keypad a b)]))
+
+(into {} (for [[a b] (ac/all-pairs (vals dirpad))]
+           [[a b] (map (fn [p]
+                         (paths dirpad p)) (find-paths dirpad a b))]))
+
+(defn tclose []
+  [(into {} (for [[k v] dirpad]
+              [v (vec (paths dirpad (str v)))]))
+   (into {} (for [[k v] dirpad]
+              (let [r (mapcat (fn [p] (paths dirpad p)) (paths dirpad (str v)))]
+                [v
+                 {:n (count r)
+                  :f (frequencies (map count r))
+                  :c r}])))
+   (into {} (for [[k v] dirpad]
+              (let [r (mapcat (fn [p] (paths dirpad p)) (mapcat (fn [p] (paths dirpad p)) (paths dirpad (str v))))]
+                [v
+                 {:n (count r)
+                  :f (frequencies (map count r))
+                  ;; :c r
+                  }])))])
