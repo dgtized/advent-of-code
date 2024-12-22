@@ -100,22 +100,31 @@
         (recur (rest code) next-pos (conj path (map (fn [d] (str d "A")) directions))))
       path)))
 
-(defn dir-paths [codes]
-  (let [all-paths (mapcat (fn [code] (expand-paths (collapse-subpaths (paths dirpad code)))) codes)
-        len (count (apply min-key count all-paths))]
-    (filter (fn [p] (= (count p) len)) all-paths)))
+(defn dir-paths [chunks]
+  (mapcat (fn [chunk]
+            (let [chunk-set (map (fn [code] (collapse-subpaths (paths dirpad code))) chunk)]
+              (let [r (mapcat expand-paths chunk-set)
+                    n (count (apply min-key count r))]
+                [(filter #(= (count %) n) r)])))
+          chunks))
+
+(contains? (set (expand-paths (dir-paths (paths keypad "029A"))))
+           "v<<A>>^A<A>AvA<^AA>A<vAAA>^A")
+
+(contains? (set (expand-paths (dir-paths (dir-paths (paths keypad "029A")))))
+           "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A")
 
 (assert (= ["<A^A^^>AvvvA"
             "<A^A^>^AvvvA"
             "<A^A>^^AvvvA"]
            (expand-paths (collapse-subpaths (paths keypad "029A")))))
-(assert (contains? (set (dir-paths (expand-paths (collapse-subpaths  (paths keypad "029A")))))
+(assert (contains? (set (expand-paths (dir-paths (paths keypad "029A"))))
                    "v<<A>>^A<A>AvA<^AA>A<vAAA>^A"))
-(assert (contains? (set (dir-paths (dir-paths (expand-paths (collapse-subpaths (paths keypad "029A"))))))
+(assert (contains? (set (expand-paths (dir-paths (dir-paths (paths keypad "029A")))))
                    "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"))
 
 (defn translate-paths [code]
-  (dir-paths (dir-paths (expand-paths (collapse-subpaths (paths keypad code))))))
+  (expand-paths (dir-paths (dir-paths (paths keypad code)))))
 
 (assert (contains? (set (translate-paths "980A"))
                    "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A"))
@@ -139,12 +148,13 @@
      :score (apply + (for [{:keys [c n]} best-paths] (* c n)))}))
 
 (assert (= 126384 (:score (part1 (parse example)))))
-;; "Elapsed time: 14325.547546 msecs"
-;; "Elapsed time: 3510.867153 msecs"
-;; "Elapsed time: 4144.721302 msecs"
-;; "Elapsed time: 2846.716222 msecs"
-;; "Elapsed time: 467.9332 msecs"
-;; (assert (= 184718 (:score (part1 (parse input)))))
+;; "Elapsed time: 537.688884 msecs"
+;; "Elapsed time: 20.562469 msecs"
+;; "Elapsed time: 18.306883 msecs"
+;; "Elapsed time: 161.662897 msecs"
+;; "Elapsed time: 66.388046 msecs"
+(println)
+(assert (= 184718 (:score (part1 (parse input)))))
 
 (defn part2 [in]
   in)
