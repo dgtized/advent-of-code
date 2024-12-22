@@ -123,44 +123,41 @@
 (assert (contains? (set (expand-paths (dir-paths (dir-paths (paths keypad "029A")))))
                    "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"))
 
-(defn translate-paths [code]
-  (expand-paths (dir-paths (dir-paths (paths keypad code)))))
+(defn translate-paths [code depth]
+  (expand-paths (nth (iterate dir-paths (paths keypad code)) depth)))
 
-(assert (contains? (set (translate-paths "980A"))
+(assert (contains? (set (translate-paths "980A" 2))
                    "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A"))
-(assert (contains? (set (translate-paths "456A"))
+(assert (contains? (set (translate-paths "456A" 2))
                    "<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A"))
-(assert (contains? (set (translate-paths "179A"))
+(assert (contains? (set (translate-paths "179A" 2))
                    "<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
-(assert (contains? (set (translate-paths "379A"))
+(assert (contains? (set (translate-paths "379A" 2))
                    "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"))
 
 (defn parse [in]
   (str/split-lines in))
 
-(defn part1 [codes]
+(defn part1 [codes depth]
   (let [best-paths
         (for [code codes]
-          (let [code-path (apply min-key count (time (translate-paths code)))]
+          (let [code-path (apply min-key count (time (translate-paths code depth)))]
             {:code code :c (parse-long (re-find #"^\d+" code))
              :path code-path :n (count code-path)}))]
     {:paths best-paths
      :score (apply + (for [{:keys [c n]} best-paths] (* c n)))}))
 
-(assert (= 126384 (:score (part1 (parse example)))))
+(assert (= 126384 (:score (part1 (parse example) 2))))
 ;; "Elapsed time: 537.688884 msecs"
 ;; "Elapsed time: 20.562469 msecs"
 ;; "Elapsed time: 18.306883 msecs"
 ;; "Elapsed time: 161.662897 msecs"
 ;; "Elapsed time: 66.388046 msecs"
 (println)
-(assert (= 184718 (:score (part1 (parse input)))))
+(assert (= 184718 (:score (part1 (parse input) 2))))
 
-(defn part2 [in]
-  in)
-
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+;; (assert (= (part1 (parse example) 25)))
+;; (assert (= (part1 (parse input) 25)))
 
 
 (into {} (for [[a b] (ac/all-pairs (vals keypad))]
