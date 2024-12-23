@@ -62,16 +62,9 @@
                                    (set/intersection (set p) v-neighbors)
                                    (set/intersection (set x) v-neighbors))))))))))
 
-(defn expand-clique [g clique]
-  (apply set/intersection (map g clique)))
-
-(let [g (peers (parse input))
-      triples (three-sets g)]
-  (take 100 (keep (fn [clique] (seq (expand-clique g clique))) triples)))
-
 (defn part2 [edges]
   (let [g (peers edges)]
-    (sort (apply max-key count (bk-pivot g #{} (set/difference (set (keys g))) #{})))))
+    (sort (apply max-key count (bk-pivot g #{} (set (keys g)) #{})))))
 
 (assert (= "co,de,ka,ta" (str/join "," (part2 (parse example)))))
 (assert (= "ac,ed,fh,kd,lf,mb,om,pe,qt,uo,uy,vr,wg"
