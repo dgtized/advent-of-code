@@ -16,20 +16,26 @@
           {} edges))
 
 (defn three-sets [g]
-  (for [[n1 conns1] g
-        n2 conns1
-        :let [conns2 (get g n2)
-              isec (set/intersection conns1 conns2)]
-        :when (seq isec)
-        n3 isec]
-    (sort [n1 n2 n3])))
+  (loop [nodes (keys g) triples #{}]
+    (if (empty? nodes)
+      triples
+      (let [n1 (first nodes)
+            conns1 (get g n1)]
+        (recur
+         (rest nodes)
+         (into triples
+               (for [n2 conns1
+                     :let [isec (set/intersection conns1 (get g n2))]
+                     :when (seq isec)
+                     n3 isec]
+                 (str/join "-" (sort [n1 n2 n3])))))))))
 
 (defn part1 [in]
-  (let [triples (dedupe (sort (map (partial str/join "-") (three-sets (peers in)))))]
-    (filter #(re-find #"t" %) triples)))
+  (let [triples (three-sets (peers in))]
+    (filter #(re-find #"t\w" %) triples)))
 
-(assert (= 7 (count (part1 (parse example)))))
-(assert (= (part1 (parse input))))
+(assert (= 7 (count (sort (part1 (parse example))))))
+(assert (= 1512 (count (part1 (parse input)))))
 
 (defn part2 [in]
   in)
