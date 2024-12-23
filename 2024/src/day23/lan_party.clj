@@ -28,17 +28,51 @@
                      :let [isec (set/intersection conns1 (get g n2))]
                      :when (seq isec)
                      n3 isec]
-                 (str/join "-" (sort [n1 n2 n3])))))))))
+                 (sort [n1 n2 n3]))))))))
 
 (defn part1 [in]
-  (let [triples (three-sets (peers in))]
-    (filter #(re-find #"t\w" %) triples)))
+  (->> in
+       peers
+       three-sets
+       (map (partial str/join "-"))
+       (filter #(re-find #"t\w" %))))
 
 (assert (= 7 (count (sort (part1 (parse example))))))
 (assert (= 1512 (count (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+;; adapted from https://en.wikipedia.org/wiki/Clique_problem
+;; and more specifically: https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
+(defn bk-pivot [neighbors r p x]
+  (if (and (empty? p) (empty? x))
+    [(set r)]
+    (let [pivot-u (first (concat p x))
+          pivot-set (set/difference (set p) (neighbors pivot-u))]
+      (loop [p p
+             pivot-set pivot-set
+             x x
+             result []]
+        (if (empty? pivot-set)
+          result
+          (let [v (first pivot-set)
+                v-neighbors (neighbors v)]
+            (recur (rest p) (rest pivot-set) (conj x v)
+                   (into result
+                         (bk-pivot neighbors
+                                   (conj r v)
+                                   (set/intersection (set p) v-neighbors)
+                                   (set/intersection (set x) v-neighbors))))))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn expand-clique [g clique]
+  (apply set/intersection (map g clique)))
+
+(let [g (peers (parse input))
+      triples (three-sets g)]
+  (take 100 (keep (fn [clique] (seq (expand-clique g clique))) triples)))
+
+(defn part2 [edges]
+  (let [g (peers edges)]
+    (sort (apply max-key count (bk-pivot g #{} (set/difference (set (keys g))) #{})))))
+
+(assert (= "co,de,ka,ta" (str/join "," (part2 (parse example)))))
+(assert (= "ac,ed,fh,kd,lf,mb,om,pe,qt,uo,uy,vr,wg"
+           (str/join "," (part2 (parse input)))))
