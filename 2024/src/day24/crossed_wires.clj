@@ -36,14 +36,18 @@
 (defn wire [prefix digit]
   (format "%s%02d" prefix digit))
 
+(defn dec-value [xs]
+  (BigInteger. (apply str xs) 2))
+
 (defn part1 [in]
   (let [wires (run in)]
-    (BigInteger. (apply str (reverse (for [d (range 64)
-                                           :let [w (wire "z" d)
-                                                 v (get wires w)]
-                                           :when v]
-                                       v)))
-                 2)))
+    (->> (for [d (range 64)
+               :let [w (wire "z" d)
+                     v (get wires w)]
+               :when v]
+           v)
+         reverse
+         dec-value)))
 
 (assert (= 4 (part1 (parse example))))
 (assert (= 2024 (part1 (parse example2))))
