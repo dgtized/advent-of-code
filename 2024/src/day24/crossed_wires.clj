@@ -36,21 +36,21 @@
 (defn wire [prefix digit]
   (format "%s%02d" prefix digit))
 
-(defn bit-value [xs]
+(defn bit-string [xs]
   (apply str xs))
 
 (defn dec-value [xs]
-  (BigInteger. (bit-value xs) 2))
+  (BigInteger. (bit-string xs) 2))
+
+(defn bit-value [wires]
+  (for [d (range 63 -1 -1)
+        :let [w (wire "z" d)
+              v (get wires w)]
+        :when v]
+    v))
 
 (defn part1 [in]
-  (let [wires (run in)]
-    (->> (for [d (range 64)
-               :let [w (wire "z" d)
-                     v (get wires w)]
-               :when v]
-           v)
-         reverse
-         dec-value)))
+  (dec-value (bit-value (run in))))
 
 (assert (= 4 (part1 (parse example))))
 (assert (= 2024 (part1 (parse example2))))
