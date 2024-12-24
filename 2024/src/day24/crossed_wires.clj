@@ -49,34 +49,25 @@
 (assert (= 2024 (part1 (parse example2))))
 (assert (= 52038112429798 (part1 (parse input))))
 
-(defn calc [in]
-  (let [wires (run in)]
-    (apply str (reverse (for [d (range 64)
-                              :let [w (wire "z" d)
-                                    v (get wires w)]
-                              :when v]
-                          v)))))
-
 (defn part2 [in]
-  (let [orig (run in)]
-    (for [d (range 64)
-          :let [x-wire (wire "x" d)
-                y-wire (wire "y" d)
-                z-wire (wire "z" d)]
-          :when (and (get-in in [:wires x-wire]))
-          :let [place (if (zero? d)
-                        in
-                        (-> in
-                            (assoc-in [:wires x-wire] 0)
-                            (assoc-in [:wires y-wire] 0)))]]
-      [z-wire (for [var [x-wire y-wire]
-                    :let [v (get-in in [:wires var])]
-                    :when v
-                    :let [r (run (assoc-in place [:wires var] 0))
-                          r' (run (assoc-in place [:wires var] 1))]]
-                [var
-                 [(get r (wire "z" (inc d))) (get r z-wire)]
-                 [(get r' (wire "z" (inc d))) (get r' z-wire)]])])))
+  (for [d (range 64)
+        :let [x-wire (wire "x" d)
+              y-wire (wire "y" d)
+              z-wire (wire "z" d)]
+        :when (and (get-in in [:wires x-wire]))
+        :let [place (if (zero? d)
+                      in
+                      (-> in
+                          (assoc-in [:wires x-wire] 0)
+                          (assoc-in [:wires y-wire] 0)))]]
+    [z-wire (for [var [x-wire y-wire]
+                  :let [v (get-in in [:wires var])]
+                  :when v
+                  :let [r (run (assoc-in place [:wires var] 0))
+                        r' (run (assoc-in place [:wires var] 1))]]
+              [var
+               [(get r (wire "z" (inc d))) (get r z-wire)]
+               [(get r' (wire "z" (inc d))) (get r' z-wire)]])]))
 
 (assert (= (part2 (parse example))))
 (assert (= (part2 (parse example2))))
