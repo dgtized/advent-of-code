@@ -36,8 +36,11 @@
 (defn wire [prefix digit]
   (format "%s%02d" prefix digit))
 
+(defn bit-value [xs]
+  (apply str xs))
+
 (defn dec-value [xs]
-  (BigInteger. (apply str xs) 2))
+  (BigInteger. (bit-value xs) 2))
 
 (defn part1 [in]
   (let [wires (run in)]
@@ -53,22 +56,28 @@
 (assert (= 2024 (part1 (parse example2))))
 (assert (= 52038112429798 (part1 (parse input))))
 
+(defn get-wire [input wire]
+  (get-in input [:wires wire]))
+
+(defn set-wire [input wire value]
+  (assoc-in input [:wires wire]))
+
 (defn part2 [in]
   (for [d (range 64)
         :let [x-wire (wire "x" d)
               y-wire (wire "y" d)
               z-wire (wire "z" d)]
-        :when (and (get-in in [:wires x-wire]))
+        :when (get-wire in x-wire)
         :let [place (if (zero? d)
                       in
                       (-> in
-                          (assoc-in [:wires x-wire] 0)
-                          (assoc-in [:wires y-wire] 0)))]]
+                          (set-wire x-wire 0)
+                          (set-wire y-wire 0)))]]
     [z-wire (for [var [x-wire y-wire]
-                  :let [v (get-in in [:wires var])]
+                  :let [v (get-wire in var)]
                   :when v
-                  :let [r (run (assoc-in place [:wires var] 0))
-                        r' (run (assoc-in place [:wires var] 1))]]
+                  :let [r (run (set-wire place var 0))
+                        r' (run (set-wire place var 1))]]
               [var
                [(get r (wire "z" (inc d))) (get r z-wire)]
                [(get r' (wire "z" (inc d))) (get r' z-wire)]])]))
