@@ -159,13 +159,52 @@
 ;; (assert (= (part1 (parse example) 25)))
 ;; (assert (= (part1 (parse input) 25)))
 
+(def solutions
+  (memoize
+   (fn [level code]
+     (if (zero? level)
+       (count code)
+       (->> (map (fn [a b]
+                   (for [s (find-paths dirpad a b)]
+                     (solutions (dec level) (concat s [\A]))))
+                 (cons \A code) code)
+            (map (partial apply min))
+            (reduce +))))))
+
+(defn solve-keypad [depth code]
+  (reduce + (for [chunk (paths keypad code)]
+              (apply min (for [c chunk]
+                           (solutions depth c))))))
+
+(defn part2 [in robots]
+  (apply + (for [code (parse in)
+                 :let [v (parse-long (re-find #"^\d+" code))]]
+             (* (solve-keypad robots code) v))))
+
+(for [robots [2 25]
+      in [example input]]
+  (part2 in robots))
+
+(assert (= 228800606998554 (part2 input 25)))
+
+(into {} (for [[a b] (ac/all-pairs (vals keypad))]
+           (let [choices (into {} (for [path (find-paths keypad a b)]
+                                    [path (expand-paths (collapse-subpaths (paths dirpad path)))]))
+                 best-n (sort-by count (apply concat (vals choices)))
+                 best (take-while (fn [p] (= (count p) (count (first best-n)))) best-n)]
+             [[a b] (if (= (count best) 1)
+                      (first best)
+                      {:choices choices
+                       :best (mapcat (fn [p] (expand-paths (collapse-subpaths (paths dirpad p)))) best)})])))
+
 
 (into {} (for [[a b] (ac/all-pairs (vals keypad))]
            [[a b] (find-paths keypad a b)]))
 
 (into {} (for [[a b] (ac/all-pairs (vals dirpad))]
            [[a b] (map (fn [p]
-                         (paths dirpad p)) (find-paths dirpad a b))]))
+                         (paths dirpad p))
+                       (find-paths dirpad a b))]))
 
 (defn tclose []
   [(into {} (for [[k v] dirpad]
