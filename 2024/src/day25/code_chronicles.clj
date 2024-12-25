@@ -36,9 +36,3 @@
 
 (assert (= 3 (count (part1 (parse example)))))
 (assert (= 2854 (count (part1 (parse input)))))
-
-(defn part2 [in]
-  in)
-
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
