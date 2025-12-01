@@ -19,7 +19,7 @@
      (let [pos' (mod (+ pos move) 100)
            [_ _ z]
            (last (take-while
-                  (fn [[p m _]] (not= p pos') (not (zero? m)))
+                  (fn [[_ m _]] (not= m 0))
                   (iterate
                    (fn [[p m z]]
                      (if (< m 0)
