@@ -1,4 +1,6 @@
-(ns day02.gift-shop)
+(ns day02.gift-shop
+  (:require
+   [clojure.math :as math]))
 
 (def input (slurp "src/day02/input"))
 (def example (slurp "src/day02/example"))
@@ -26,8 +28,27 @@
 (assert (= 1227775554 (reduce + (part1 (parse example)))))
 (assert (= 30608905813 (reduce + (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn divisors [v]
+  (for [d (range 1 (inc (math/ceil (/ v 2))))
+        :when (zero? (rem v d))]
+    d))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(comment (divisors 100))
+
+(defn invalid2? [id]
+  (let [sid (str id)
+        divs (divisors (count sid))]
+    (when (> id 9)
+      (some (fn [div]
+              (when (= (count (set (re-seq (re-pattern (str ".{" div "}")) sid))) 1)
+                id))
+            divs))))
+
+(defn search2 [[low high]]
+  (keep invalid2? (range low (inc high))))
+
+(defn part2 [in]
+  (mapcat search2 in))
+
+(assert (= 4174379265 (reduce + (part2 (parse example)))))
+(assert (= 31898925685 (reduce + (part2 (parse input)))))
