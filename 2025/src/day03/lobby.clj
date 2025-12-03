@@ -44,8 +44,37 @@
 ;; not 17143
 (assert (= 17343 (convert-sum (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn find-best [value limit xs]
+  (let [i (first-index-of value xs)]
+    (cond (= value 0)
+          nil
+          (nil? i)
+          (recur (dec value) limit xs)
+          (<= (+ i limit) (count xs))
+          value
+          :else
+          (recur (dec value) limit xs))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(comment
+  (find-best 9 2 [8 7 9])
+  (find-best 9 1 [7 9 8])
+  (find-best 9 3 [8 7 9])
+  (find-best 9 2 [3 2 1]))
+
+(defn find-max-el
+  ([xs] (find-max-el [] 12 xs))
+  ([accept limit xs]
+   (if (= (count accept) 12)
+     accept
+     (let [best (find-best (apply max xs) limit xs)]
+       (if (some? best)
+         (recur (conj accept best)
+                (dec limit)
+                (drop (inc (first-index-of best xs)) xs))
+         [:fail xs])))))
+
+(defn part2 [in]
+  (mapv find-max-el in))
+
+(assert (= 3121910778619 (convert-sum (part2 (parse example)))))
+(assert (= 172664333119298 (convert-sum (part2 (parse input)))))
