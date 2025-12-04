@@ -1,4 +1,15 @@
-(ns aoc.grid)
+(ns aoc.grid
+  (:require [clojure.string :as str]))
+
+(defn grid->str [grid]
+  (let [ks (keys grid)
+        w (first (apply max-key first ks))
+        h (second (apply max-key second ks))]
+    (str/join "\n"
+              (for [y (range h)]
+                (apply str
+                       (for [x (range w)]
+                         (get grid [x y])))))))
 
 (defn lines->grid [lines]
   (->> lines

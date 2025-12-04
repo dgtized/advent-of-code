@@ -24,8 +24,28 @@
 (assert (= 13 (count (part1 (parse example)))))
 (assert (= 1489 (count (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn remove-bales [grid bales]
+  (reduce (fn [grid bale] (assoc grid bale \.)) grid bales))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(comment
+  (let [grid (parse example)
+        s1 (remove-bales grid (part1 grid))
+        s2 (remove-bales s1 (part1 s1))]
+    (println (ag/grid->str grid))
+    (println)
+    (println (ag/grid->str s1))
+    (println)
+    (println (ag/grid->str s2))
+    nil))
+
+(defn part2 [in]
+  (loop [grid in removed 0]
+    (let [bales (part1 grid)]
+      (if (empty? bales)
+        removed
+        (recur
+         (remove-bales grid bales)
+         (+ removed (count bales)))))))
+
+(assert (= 43 (part2 (parse example))))
+(assert (= 8890 (part2 (parse input))))
