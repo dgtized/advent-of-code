@@ -21,8 +21,22 @@
 (assert (= 3 (part1 (parse example))))
 (assert (= 635 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn range-ids [[a b]]
+  (- (inc b) a))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [{:keys [fresh]}]
+  (loop [ranges (sort-by first fresh) total 0]
+    (cond (empty? ranges)
+          total
+          (= (count ranges) 1)
+          (recur (rest ranges) (+ total (range-ids (first ranges))))
+          :else
+          (let [[r0 r1] (take 2 ranges)
+                [a0 b0] r0
+                [a1 b1] r1]
+            (if (<= a0 a1 b0)
+              (recur (cons [a0 (max b0 b1)] (drop 2 ranges)) total)
+              (recur (rest ranges) (+ total (range-ids r0))))))))
+
+(assert (= 14 (part2 (parse example))))
+(assert (= 369761800782619 (part2 (parse input))))
