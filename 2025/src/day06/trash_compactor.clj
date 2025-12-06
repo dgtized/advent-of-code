@@ -30,16 +30,20 @@
 (defn parse2 [in]
   (str/split-lines in))
 
+(defn vertical [rows idx]
+  (->> (for [r rows
+             :let [v (subs r idx (inc idx))]
+             :when (re-find #"\d" v)]
+         v)
+       (apply str)
+       parse-long))
+
 (defn part2 [in]
   (let [ops (last in)
         rows (butlast in)]
     (loop [idx (dec (apply max (map count in))) group [] values []]
       (if (>= idx 0)
-        (let [g (conj group
-                      (parse-long (apply str (for [r rows
-                                                   :let [v (subs r idx (inc idx))]
-                                                   :when (re-find #"\d" v)]
-                                               v))))
+        (let [g (conj group (vertical rows idx))
               op (get {\+ + \* *} (nth ops idx nil))]
           (if op
             (recur (- idx 2)
