@@ -27,8 +27,28 @@
 (assert (= 4277556 (part1 (parse example))))
 (assert (= 4771265398012 (part1 (parse input))))
 
-(defn part2 [in]
-  in)
+(defn parse2 [in]
+  (str/split-lines in))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [in]
+  (let [ops (last in)
+        rows (butlast in)]
+    (loop [idx (dec (apply max (map count in))) group [] values []]
+      (if (>= idx 0)
+        (let [g (conj group
+                      (parse-long (apply str (for [r rows
+                                                   :let [v (subs r idx (inc idx))]
+                                                   :when (re-find #"\d" v)]
+                                               v))))
+              op (get {\+ + \* *} (nth ops idx nil))]
+          (if op
+            (recur (- idx 2)
+                   []
+                   (conj values (apply op g)))
+            (recur (dec idx)
+                   g
+                   values)))
+        (reduce + values)))))
+
+(assert (= 3263827 (part2 (parse2 example))))
+(assert (= 10695785245101 (part2 (parse2 input))))
