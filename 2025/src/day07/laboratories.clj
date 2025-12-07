@@ -1,6 +1,7 @@
 (ns day07.laboratories
-  (:require [aoc.grid :as ag]
-            [clojure.string :as str]))
+  (:require
+   [aoc.grid :as ag]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day07/input"))
 (def example (slurp "src/day07/example"))
@@ -22,7 +23,7 @@
                           []))))))
 
 (defn part1 [grid]
-  (let [[c r] (ag/some-value grid \S)
+  (let [[c _] (ag/some-value grid \S)
         [_ rows] (ag/dims grid)]
     (loop [row 1 columns #{c} splits 0]
       (if (= row rows)
@@ -34,8 +35,27 @@
 (assert (= 21 (second (part1 (parse example)))))
 (assert (= 1687 (second (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn timeline-splits [grid row columns]
+  (reduce + (for [c columns]
+              (case (get grid [c row])
+                \^ 1
+                \. 0))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [grid]
+  (let [[c _] (ag/some-value grid \S)
+        [_ rows] (ag/dims grid)]
+    (loop [row 1 columns {c 1}]
+      (if (= row rows)
+        columns
+        (recur (inc row)
+               (reduce (fn [cols c]
+                         (case (get grid [c row])
+                           \. cols
+                           \^ (-> cols
+                                  (update (dec c) (fnil + 0) (get columns c))
+                                  (update (inc c) (fnil + 0) (get columns c) 0)
+                                  (dissoc c))))
+                       columns (keys columns)))))))
+
+(assert (= 40 (reduce + (vals (part2 (parse example))))))
+(assert (= 390684413472684 (reduce + (vals (part2 (parse input))))))
