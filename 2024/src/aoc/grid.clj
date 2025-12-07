@@ -23,3 +23,8 @@
 
 (defn keep-values [grid value]
   (keep (fn [[pos v]] (when (= value v) pos)) grid))
+
+(defn dims [grid]
+  (let [ks (keys grid)]
+    [(inc (first (apply max-key first ks)))
+     (inc (second (apply max-key second ks)))]))
