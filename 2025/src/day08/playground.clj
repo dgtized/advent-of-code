@@ -37,21 +37,26 @@
 (comment (merge-graph {[0 0 0] 1 [0 1 0] 2 [0 1 1] 3} [0 0 0] [0 1 0]))
 
 (defn part1 [{:keys [junctions grid]} steps]
-  (loop [conn 0 graph (into {} (map-indexed (fn [i loc] [loc i]) junctions)) connections (sort-by second grid)]
+  (loop [conn 0
+         graph (into {} (map-indexed (fn [i loc] [loc i]) junctions))
+         connections (sort-by second grid)
+         last-conn nil]
     (if (or (= conn steps)
             (= 1 (count (set (vals graph)))))
-      graph
+      [graph last-conn]
       (let [[[a b] _] (first connections)]
         (if (= (get graph a) (get graph b))
           (recur (inc conn)
                  graph
-                 (rest connections))
+                 (rest connections)
+                 [a b])
           (recur (inc conn)
                  (merge-graph graph a b)
-                 (rest connections)))))))
+                 (rest connections)
+                 [a b]))))))
 
 (defn count-graph [graph]
-  (frequencies (vals graph)))
+  (frequencies (vals (first graph))))
 
 (defn score [fs]
   (apply * (take 3 (sort #(compare %2 %1) (mapv second fs)))))
@@ -59,8 +64,11 @@
 (assert (= 40 (score (count-graph (part1 (parse example) 10)))))
 (assert (= 97384 (score (count-graph (part1 (parse input) 1000)))))
 
-(defn part2 [in]
-  in)
+(defn score2 [in]
+  (apply * (mapv first (second in))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(defn part2 [in]
+  (score2 (part1 in (count (:grid in)))))
+
+(assert (= 25272 (part2 (parse example))))
+(assert (= 9003685096 (part2 (parse input))))
