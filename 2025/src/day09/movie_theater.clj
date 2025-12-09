@@ -91,8 +91,8 @@
 (* 217 2) ;; 434
 
 (defn point-in-rect? [[[x0 y0] [x1 y1]] [x y]]
-  (and (<= (min x0 x1) x (max x0 x1))
-       (<= (min y0 y1) y (max y0 y1))))
+  (and (< (min x0 x1) x (max x0 x1))
+       (< (min y0 y1) y (max y0 y1))))
 
 (comment (point-in-rect? [[0 0] [10 10]] [0 0])
          (point-in-rect? [[0 0] [10 10]] [10 0])
@@ -109,14 +109,22 @@
                    :when (not-any? (fn [p] (point-in-rect? rect p)) (remove (fn [p] (= p pt)) pts))]
                [rect (area rect)]))))
 
-(legal-rectangles [94876 48734] < (parse input))
+(legal-rectangles [94876 48734] <= (parse input))
 ;; 1275903376
-(legal-rectangles [94876 50058] > (parse input))
+(legal-rectangles [94876 50058] >= (parse input))
 ;; 1565730054 ;; too low
+;; 1573359081
 
 (render (parse input) 100000 1600 "solutions"
-        [[[4974 34543] [94876 48734]]
-         [[6011 67676] [94876 50058]]])
+        (mapv first [(last (legal-rectangles [94876 48734] <= (parse input)))
+                     (last (legal-rectangles [94876 50058] >= (parse input)))]))
+
+[[[4974 34543] [94876 48734]]
+ [[6011 67676] [94876 50058]]]
+
+;; solution
+[[[[4056 34543] [94876 48734]] 1288931632]
+ [[[5578 67676] [94876 50058]] 1573359081]]
 
 (defn part2 [in]
   )
