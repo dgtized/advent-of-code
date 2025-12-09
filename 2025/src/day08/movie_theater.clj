@@ -1,6 +1,12 @@
 (ns day08.movie-theater
-  (:require [clojure.string :as str]
-            [aoc.combinatorics :as ac]))
+  (:require
+   [aoc.combinatorics :as ac]
+   [clojure.string :as str])
+  (:import
+   (java.awt Color)
+   (java.awt.image BufferedImage)
+   (java.io File)
+   (javax.imageio ImageIO)))
 
 (def input (slurp "src/day08/input"))
 (def example (slurp "src/day08/example"))
@@ -20,6 +26,33 @@
 
 (assert (= 50 (apply max (part1 (parse example)))))
 (assert (= 4781546175 (apply max (part1 (parse input)))))
+
+(defn render [points scale size]
+  (let [xs (map first points)
+        ys (map second points)
+        ;; x-min (apply min xs)
+        x-max (apply max xs)
+        ;; y-min (apply min xs)
+        y-max (apply max xs)
+        rv (fn [[x y]]
+             [(int (* size (/ x scale))) (int (* size (/ y scale)))])
+        image (BufferedImage. size size BufferedImage/TYPE_INT_ARGB)
+        gr (.getGraphics image)]
+    (doto gr (.setColor Color/black)
+          (.fillRect 0 0 size size))
+    ;; (doto gr (.setColor Color/green))
+    ;; (doseq [[a b] (ac/all-pairs points)]
+    ;;   (let [[x0 y0] (rv a)
+    ;;         [x1 y1] (rv b)]
+    ;;     (doto gr (.fillRect x0 y0 x1 y1))))
+    (doto gr (.setColor Color/red))
+    (doseq [[a b] (mapv vector points (rest points))]
+      (let [[x0 y0] (rv a)
+            [x1 y1] (rv b)]
+        (doto gr (.drawLine x0 y0 x1 y1))))
+    (ImageIO/write image "png" (File. "src/day08/image.png"))))
+
+(render (parse input) 100000.0 1000)
 
 (defn part2 [in]
   in)
