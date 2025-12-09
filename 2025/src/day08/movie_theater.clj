@@ -1,6 +1,7 @@
 (ns day08.movie-theater
   (:require
    [aoc.combinatorics :as ac]
+   [clojure.math :as math]
    [clojure.string :as str])
   (:import
    (java.awt Color)
@@ -62,11 +63,31 @@
       (doto gr (.drawLine x0 y0 x1 y1)))
     (ImageIO/write image "png" (File. (str "src/day08/" desc ".png")))))
 
-(render (parse input) 100000.0 1000 "input")
-(render (parse example) 12.0 1000 "example")
+(render (parse input) 100000.0 1600 "input")
+(render (parse example) 12.0 1600 "example")
+
+(defn distance [[x0 y0] [x1 y1]]
+  (math/sqrt (+ (math/pow (- x1 x0) 2) (math/pow (- y1 y0) 2))))
+
+;; find inset bounds
+(let [points (parse input)]
+  (for [[a b] (mapv vector points (rest points))
+        :let [d (distance a b)]
+        :when (> d 1600)]
+    [a b d]))
+
+(comment ;; results
+  ([[1840 50058] [94876 50058] 93036.0]
+   [[94876 48734] [2512 48734] 92364.0]))
+
+(count (parse input)) ;; 496
+(count (filter (fn [[x _]] (< x 94876)) (parse input))) ;; 436
+(count (filter (fn [[x y]] (and (< x 94876) (< y 48734))) (parse input))) ;; 217
+(count (filter (fn [[x y]] (and (< x 94876) (> y 50058))) (parse input))) ;; 217
+(* 217 2) ;; 434
 
 (defn part2 [in]
-  in)
+  )
 
-(assert (= (part2 (parse example))))
+;; (assert (= (part2 (parse example))))
 (assert (= (part2 (parse input))))
