@@ -27,13 +27,18 @@
 (assert (= 50 (apply max (part1 (parse example)))))
 (assert (= 4781546175 (apply max (part1 (parse input)))))
 
-(defn render [points scale size]
+(defn space-range [points]
   (let [xs (map first points)
-        ys (map second points)
-        ;; x-min (apply min xs)
-        x-max (apply max xs)
-        ;; y-min (apply min xs)
-        y-max (apply max xs)
+        ys (map second points)]
+    [[(apply min xs)
+      (apply max xs)]
+     [(apply min ys)
+      (apply max ys)]]))
+
+(space-range (parse input))
+
+(defn render [points scale size]
+  (let [
         rv (fn [[x y]]
              [(int (* size (/ x scale))) (int (* size (/ y scale)))])
         image (BufferedImage. size size BufferedImage/TYPE_INT_ARGB)
