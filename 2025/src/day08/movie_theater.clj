@@ -36,8 +36,9 @@
       (apply max ys)]]))
 
 (space-range (parse input))
+(space-range (parse example))
 
-(defn render [points scale size]
+(defn render [points scale size desc]
   (let [
         rv (fn [[x y]]
              [(int (* size (/ x scale))) (int (* size (/ y scale)))])
@@ -55,9 +56,14 @@
       (let [[x0 y0] (rv a)
             [x1 y1] (rv b)]
         (doto gr (.drawLine x0 y0 x1 y1))))
-    (ImageIO/write image "png" (File. "src/day08/image.png"))))
+    (doto gr (.setColor Color/blue))
+    (let [[x0 y0] (rv (last points))
+          [x1 y1] (rv (first points))]
+      (doto gr (.drawLine x0 y0 x1 y1)))
+    (ImageIO/write image "png" (File. (str "src/day08/" desc ".png")))))
 
-(render (parse input) 100000.0 1000)
+(render (parse input) 100000.0 1000 "input")
+(render (parse example) 12.0 1000 "example")
 
 (defn part2 [in]
   in)
