@@ -1,4 +1,4 @@
-(ns day08.movie-theater
+(ns day09.movie-theater
   (:require
    [aoc.combinatorics :as ac]
    [clojure.math :as math]
@@ -9,8 +9,8 @@
    (java.io File)
    (javax.imageio ImageIO)))
 
-(def input (slurp "src/day08/input"))
-(def example (slurp "src/day08/example"))
+(def input (slurp "src/day09/input"))
+(def example (slurp "src/day09/example"))
 
 (defn parse [in]
   (for [line (str/split-lines in)]
@@ -65,7 +65,7 @@
       (let [[x0 y0] (rv a)
             [x1 y1] (rv b)]
         (doto gr (.drawRect (min x0 x1) (min y0 y1) (- (max x0 x1) (min x0 x1)) (- (max y0 y1) (min y0 y1))))))
-    (ImageIO/write image "png" (File. (str "src/day08/" desc ".png")))))
+    (ImageIO/write image "png" (File. (str "src/day09/" desc ".png")))))
 
 (render (parse input) 100000.0 1600 "input" [])
 (render (parse example) 12.0 1600 "example" [])
