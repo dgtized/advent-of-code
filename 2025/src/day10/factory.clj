@@ -29,7 +29,7 @@
        :raw-goal goal
        :buttons (mapv button->num buttons)
        :bits buttons
-       :extra (mapv parse-long (re-seq #"\d+" (last bs)))})))
+       :jolts (mapv parse-long (re-seq #"\d+" (last bs)))})))
 
 (defn find-path [{:keys [goal buttons]}]
   (graph/a*-search
@@ -47,10 +47,54 @@
 (Integer/toBinaryString (bit-xor (bit-xor (bit-xor 0 2r10001) 2r00111) 2r11110))
 
 (assert (= 7 (reduce + (map count (part1 (parse example))))))
-(assert (= 479 (reduce + (map count (part1 (parse input))))))
+;; (assert (= 479 (reduce + (map count (part1 (parse input))))))
+
+(defn bit-add [sum bits]
+  (reduce (fn [s b] (update s b (fnil inc 0))) sum bits))
+
+(comment (bit-add [0 0 0] [0 2]))
+
+(defn pad [xs len]
+  (let [c (count xs)]
+    (if (< c len)
+      (into (vec (repeat (- len c) 0)) xs)
+      xs)))
+
+(pad [0] 3)
+(pad [1 0] 3)
+
+(defn bit-diff [a b]
+  (let [len (max (count a) (count b))]
+    (reduce + (mapv - (pad a len) (pad b len)))))
+
+(bit-diff [1 0 1] [0 0 0])
+(bit-diff [1 0 1] [0 0])
+
+(defn past-goal? [goal]
+  (fn [curr]
+    (let [len (max (count curr) (count goal))]
+      (some (fn [[g b]] (< g b))
+            (map vector (pad goal len) (pad curr len))))))
+
+((past-goal? [1 1 2]) [0 0 0])
+((past-goal? [1 1 2]) [0 0 3])
+
+(defn find-counter [{:keys [jolts bits]}]
+  (time (graph/a*-search
+         {:successors (fn [curr] (remove (past-goal? jolts) (mapv (fn [b] (bit-add curr b)) bits)))
+          :sources [(pad [] (count jolts))]
+          :cost (fn [curr _] (count curr))
+          :heuristic (fn [curr]
+                       ;; (println [:heuristic node])
+                       (bit-diff jolts curr))
+          :goal? (fn [curr] (= jolts curr))})))
+
+(find-counter (nth (parse example) 1))
 
 (defn part2 [in]
-  in)
+  (mapv (comp dec count find-counter) in))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 33 (reduce + (part2 (parse example)))))
+;; (assert (= (reduce + (part2 (parse input)))))
+
+;; (println (reduce + (part2 (parse input))))
