@@ -72,13 +72,17 @@
 
 (bit-dist [1 0 1] [0 0 1])
 
+(defn add [a b]
+  (mapv + a b))
+
 (defn find-counter [{:keys [jolts bits]}]
-  (time (graph/a*-search
-         {:successors (fn [curr] (mapv (fn [b] (bit-add curr b)) bits))
-          :sources [(pad [] (count jolts))]
-          :cost (fn [curr last] (bit-dist curr last))
-          :heuristic (fn [curr] (bit-dist jolts curr))
-          :goal? (fn [curr] (= jolts curr))})))
+  (let [moves (mapv (fn [b] (bit-add (pad [] (count jolts)) b)) bits)]
+    (time (graph/a*-search
+           {:successors (fn [curr] (mapv (fn [m] (add curr m)) moves))
+            :sources [(pad [] (count jolts))]
+            :cost (fn [curr last] (bit-dist curr last))
+            :heuristic (fn [curr] (bit-dist jolts curr))
+            :goal? (fn [curr] (= jolts curr))}))))
 
 (find-counter (nth (parse example) 1))
 
