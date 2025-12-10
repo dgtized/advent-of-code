@@ -75,6 +75,8 @@
 (defn add [a b]
   (mapv + a b))
 
+(defn mul [a n]
+  (mapv (partial * n) a))
 (defn find-counter [{:keys [jolts bits]}]
   (let [moves (mapv (fn [b] (bit-add (pad [] (count jolts)) b)) bits)]
     (time (graph/a*-search
