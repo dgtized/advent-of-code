@@ -1,6 +1,8 @@
 (ns day10.factory
-  (:require [clojure.string :as str]
-            [aoc.graph :as graph]))
+  (:require
+   [aoc.graph :as graph]
+   [clojure.math :as math]
+   [clojure.string :as str]))
 
 (def input (slurp "src/day10/input"))
 (def example (slurp "src/day10/example"))
@@ -63,12 +65,12 @@
 (pad [0] 3)
 (pad [1 0] 3)
 
-(defn bit-diff [a b]
+(defn bit-dist [a b]
   (let [len (max (count a) (count b))]
-    (reduce + (mapv - (pad a len) (pad b len)))))
+    (math/sqrt (reduce + (mapv (fn [l r] (math/pow (- l r) 2))
+                               (pad a len) (pad b len))))))
 
-(bit-diff [1 0 1] [0 0 0])
-(bit-diff [1 0 1] [0 0])
+(bit-dist [1 0 1] [0 0 1])
 
 (defn past-goal? [goal]
   (fn [curr]
@@ -83,10 +85,8 @@
   (time (graph/a*-search
          {:successors (fn [curr] (remove (past-goal? jolts) (mapv (fn [b] (bit-add curr b)) bits)))
           :sources [(pad [] (count jolts))]
-          :cost (fn [curr _] (count curr))
-          :heuristic (fn [curr]
-                       ;; (println [:heuristic node])
-                       (bit-diff jolts curr))
+          :cost (fn [curr last] (bit-dist curr last))
+          :heuristic (fn [curr] (bit-dist jolts curr))
           :goal? (fn [curr] (= jolts curr))})))
 
 (find-counter (nth (parse example) 1))
