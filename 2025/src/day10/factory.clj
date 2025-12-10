@@ -72,18 +72,9 @@
 
 (bit-dist [1 0 1] [0 0 1])
 
-(defn past-goal? [goal]
-  (fn [curr]
-    (let [len (max (count curr) (count goal))]
-      (some (fn [[g b]] (< g b))
-            (map vector (pad goal len) (pad curr len))))))
-
-((past-goal? [1 1 2]) [0 0 0])
-((past-goal? [1 1 2]) [0 0 3])
-
 (defn find-counter [{:keys [jolts bits]}]
   (time (graph/a*-search
-         {:successors (fn [curr] (remove (past-goal? jolts) (mapv (fn [b] (bit-add curr b)) bits)))
+         {:successors (fn [curr] (mapv (fn [b] (bit-add curr b)) bits))
           :sources [(pad [] (count jolts))]
           :cost (fn [curr last] (bit-dist curr last))
           :heuristic (fn [curr] (bit-dist jolts curr))
