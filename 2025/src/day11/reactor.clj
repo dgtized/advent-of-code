@@ -32,26 +32,21 @@
 (assert (= 5 (score (part1 (parse example)))))
 (assert (= 428 (score (part1 (parse input)))))
 
-(defn bfs-paths [{:keys [successors source goal]}]
-  (loop [paths [[source]] visited #{source}]
-    (if (contains? visited goal)
-      (filter #(= (last %) goal) paths)
-      (let [frontier (mapcat (fn [path]
-                               (when (< (count path) 5)
-                                 (for [n (successors (last path))]
-                                   (when-not (contains? visited n)
-                                     (conj path n)))))
-                             paths)]
-        (recur frontier (set/union visited (set (map last frontier))))))))
-
-[#_(bfs-paths {:successors graph :source "svr" :goal "dac"})
- #_(bfs-paths {:successors graph :source "dac" :goal "fft"})
- #_(bfs-paths {:successors graph :source "fft" :goal "out"})]
+(defn reactor-paths [{:keys [successors source points goal]}]
+  (let [mem (atom {})]
+    (letfn [(path-count [loc passed]
+              (if-let [e (find @mem [loc passed])]
+                (val e)
+                (let [ret (if (= loc goal)
+                            (if (= passed points) 1 0)
+                            (let [passed' (if (points loc) (conj passed loc) passed)]
+                              (reduce + (mapv (fn [l] (path-count l passed')) (successors loc)))))]
+                  (swap! mem assoc [loc passed] ret)
+                  ret)))]
+      (path-count source #{}))))
 
 (defn part2 [graph]
-  [[(bfs-paths {:successors graph :source "svr" :goal "fft"})
-    (bfs-paths {:successors graph :source "fft" :goal "dac"})
-    #_(count (bfs-paths {:successors graph :source "dac" :goal "out"}))]])
+  (reactor-paths {:successors graph :source "svr" :goal "out" :points #{"fft" "dac"}}))
 
-(assert (= 2 (count (part2 (parse example2)))))
-;; (assert (= (count (part2 (parse input)))))
+(assert (= 2 (part2 (parse example2))))
+(assert (= 331468292364745 (part2 (parse input))))
