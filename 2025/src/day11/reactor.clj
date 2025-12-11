@@ -40,7 +40,7 @@
                 (let [ret (if (= loc goal)
                             (if (= passed points) 1 0)
                             (let [passed' (if (points loc) (conj passed loc) passed)]
-                              (reduce + (mapv (fn [l] (path-count l passed')) (successors loc)))))]
+                              (reduce (fn [s l] (+ s (path-count l passed'))) 0 (successors loc))))]
                   (swap! mem assoc [loc passed] ret)
                   ret)))]
       (path-count source #{}))))
