@@ -12,11 +12,23 @@
                 [k (set (str/split v #"\s+"))])))
        (into {})))
 
-(defn part1 [in]
-  in)
+(defn bfs [graph]
+  (loop [queue (conj clojure.lang.PersistentQueue/EMPTY "you")
+         paths []]
+    (if (empty? queue)
+      paths
+      (let [current (peek queue)]
+        (recur (into (pop queue) (get graph current))
+               (conj paths current))))))
 
-(assert (= (part1 (parse example))))
-(assert (= (part1 (parse input))))
+(defn part1 [in]
+  (bfs in))
+
+(defn score [in]
+  (count (filter (fn [x] (= "out" x)) in)))
+
+(assert (= 5 (score (part1 (parse example)))))
+(assert (= 428 (score (part1 (parse input))))) 
 
 (defn part2 [in]
   in)
