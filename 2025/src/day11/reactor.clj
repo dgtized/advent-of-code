@@ -1,8 +1,10 @@
 (ns day11.reactor
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.set :as set]))
 
 (def input (slurp "src/day11/input"))
 (def example (slurp "src/day11/example"))
+(def example2 (slurp "src/day11/example2"))
 
 (defn parse [in]
   (->> in
@@ -28,10 +30,28 @@
   (count (filter (fn [x] (= "out" x)) in)))
 
 (assert (= 5 (score (part1 (parse example)))))
-(assert (= 428 (score (part1 (parse input))))) 
+(assert (= 428 (score (part1 (parse input)))))
 
-(defn part2 [in]
-  in)
+(defn bfs-paths [{:keys [successors source goal]}]
+  (loop [paths [[source]] visited #{source}]
+    (if (contains? visited goal)
+      (filter #(= (last %) goal) paths)
+      (let [frontier (mapcat (fn [path]
+                               (when (< (count path) 5)
+                                 (for [n (successors (last path))]
+                                   (when-not (contains? visited n)
+                                     (conj path n)))))
+                             paths)]
+        (recur frontier (set/union visited (set (map last frontier))))))))
 
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+[#_(bfs-paths {:successors graph :source "svr" :goal "dac"})
+ #_(bfs-paths {:successors graph :source "dac" :goal "fft"})
+ #_(bfs-paths {:successors graph :source "fft" :goal "out"})]
+
+(defn part2 [graph]
+  [[(bfs-paths {:successors graph :source "svr" :goal "fft"})
+    (bfs-paths {:successors graph :source "fft" :goal "dac"})
+    #_(count (bfs-paths {:successors graph :source "dac" :goal "out"}))]])
+
+(assert (= 2 (count (part2 (parse example2)))))
+;; (assert (= (count (part2 (parse input)))))
