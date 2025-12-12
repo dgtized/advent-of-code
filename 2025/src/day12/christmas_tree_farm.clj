@@ -32,7 +32,7 @@
 (defn parse-shape [s]
   (let [[f & ls] (str/split-lines s)]
     [(parse-long (re-find #"\d+" f))
-     (symmetries (vec ls))]))
+     (vec ls)]))
 
 (defn parse-region [s]
   (let [[r v] (str/split s #": ")]
@@ -44,14 +44,21 @@
     {:shapes (into {} (mapv parse-shape (butlast xs)))
      :regions (mapv parse-region (str/split-lines (last xs)))}))
 
-(defn part1 [in]
-  in)
+(defn covers [rows]
+  (get (frequencies (apply str rows)) \# 0))
+
+(covers corner)
+
+(defn heuristic [shapes]
+  (let [sizes (map covers (vals shapes))]
+    (fn [{:keys [size quantities]}]
+      (let [area (apply * size)
+            min-use (reduce + (map * sizes quantities))
+            max-fit (* 9 (reduce + quantities))]
+        [area max-fit min-use (<= max-fit area) (< min-use area)]))))
+
+(defn part1 [{:keys [shapes regions]}]
+  (map (heuristic shapes) regions))
 
 (assert (= (part1 (parse example))))
-(assert (= (part1 (parse input))))
-
-(defn part2 [in]
-  in)
-
-(assert (= (part2 (parse example))))
-(assert (= (part2 (parse input))))
+(assert (= 469 (count (filter (fn [x] (nth x 3)) (part1 (parse input))))))
