@@ -4,10 +4,35 @@
 (def input (slurp "src/day12/input"))
 (def example (slurp "src/day12/example"))
 
+(defn rotate-shape [rows]
+  (mapv (fn [x] (apply str (reverse x)))
+        (apply map vector rows)))
+
+(def corner ["#.." "..." "..."])
+
+(take 4 (iterate rotate-shape corner))
+
+(defn flipx-shape [rows]
+  (mapv (fn [r] (apply str (reverse r))) rows))
+
+(take 3 (iterate flipx-shape corner))
+
+(defn flipy-shape [rows]
+  (vec (reverse rows)))
+
+(take 3 (iterate flipy-shape corner))
+
+(defn symmetries [shape]
+  (->> [identity flipy-shape flipy-shape]
+       (mapcat (fn [op] (take 3 (iterate rotate-shape (op shape)))))
+       distinct))
+
+(symmetries corner)
+
 (defn parse-shape [s]
   (let [[f & ls] (str/split-lines s)]
     [(parse-long (re-find #"\d+" f))
-     (vec ls)]))
+     (symmetries (vec ls))]))
 
 (defn parse-region [s]
   (let [[r v] (str/split s #": ")]
@@ -16,7 +41,7 @@
 
 (defn parse [in]
   (let [xs (str/split in #"\n\n")]
-    {:shapes (mapv parse-shape (butlast xs))
+    {:shapes (into {} (mapv parse-shape (butlast xs)))
      :regions (mapv parse-region (str/split-lines (last xs)))}))
 
 (defn part1 [in]
